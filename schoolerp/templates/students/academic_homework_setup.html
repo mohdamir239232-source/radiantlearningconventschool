@@ -1,0 +1,216 @@
+{% extends "base_layout.html" %}
+{% block title %}Homework Planner{% endblock %}
+{% block content %}
+<style>
+    .academic-page .page-hero {
+        background: linear-gradient(120deg, #eef2ff 0%, #ffffff 55%, #f8fafc 100%);
+        border: 1px solid #c7d2fe;
+        border-radius: 16px;
+        padding: 16px 18px;
+        margin-bottom: 14px;
+    }
+    .academic-page .hero-title {
+        margin: 0;
+        font-size: 1.2rem;
+        color: #0f172a;
+    }
+    .academic-page .hero-subtitle {
+        margin: 2px 0 0;
+        color: #475569;
+        font-size: 0.86rem;
+    }
+    .academic-page .hero-chip {
+        background: #ffffff;
+        border: 1px solid #cbd5e1;
+        border-radius: 999px;
+        padding: 6px 12px;
+        font-size: 0.78rem;
+        color: #1e293b;
+        font-weight: 600;
+    }
+    .academic-page .academic-card {
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.07);
+    }
+    .academic-page .card-header {
+        border-bottom: 1px solid #e2e8f0;
+    }
+    .academic-page .academic-table thead th {
+        background: #0f172a;
+        color: #f8fafc;
+        font-size: 0.72rem;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+    }
+    .academic-page .filter-bar {
+        position: sticky;
+        top: 0;
+        z-index: 7;
+        background: #ffffff;
+    }
+    .academic-page .academic-table tbody tr {
+        transition: background-color 0.2s ease;
+    }
+    .academic-page .academic-table tbody tr:hover {
+        background: #f8fafc;
+    }
+    .academic-page .field-badge {
+        background: #f8fafc;
+        border: 1px solid #cbd5e1;
+        border-radius: 999px;
+        padding: 2px 10px;
+        font-size: 0.74rem;
+        font-weight: 600;
+        color: #0f172a;
+    }
+    .academic-page .empty-state {
+        padding: 26px 12px;
+        text-align: center;
+        color: #64748b;
+    }
+    .academic-page .empty-state i {
+        font-size: 1.1rem;
+        margin-bottom: 6px;
+        color: #94a3b8;
+    }
+</style>
+
+<div class="container-fluid py-3 academic-page">
+    <div class="page-hero d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div class="d-flex align-items-center gap-2">
+            <i class="fas fa-book-reader text-primary fs-4"></i>
+            <div>
+                <h4 class="hero-title fw-bold">Homework Planner</h4>
+                <p class="hero-subtitle">Create class-wise homework entries with deadlines and attachment support.</p>
+            </div>
+        </div>
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+            <span class="hero-chip"><i class="fas fa-list me-1 text-primary"></i>{{ homework_rows|length }} Records</span>
+            <span class="hero-chip"><i class="fas fa-paperclip me-1 text-primary"></i>Attachment Ready</span>
+        </div>
+    </div>
+
+    {% if messages %}
+        {% for msg in messages %}
+            <div class="alert alert-{{ msg.tags|default:'info' }} alert-dismissible fade show py-2" role="alert">
+                {{ msg }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="row g-3">
+        <div class="col-lg-5">
+            <div class="card shadow-sm border-0 academic-card">
+                <div class="card-header bg-primary text-white py-2">
+                    <i class="fas fa-plus-circle me-2"></i>Add Homework Entry
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <label class="form-label fw-semibold small">Class <span class="text-danger">*</span></label>
+                                <input list="classList" name="class_name" class="form-control form-control-sm" required>
+                                <datalist id="classList">
+                                    {% for c in class_names %}<option value="{{ c }}">{% endfor %}
+                                </datalist>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-semibold small">Section <span class="text-danger">*</span></label>
+                                <input name="section" class="form-control form-control-sm" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold small">Subject <span class="text-danger">*</span></label>
+                                <input name="subject_name" class="form-control form-control-sm" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold small">Title <span class="text-danger">*</span></label>
+                                <input name="title" class="form-control form-control-sm" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold small">Description <span class="text-danger">*</span></label>
+                                <textarea name="description" class="form-control form-control-sm" rows="4" required></textarea>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-semibold small">Assigned Date <span class="text-danger">*</span></label>
+                                <input type="date" name="assigned_date" class="form-control form-control-sm" required>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-semibold small">Due Date <span class="text-danger">*</span></label>
+                                <input type="date" name="due_date" class="form-control form-control-sm" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold small">Attachment</label>
+                                <input type="file" name="attachment" class="form-control form-control-sm">
+                            </div>
+                        </div>
+                        <button class="btn btn-primary btn-sm mt-3 px-4" type="submit">
+                            <i class="fas fa-save me-1"></i>Save Homework
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <div class="card shadow-sm border-0 academic-card">
+                <div class="card-header py-2 d-flex align-items-center justify-content-between flex-wrap gap-2 filter-bar">
+                    <span class="fw-semibold"><i class="fas fa-list me-1 text-primary"></i>Recent Homework</span>
+                    <div class="d-flex align-items-center gap-2">
+                        <input id="homeworkSearch" type="text" class="form-control form-control-sm" style="width:180px" placeholder="Search title/subject">
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive" style="max-height:500px;overflow-y:auto;">
+                        <table class="table table-sm table-hover table-bordered mb-0 small academic-table">
+                            <thead class="sticky-top">
+                                <tr>
+                                    <th>#</th><th>Class</th><th>Section</th><th>Subject</th><th>Title</th><th>Assigned</th><th>Due</th><th>Attachment</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in homework_rows %}
+                                <tr class="homework-row">
+                                    <td>{{ forloop.counter }}</td>
+                                    <td><span class="field-badge">Class {{ row.class_name }}</span></td>
+                                    <td><span class="field-badge">{{ row.section }}</span></td>
+                                    <td>{{ row.subject_name }}</td>
+                                    <td>{{ row.title }}</td>
+                                    <td>{{ row.assigned_date|date:"d M Y" }}</td>
+                                    <td>{{ row.due_date|date:"d M Y" }}</td>
+                                    <td>{% if row.attachment %}<a href="{{ row.attachment.url }}" target="_blank" class="btn btn-sm btn-outline-primary py-0 px-2">View</a>{% else %}-{% endif %}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="8">
+                                        <div class="empty-state">
+                                            <i class="fas fa-book-reader d-block"></i>
+                                            No homework records yet. Create your first homework entry to begin.
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    (function () {
+        const input = document.getElementById('homeworkSearch');
+        if (!input) {
+            return;
+        }
+        input.addEventListener('input', function () {
+            const query = input.value.trim().toLowerCase();
+            document.querySelectorAll('.homework-row').forEach(function (row) {
+                row.style.display = row.textContent.toLowerCase().includes(query) ? '' : 'none';
+            });
+        });
+    })();
+</script>
+{% endblock %}

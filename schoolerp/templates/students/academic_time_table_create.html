@@ -1,0 +1,109 @@
+{% extends 'base_layout.html' %}
+
+{% block content %}
+<style>
+.wrap { display:grid; grid-template-columns: 360px 1fr; gap:16px; }
+.card { background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:14px; }
+.card h3 { margin:0 0 12px; color:#111827; }
+.field { margin-bottom:10px; }
+.field label { display:block; font-size:12px; font-weight:700; margin-bottom:4px; color:#374151; }
+.field input, .field select { width:100%; padding:9px; border:1px solid #d1d5db; border-radius:8px; }
+.btn { border:none; border-radius:8px; padding:10px 12px; background:#0f766e; color:#fff; font-weight:700; cursor:pointer; width:100%; }
+.table { width:100%; border-collapse:collapse; }
+.table th, .table td { border-bottom:1px solid #e5e7eb; padding:8px; font-size:13px; text-align:left; }
+.table th { background:#f9fafb; font-size:12px; text-transform:uppercase; color:#374151; }
+.filter { display:flex; gap:8px; margin-bottom:10px; }
+.filter input { padding:8px; border:1px solid #d1d5db; border-radius:8px; }
+</style>
+
+<div class="wrap">
+    <div class="card">
+        <h3>Time Table Create</h3>
+        <form method="post">
+            {% csrf_token %}
+            <div class="field">
+                <label>Class</label>
+                <input name="class_name" required>
+            </div>
+            <div class="field">
+                <label>Section</label>
+                <input name="section" required>
+            </div>
+            <div class="field">
+                <label>Day</label>
+                <select name="day_of_week" required>
+                    {% for day_value, day_label in day_choices %}
+                    <option value="{{ day_value }}">{{ day_label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="field">
+                <label>Period</label>
+                <input name="period_label" placeholder="Period 1" required>
+            </div>
+            <div class="field">
+                <label>Subject</label>
+                <input name="subject_name" required>
+            </div>
+            <div class="field">
+                <label>Teacher</label>
+                <input name="teacher_name">
+            </div>
+            <div class="field">
+                <label>Start Time</label>
+                <input type="time" name="start_time">
+            </div>
+            <div class="field">
+                <label>End Time</label>
+                <input type="time" name="end_time">
+            </div>
+            <div class="field">
+                <label>Room</label>
+                <input name="room_number">
+            </div>
+            <button class="btn" type="submit">Save Time Table Entry</button>
+        </form>
+    </div>
+
+    <div class="card">
+        <h3>Saved Time Table Entries</h3>
+        <form method="get" class="filter">
+            <input name="class" value="{{ selected_class }}" placeholder="Filter Class">
+            <input name="section" value="{{ selected_section }}" placeholder="Filter Section">
+            <button type="submit">Filter</button>
+        </form>
+        <div style="overflow:auto;">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Class</th>
+                        <th>Section</th>
+                        <th>Day</th>
+                        <th>Period</th>
+                        <th>Subject</th>
+                        <th>Teacher</th>
+                        <th>Time</th>
+                        <th>Room</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in entries %}
+                    <tr>
+                        <td>{{ row.class_name }}</td>
+                        <td>{{ row.section }}</td>
+                        <td>{{ row.get_day_of_week_display }}</td>
+                        <td>{{ row.period_label }}</td>
+                        <td>{{ row.subject_name }}</td>
+                        <td>{{ row.teacher_name|default:'-' }}</td>
+                        <td>{% if row.start_time %}{{ row.start_time }} - {{ row.end_time|default:'--' }}{% else %}-{% endif %}</td>
+                        <td>{{ row.room_number|default:'-' }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="8">No entries found.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

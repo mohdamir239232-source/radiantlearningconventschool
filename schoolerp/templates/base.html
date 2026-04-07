@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>{% if school_setting and school_setting.school_name %}{{ school_setting.school_name }}{% else %}RLCS School{% endif %} | Super Admin Panel</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+:root {
+    --brand-primary: #7f1d1d;
+    --brand-primary-dark: #5b1212;
+    --brand-accent: #f59e0b;
+    --surface-light: #fff7ed;
+    --text-light: #fff7f5;
+}
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Poppins',sans-serif;
+}
+
+body{
+display:flex;
+height:100vh;
+background:linear-gradient(135deg, #fff7ed 0%, #eef2f7 45%, #e2e8f0 100%);
+overflow:hidden;
+}
+
+/* SIDEBAR */
+.sidebar {
+    width: 268px;
+    height: 100vh;
+    background: linear-gradient(180deg, var(--brand-primary) 0%, var(--brand-primary-dark) 100%);
+    color: white;
+    position: fixed;
+    overflow-y: auto;
+    border-right: 1px solid rgba(245, 158, 11, 0.35);
+    box-shadow: 0 18px 36px rgba(91, 18, 18, 0.24);
+}
+
+.sidebar-brand {
+    padding: 16px 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.18);
+    background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+}
+
+.sidebar-brand .title {
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+}
+
+.sidebar-brand .subtitle {
+    margin-top: 4px;
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-light);
+    background: rgba(0, 0, 0, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 999px;
+    padding: 2px 10px;
+}
+
+.sidebar-brand .meta {
+    margin-top: 10px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.sidebar-brand .meta-chip {
+    font-size: 11px;
+    padding: 5px 9px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.08);
+    color: #ffedd5;
+}
+
+/* MENU STYLES */
+.menu-item {
+    color: white;
+    display: block;
+    padding: 14px 14px;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    transition: background 0.3s, padding-left 0.3s;
+    font-weight: 500;
+}
+
+.menu-item:hover {
+    background: rgba(0,0,0,0.2);
+    padding-left: 18px;
+}
+
+.menu-item.has-submenu::after {
+    content: ' ▼';
+    font-size: 10px;
+    transition: transform 0.3s;
+    float: right;
+}
+
+.menu-item.has-submenu.active::after {
+    transform: rotate(-180deg);
+}
+
+.menu-item.active-section {
+    background: rgba(245, 158, 11, 0.18);
+    color: #fff7ed;
+    border-left: 3px solid #f59e0b;
+}
+
+.submenu {
+    background: rgba(15, 23, 42, 0.22);
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease-out;
+}
+
+.submenu.active {
+    max-height: 1000px;
+}
+
+.submenu-item {
+    color: white;
+    display: block;
+    padding: 12px 34px;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    transition: background 0.3s, padding-left 0.3s;
+    font-size: 14px;
+}
+
+.submenu-item:hover {
+    background: rgba(0,0,0,0.3);
+    padding-left: 40px;
+}
+
+.submenu-item.active-link {
+    background: rgba(245, 158, 11, 0.16);
+    color: #fff7ed;
+    border-left: 3px solid #f59e0b;
+    padding-left: 40px;
+}
+
+.submenu-item-danger {
+    color: #fecaca;
+    font-weight: 600;
+}
+
+.submenu-item-danger:hover {
+    background: rgba(127, 29, 29, 0.65);
+}
+
+.submenu-title {
+    display: block;
+    padding: 12px 34px 6px;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: #fed7aa;
+    opacity: 0.92;
+}
+
+.sidebar h3 {
+    padding: 10px;
+    margin: 0;
+    border-bottom: 2px solid rgba(255,255,255,0.2);
+}
+
+/* MAIN */
+.main{
+flex:1;
+display:flex;
+flex-direction:column;
+margin-left:268px;
+}
+
+/* TOPBAR */
+.topbar{
+height:72px;
+background:rgba(255, 247, 237, 0.92);
+display:flex;
+align-items:center;
+justify-content:space-between;
+padding:0 24px;
+box-shadow:0 10px 30px rgba(15, 23, 42, 0.08);
+backdrop-filter: blur(12px);
+}
+
+.topbar-left {
+display:flex;
+align-items:center;
+gap:14px;
+}
+
+.menu-toggle {
+border:none;
+background:#ffffff;
+color:#7f1d1d;
+width:42px;
+height:42px;
+border-radius:12px;
+font-size:18px;
+box-shadow:0 10px 24px rgba(127, 29, 29, 0.12);
+cursor:pointer;
+}
+
+.topbar-title h2 {
+font-size:18px;
+color:#111827;
+margin-bottom:4px;
+}
+
+.topbar-title p {
+font-size:12px;
+color:#64748b;
+}
+
+.topbar-right {
+display:flex;
+align-items:center;
+gap:14px;
+}
+
+.topbar input{
+padding:10px 14px;
+border-radius:12px;
+border:1px solid #d6d3d1;
+background:#fff;
+min-width:260px;
+}
+
+.admin-badge {
+padding:10px 14px;
+border-radius:14px;
+background:linear-gradient(135deg, #7f1d1d, #b45309);
+color:#fff7ed;
+box-shadow:0 12px 30px rgba(127, 29, 29, 0.18);
+}
+
+.admin-badge strong {
+display:block;
+font-size:13px;
+}
+
+.admin-badge span {
+font-size:11px;
+opacity:0.88;
+}
+
+/* CONTENT */
+.content{
+padding:20px;
+overflow-y:auto;
+}
+
+.page-shell {
+background: rgba(255,255,255,0.72);
+border: 1px solid rgba(226, 232, 240, 0.9);
+border-radius: 22px;
+padding: 22px;
+box-shadow: 0 24px 45px rgba(15, 23, 42, 0.07);
+}
+
+/* CARDS */
+.cards{
+display:flex;
+gap:15px;
+margin-bottom:20px;
+}
+
+.card{
+flex:1;
+padding:20px;
+border-radius:12px;
+color:white;
+box-shadow:0 6px 15px rgba(0,0,0,0.15);
+}
+
+.blue{background:linear-gradient(45deg,hsl(143, 90%, 54%),#0d47a1);}
+.green{background:linear-gradient(45deg,#4caf50,#1b5e20);}
+.orange{background:linear-gradient(45deg,#ff9800,#e65100);}
+.purple{background:linear-gradient(45deg,#9c27b0,#4a148c);}
+
+/* CHART */
+.charts{
+display:flex;
+gap:20px;
+}
+
+.chart-box{
+flex:1;
+background:white;
+padding:15px;
+border-radius:12px;
+box-shadow:0 4px 12px rgba(0,0,0,0.1);
+}
+
+canvas{
+height:280px !important;
+}
+
+@media (max-width: 1080px) {
+    .sidebar {
+        width: 232px;
+    }
+
+    .main {
+        margin-left: 232px;
+    }
+
+    .topbar input {
+        min-width: 180px;
+    }
+}
+
+@media (max-width: 820px) {
+    body {
+        overflow: auto;
+    }
+
+    .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+    }
+
+    .main {
+        margin-left: 0;
+    }
+
+    .topbar,
+    .cards,
+    .charts {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .topbar-right,
+    .topbar-left {
+        width: 100%;
+    }
+
+    .topbar input {
+        min-width: 100%;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+    <div class="sidebar-brand">
+        <div class="title">{% if school_setting and school_setting.school_name %}{{ school_setting.school_name }}{% else %}School ERP{% endif %}</div>
+        <span class="subtitle">Control and Governance Panel</span>
+        <div class="meta">
+            <span class="meta-chip">RLCS Operations</span>
+            <span class="meta-chip">Admin Access</span>
+        </div>
+    </div>
+    <a href="/dashboard/" class="menu-item">🏠 Dashboard</a>
+    
+    {% if module_access.students %}
+    <!-- STUDENT MANAGEMENT -->
+    <div class="menu-item has-submenu" onclick="toggleSubmenu(this)">📘 Student Management</div>
+    <div class="submenu">
+        <a href="/student/admission/" class="submenu-item">New Admission</a>
+        <a href="/student/list/" class="submenu-item">Student List</a>
+        <a href="/student/assign-subject/" class="submenu-item">Assign Subject</a>
+        <a href="/student/promote/" class="submenu-item">Promote Class</a>
+        <a href="/student/character-certificate/" class="submenu-item">Student Character Certificate</a>
+        <a href="/student/oob-certificate/" class="submenu-item">OOB Certificate</a>
+        <a href="/student/bonafide-certificate/" class="submenu-item">Bonafide Certificate</a>
+    </div>
+    {% endif %}
+
+    {% if module_access.academic %}
+    <!-- CERTIFICATE -->
+    <div class="menu-item has-submenu" onclick="toggleSubmenu(this)">🏆 Certificate</div>
+    <div class="submenu">
+        <a href="/certificate/appreciation/" class="submenu-item">Appreciation</a>
+        <a href="/certificate/participation/" class="submenu-item">Participation</a>
+        <a href="/certificate/achievement/" class="submenu-item">Achievement</a>
+    </div>
+    {% endif %}
+
+    {% if module_access.attendance %}
+    <!-- STUDENT ATTENDANCE -->
+    <div class="menu-item has-submenu" onclick="toggleSubmenu(this)">📅 Student Attendance</div>
+    <div class="submenu">
+        <a href="/attendance/mark/" class="submenu-item">Attendance</a>
+        <a href="/attendance/report/" class="submenu-item">Attendance Report</a>
+        <a href="/attendance/daily-report/" class="submenu-item">Daily Attendance Report</a>
+    </div>
+    {% endif %}
+
+    {% if module_access.academic %}
+    <!-- ACADEMIC -->
+    <div class="menu-item has-submenu" onclick="toggleSubmenu(this)">📚 Academic</div>
+    <div class="submenu">
+        <a href="/academic/notice/" class="submenu-item">Notice</a>
+        <a href="/academic/timetable/" class="submenu-item">Time Table</a>
+        <a href="/academic/course-schedule/" class="submenu-item">Course Schedule</a>
+        <a href="/academic/syllabus/" class="submenu-item">Syllabus</a>
+        <a href="/academic/datesheet/" class="submenu-item">Date Sheet Create</a>
+        <a href="/academic/holidays/" class="submenu-item">Holiday List</a>
+        <a href="/academic/homework/" class="submenu-item">Home Work</a>
+    </div>
+    {% endif %}
+
+    {% if module_access.staff %}
+    <!-- STAFF -->
+    <div class="menu-item has-submenu" onclick="toggleSubmenu(this)">Staff Management</div>
+    <div class="submenu">
+        <a href="/staff/view/" class="submenu-item">View Staff</a>
+        <a href="/staff/add/" class="submenu-item">Add New Staff</a>
+        <a href="/staff/idcard/" class="submenu-item">Staff ID Card</a>
+        <a href="/staff/attendance/" class="submenu-item">Staff Attendance</a>
+        <a href="/staff/attendance-report/" class="submenu-item">Attendance Report</a>
+        <a href="/staff/permission/" class="submenu-item">Teacher Permission</a>
+        <a href="/staff/experience-certificate/" class="submenu-item">Experience Certificate</a>
+        <a href="/staff/daily-performance/" class="submenu-item">Daily Performance Report</a>
+        <a href="/staff/monthly-performance/" class="submenu-item">Monthly Performance Report</a>
+    </div>
+    {% endif %}
+
+    {% if module_access.fee %}
+    <!-- FEE -->
+    <div class="menu-item has-submenu" onclick="toggleSubmenu(this)">💰 Fee Management</div>
+    <div class="submenu">
+        <a href="/fee/deposit/" class="submenu-item">Fee Deposit</a>
+        <a href="/fee/receipt/" class="submenu-item">Fee Receipt View</a>
+        <a href="/fee/report/" class="submenu-item">Fee Report</a>
+        <a href="/fee/due-report/" class="submenu-item">Fee Due Report</a>
+        <a href="/fee/demand-bill/" class="submenu-item">Fee Demand Bill</a>
+        <a href="/fee/discount/" class="submenu-item">Fee Discount</a>
+        <a href="/fee/online-request/" class="submenu-item">Fee Online Request</a>
+    </div>
+    {% endif %}
+
+    {% if module_access.reports %}
+    <!-- ACCOUNT -->
+    <div class="menu-item has-submenu" onclick="toggleSubmenu(this)">📊 Account Management</div>
+    <div class="submenu">
+        <a href="/account/expense/" class="submenu-item">Expense</a>
+        <a href="/account/expense-receipt/" class="submenu-item">Expense Receipt Print</a>
+        <a href="/account/income/" class="submenu-item">Income</a>
+        <a href="/account/income-expense/" class="submenu-item">Expense & Income</a>
+    </div>
+    {% endif %}
+
+    {% if module_access.exam %}
+    <!-- EXAM -->
+    <div class="menu-item has-submenu" onclick="toggleSubmenu(this)">✏️ Exam Management</div>
+    <div class="submenu">
+        <a href="/exam/admit-card/" class="submenu-item">Admit Card</a>
+        <a href="/exam/desk-slip/" class="submenu-item">Exam Desk Slip</a>
+        <a href="/exam/settings/" class="submenu-item">Exam Setting</a>
+    </div>
+    {% endif %}
+
+    {% if module_access.transport %}
+    <!-- TRANSPORT -->
+    <div class="menu-item has-submenu" onclick="toggleSubmenu(this)">🚌 Transport Management</div>
+    <div class="submenu">
+        <a href="/transport/vehicle/" class="submenu-item">Vehicle</a>
+        <a href="/transport/route/" class="submenu-item">Vehicle Route</a>
+    </div>
+    {% endif %}
+
+    {% if module_access.fee %}
+    <!-- FEE MASTER -->
+    <div class="menu-item has-submenu" onclick="toggleSubmenu(this)">💵 Fee Master</div>
+    <div class="submenu">
+        <a href="/fee-master/particular/" class="submenu-item">Fee Particular</a>
+        <a href="/fee-master/amount-slab/" class="submenu-item">Fee Amount Slab</a>
+        <a href="/fee-master/discount/" class="submenu-item">Fee Discount</a>
+        <a href="/fee-master/deposit/" class="submenu-item">Fee Deposit</a>
+        <a href="/fee-master/receipt/" class="submenu-item">Fee Receipt</a>
+    </div>
+    {% endif %}
+
+    {% if module_access.students %}
+    <!-- MASTER -->
+    <div class="menu-item has-submenu" onclick="toggleSubmenu(this)">📋 Master</div>
+    <div class="submenu">
+        <a href="/master/session/" class="submenu-item">Academic Session</a>
+        <a href="/master/designation/" class="submenu-item">Staff Designation</a>
+        <a href="/master/class/" class="submenu-item">Class</a>
+        <a href="/master/subject/" class="submenu-item">Subject</a>
+    </div>
+    {% endif %}
+
+    {% if module_access.settings %}
+    <!-- SETTINGS -->
+    <div class="menu-item has-submenu" onclick="toggleSubmenu(this)">⚙️ Settings</div>
+    <div class="submenu">
+        <a href="/settings/user/" class="submenu-item">User</a>
+        <a href="/settings/permissions/" class="submenu-item">User Permissions</a>
+        <a href="/settings/school/" class="submenu-item">School Setting</a>
+        <a href="/settings/option/" class="submenu-item">Option Setting</a>
+        <a href="/settings/payment/" class="submenu-item">Payment Option Setting</a>
+        <a href="/settings/whatsapp/" class="submenu-item">WhatsApp API</a>
+        <a href="/settings/mobileapp/" class="submenu-item">Mobile App Control</a>
+    </div>
+    {% endif %}
+
+    <!-- ACCOUNT USER -->
+    <div class="menu-item has-submenu" onclick="toggleSubmenu(this)">👤 Super Admin Account</div>
+    <div class="submenu">
+        <span class="submenu-title">Identity Controls</span>
+        <a href="/account/admin/" class="submenu-item">Profile Overview</a>
+        <span class="submenu-title">Security Controls</span>
+        <a href="/account/change-password/" class="submenu-item">Password and Access Policy</a>
+        <span class="submenu-title">Active Session</span>
+        <a href="/account/logout/" class="submenu-item submenu-item-danger">Secure Sign Out</a>
+    </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+<!-- TOPBAR -->
+<div class="topbar">
+<div class="topbar-left">
+<button class="menu-toggle" type="button">☰</button>
+<div class="topbar-title">
+<h2>Super Admin Command Center</h2>
+<p>{% if school_setting and school_setting.school_code %}{{ school_setting.school_code }} | {% endif %}Institution control, finance visibility, and user governance</p>
+</div>
+</div>
+
+<div class="topbar-right">
+<input type="text" placeholder="Search modules, reports, settings">
+<div class="admin-badge">
+    <strong>{{ current_role_label }}</strong>
+    <span>Role based workspace</span>
+</div>
+</div>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+<div class="page-shell">
+{% if messages %}
+{% for message in messages %}
+<div style="margin-bottom:14px;padding:12px 14px;border-radius:14px;background:{% if message.tags == 'success' %}#dcfce7{% else %}#fee2e2{% endif %};color:{% if message.tags == 'success' %}#166534{% else %}#991b1b{% endif %};font-weight:600;">{{ message }}</div>
+{% endfor %}
+{% endif %}
+{% block content %}
+<div class="cards">
+
+<div class="card blue">
+<h4>Total Students</h4>
+<h2>720</h2>
+</div>
+
+<div class="card green">
+<h4>Total Fee</h4>
+<h2>₹8,40,000</h2>
+</div>
+
+<div class="card orange">
+<h4>Today Fee</h4>
+<h2>₹22,500</h2>
+</div>
+
+<div class="card purple">
+<h4>Due Fees</h4>
+<h2>₹45,000</h2>
+</div>
+
+</div>
+
+<div class="charts">
+
+<div class="chart-box">
+<canvas id="barChart"></canvas>
+</div>
+
+<div class="chart-box">
+<canvas id="pieChart"></canvas>
+</div>
+
+</div>
+{% endblock %}
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+function toggleSubmenu(element) {
+    const submenu = element.nextElementSibling;
+    element.classList.toggle('active');
+    submenu.classList.toggle('active');
+}
+
+function normalizePath(path) {
+    if (!path) {
+        return '/';
+    }
+
+    return path.endsWith('/') ? path : `${path}/`;
+}
+
+function initializeActiveMenu() {
+    const currentPath = normalizePath(window.location.pathname);
+    const menuLinks = document.querySelectorAll('.sidebar a.menu-item, .sidebar .submenu-item');
+    let activeLink = null;
+    let bestMatchLength = -1;
+
+    menuLinks.forEach((link) => {
+        const href = link.getAttribute('href');
+        if (!href || href.startsWith('#')) {
+            return;
+        }
+
+        const linkPath = normalizePath(new URL(href, window.location.origin).pathname);
+        const isMatch = currentPath === linkPath || (linkPath !== '/' && currentPath.startsWith(linkPath));
+
+        if (isMatch && linkPath.length > bestMatchLength) {
+            activeLink = link;
+            bestMatchLength = linkPath.length;
+        }
+    });
+
+    if (!activeLink) {
+        return;
+    }
+
+    activeLink.classList.add('active-link', 'active-section');
+    const submenu = activeLink.closest('.submenu');
+
+    if (submenu) {
+        submenu.classList.add('active');
+        const parentMenu = submenu.previousElementSibling;
+        if (parentMenu) {
+            parentMenu.classList.add('active', 'active-section');
+        }
+    }
+}
+
+initializeActiveMenu();
+
+const barChartElement = document.getElementById("barChart");
+const pieChartElement = document.getElementById("pieChart");
+
+if (barChartElement) {
+    new Chart(barChartElement, {
+        type:'bar',
+        data:{
+            labels:['Jan','Feb','Mar','Apr'],
+            datasets:[{
+                data:[2000,3000,4000,5000],
+                backgroundColor:'#2196f3'
+            }]
+        }
+    });
+}
+
+if (pieChartElement) {
+    new Chart(pieChartElement, {
+        type:'doughnut',
+        data:{
+            labels:['Tuition','Transport','Other'],
+            datasets:[{
+                data:[60,25,15],
+                backgroundColor:['#2196f3','#ff9800','#4caf50']
+            }]
+        }
+    });
+}
+
+function toggleMenu(id, el) {
+    let menu = document.getElementById(id);
+    let arrow = el.querySelector(".arrow");
+
+    if (menu.style.display === "block") {
+        menu.style.display = "none";
+        arrow.classList.remove("rotate");
+    } else {
+        menu.style.display = "block";
+        arrow.classList.add("rotate");
+    }
+}
+</script>
+
+</body>
+</html>

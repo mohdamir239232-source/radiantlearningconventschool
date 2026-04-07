@@ -1,0 +1,261 @@
+{% extends "base_layout.html" %}
+{% block title %}Course Schedule{% endblock %}
+{% block content %}
+<style>
+  .academic-page .page-hero {
+    background: linear-gradient(120deg, #eff6ff 0%, #ffffff 55%, #f8fafc 100%);
+    border: 1px solid #dbeafe;
+    border-radius: 16px;
+    padding: 16px 18px;
+    margin-bottom: 14px;
+  }
+  .academic-page .hero-title {
+    margin: 0;
+    font-size: 1.2rem;
+    color: #0f172a;
+  }
+  .academic-page .hero-subtitle {
+    margin: 2px 0 0;
+    color: #475569;
+    font-size: 0.86rem;
+  }
+  .academic-page .hero-chip {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 999px;
+    padding: 6px 12px;
+    font-size: 0.78rem;
+    color: #1e293b;
+    font-weight: 600;
+  }
+  .academic-page .academic-card {
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.07);
+  }
+  .academic-page .card-header {
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .academic-page .academic-table thead th {
+    background: #0f172a;
+    color: #f8fafc;
+    font-size: 0.72rem;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+  .academic-page .filter-bar {
+    position: sticky;
+    top: 0;
+    z-index: 7;
+    background: #ffffff;
+  }
+  .academic-page .academic-table tbody tr {
+    transition: background-color 0.2s ease;
+  }
+  .academic-page .academic-table tbody tr:hover {
+    background: #f8fafc;
+  }
+  .academic-page .field-badge {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 999px;
+    padding: 2px 10px;
+    font-size: 0.74rem;
+    font-weight: 600;
+    color: #0f172a;
+  }
+  .academic-page .action-btn {
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+  }
+  .academic-page .empty-state {
+    padding: 26px 12px;
+    text-align: center;
+    color: #64748b;
+  }
+  .academic-page .empty-state i {
+    font-size: 1.1rem;
+    margin-bottom: 6px;
+    color: #94a3b8;
+  }
+</style>
+<div class="container-fluid py-3 academic-page">
+  <div class="page-hero d-flex justify-content-between align-items-center flex-wrap gap-3">
+    <div class="d-flex align-items-center gap-2">
+      <i class="fas fa-calendar-alt text-primary fs-4"></i>
+      <div>
+        <h4 class="hero-title fw-bold">Course Schedule</h4>
+        <p class="hero-subtitle">Plan weekly periods, subject allocation, and class timelines in one place.</p>
+      </div>
+    </div>
+    <div class="d-flex align-items-center gap-2 flex-wrap">
+      <span class="hero-chip"><i class="fas fa-list me-1 text-primary"></i>{{ schedules|length }} Records</span>
+      <span class="hero-chip"><i class="fas fa-filter me-1 text-primary"></i>Smart Filters</span>
+    </div>
+  </div>
+
+  {% if messages %}
+    {% for msg in messages %}
+      <div class="alert alert-{{ msg.tags|default:'info' }} alert-dismissible fade show py-2" role="alert">
+        {{ msg }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <div class="row g-3">
+    <!-- LEFT: Create / Edit Form -->
+    <div class="col-lg-5">
+      <div class="card shadow-sm border-0 academic-card">
+        <div class="card-header bg-primary text-white py-2">
+          <i class="fas fa-{% if edit_obj %}edit{% else %}plus-circle{% endif %} me-2"></i>
+          {% if edit_obj %}Edit Schedule{% else %}Add New Schedule{% endif %}
+        </div>
+        <div class="card-body">
+          <form method="post" id="scheduleForm">
+            {% csrf_token %}
+            {% if edit_obj %}
+              <input type="hidden" name="record_id" value="{{ edit_obj.pk }}">
+            {% endif %}
+            <div class="row g-2">
+              <div class="col-6">
+                <label class="form-label fw-semibold small">Class <span class="text-danger">*</span></label>
+                <input list="classList" name="class_name" class="form-control form-control-sm"
+                       value="{{ edit_obj.class_name|default:'' }}" placeholder="e.g. 10" required>
+                <datalist id="classList">
+                  {% for c in class_names %}<option value="{{ c }}">{% endfor %}
+                </datalist>
+              </div>
+              <div class="col-6">
+                <label class="form-label fw-semibold small">Section <span class="text-danger">*</span></label>
+                <input name="section" class="form-control form-control-sm"
+                       value="{{ edit_obj.section|default:'' }}" placeholder="e.g. A" required>
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-semibold small">Subject <span class="text-danger">*</span></label>
+                <input name="subject_name" class="form-control form-control-sm"
+                       value="{{ edit_obj.subject_name|default:'' }}" placeholder="Subject Name" required>
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-semibold small">Teacher Name</label>
+                <input name="teacher_name" class="form-control form-control-sm"
+                       value="{{ edit_obj.teacher_name|default:'' }}" placeholder="Teacher Name (optional)">
+              </div>
+              <div class="col-6">
+                <label class="form-label fw-semibold small">Term</label>
+                <select name="term" class="form-select form-select-sm">
+                  {% for val, label in term_choices %}
+                    <option value="{{ val }}" {% if edit_obj.term == val %}selected{% elif not edit_obj and val == 'full_year' %}selected{% endif %}>{{ label }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-6">
+                <label class="form-label fw-semibold small">Periods/Week</label>
+                <input type="number" name="periods_per_week" class="form-control form-control-sm" min="1" max="30"
+                       value="{{ edit_obj.periods_per_week|default:'1' }}">
+              </div>
+              <div class="col-6">
+                <label class="form-label fw-semibold small">Start Date <span class="text-danger">*</span></label>
+                <input type="date" name="start_date" class="form-control form-control-sm"
+                       value="{{ edit_obj.start_date|date:'Y-m-d'|default:'' }}" required>
+              </div>
+              <div class="col-6">
+                <label class="form-label fw-semibold small">End Date <span class="text-danger">*</span></label>
+                <input type="date" name="end_date" class="form-control form-control-sm"
+                       value="{{ edit_obj.end_date|date:'Y-m-d'|default:'' }}" required>
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-semibold small">Description</label>
+                <textarea name="description" class="form-control form-control-sm" rows="2"
+                          placeholder="Optional notes...">{{ edit_obj.description|default:'' }}</textarea>
+              </div>
+            </div>
+            <div class="d-flex gap-2 mt-3">
+              <button type="submit" class="btn btn-primary btn-sm px-4">
+                <i class="fas fa-save me-1"></i>{% if edit_obj %}Update{% else %}Save{% endif %}
+              </button>
+              {% if edit_obj %}
+                <a href="/academic/course-schedule/" class="btn btn-secondary btn-sm">
+                  <i class="fas fa-times me-1"></i>Cancel
+                </a>
+              {% endif %}
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Records List -->
+    <div class="col-lg-7">
+      <div class="card shadow-sm border-0 academic-card">
+        <div class="card-header py-2 d-flex align-items-center justify-content-between filter-bar">
+          <span class="fw-semibold"><i class="fas fa-list me-1 text-primary"></i>Schedule List</span>
+          <form method="get" class="d-flex gap-2 align-items-center">
+            <input list="classList2" name="class_name" class="form-control form-control-sm" style="width:90px"
+                   placeholder="Class" value="{{ filter_class }}">
+            <datalist id="classList2">{% for c in class_names %}<option value="{{ c }}">{% endfor %}</datalist>
+            <input name="section" class="form-control form-control-sm" style="width:70px"
+                   placeholder="Sec" value="{{ filter_section }}">
+            <button class="btn btn-sm btn-outline-primary"><i class="fas fa-search"></i></button>
+            {% if filter_class or filter_section %}
+              <a href="/academic/course-schedule/" class="btn btn-sm btn-outline-secondary">
+                <i class="fas fa-times"></i>
+              </a>
+            {% endif %}
+          </form>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive" style="max-height:480px;overflow-y:auto;">
+            <table class="table table-sm table-hover table-bordered mb-0 small academic-table">
+              <thead class="sticky-top">
+                <tr>
+                  <th>#</th><th>Class</th><th>Sec</th><th>Subject</th><th>Teacher</th>
+                  <th>Term</th><th>Periods/Wk</th><th>Start</th><th>End</th><th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for s in schedules %}
+                <tr>
+                  <td>{{ forloop.counter }}</td>
+                  <td><span class="field-badge">Class {{ s.class_name }}</span></td>
+                  <td><span class="field-badge">{{ s.section }}</span></td>
+                  <td>{{ s.subject_name }}</td>
+                  <td>{{ s.teacher_name|default:'-' }}</td>
+                  <td><span class="badge bg-info text-dark">{{ s.get_term_display }}</span></td>
+                  <td class="text-center">{{ s.periods_per_week }}</td>
+                  <td>{{ s.start_date|date:"d M Y" }}</td>
+                  <td>{{ s.end_date|date:"d M Y" }}</td>
+                  <td>
+                    <a href="/academic/course-schedule/?edit={{ s.pk }}&class_name={{ filter_class }}&section={{ filter_section }}"
+                       class="btn btn-sm btn-outline-primary action-btn" title="Edit"><i class="fas fa-pen"></i></a>
+                    <form method="post" class="d-inline" onsubmit="return confirm('Delete this schedule?')">
+                      {% csrf_token %}
+                      <input type="hidden" name="action" value="delete">
+                      <input type="hidden" name="record_id" value="{{ s.pk }}">
+                      <button class="btn btn-sm btn-outline-danger action-btn" title="Delete"><i class="fas fa-trash"></i></button>
+                    </form>
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="10">
+                    <div class="empty-state">
+                      <i class="fas fa-calendar-xmark d-block"></i>
+                      No schedules found. Add a new schedule entry to get started.
+                    </div>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

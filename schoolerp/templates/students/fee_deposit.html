@@ -1,0 +1,208 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h3>Fee Deposit</h3>
+
+<div class="card-box">
+
+<div class="row mb-3">
+
+<div class="col-md-3">
+<label>Admission No</label>
+<input type="text" class="form-control" placeholder="Enter Admission No">
+</div>
+
+<div class="col-md-1 text-center">
+<br>
+<b>OR</b>
+</div>
+
+<div class="col-md-2">
+<label>Class</label>
+<select class="form-control">
+<option>Select Class</option>
+<option>Play</option>
+<option>Nursery</option>
+<option>LKG</option>
+<option>UKG</option>
+</select>
+</div>
+
+<div class="col-md-2">
+<label>Section</label>
+<select class="form-control">
+<option>Select</option>
+<option>A</option>
+<option>B</option>
+</select>
+</div>
+
+<div class="col-md-3">
+<label>Select Student</label>
+<select name="student" class="form-control" onchange="loadStudentFee(this.value)">
+
+<option value="">Select Student</option>
+
+{% for student in students %}
+
+<option value="{{ student.id }}">
+{{ student.name }} - {{ student.admission_no }}
+</option>
+
+{% endfor %}
+
+</select>
+</div>
+
+<div class="col-md-1">
+<br>
+<button class="btn btn-success">Search</button>
+</div>
+
+</div>
+
+</div>
+
+<br>
+
+<div class="card-box">
+
+<h5>Fee Particular</h5>
+
+<table class="table table-bordered">
+
+<tr>
+<th>Fee Type</th>
+<th>Amount</th>
+</tr>
+
+<tr>
+<td>Tuition Fee</td>
+<td><input type="number" class="form-control"></td>
+</tr>
+
+<tr>
+<td>Transport Fee</td>
+<td><input type="number" id="transport" onkeyup="calculateTotal()" class="form-control"></td>
+</tr>
+
+<tr>
+<td>Books</td>
+<td><input type="number" id="books" onkeyup="calculateTotal()" class="form-control"></td>
+</tr>
+
+<tr>
+<td>Dress</td>
+<td><input type="number" id="dress" onkeyup="calculateTotal()" class="form-control"></td>
+</tr>
+
+<tr>
+<td>Other</td>
+<td><input type="number" class="form-control"></td>
+</tr>
+
+<tr>
+<td>Late Fee</td>
+<td><input type="number" class="form-control"></td>
+</tr>
+
+<tr>
+<td>Concession</td>
+<td><input type="number" class="form-control"></td>
+</tr>
+
+</table>
+
+</div>
+
+<br>
+
+<div class="card-box">
+
+<div class="row">
+
+<div class="col-md-3">
+<label>Total Amount</label>
+<input type="number" class="form-control">
+</div>
+
+<div class="col-md-3">
+<label>Received Amount</label>
+<input type="number" id="total" class="form-control">
+</div>
+
+<div class="col-md-3">
+<label>Balance</label>
+<input type="number" id="balance" class="form-control">
+</div>
+
+<div class="col-md-3">
+<label>Payment Mode</label>
+<select class="form-control">
+<option>Cash</option>
+<option>Online</option>
+<option>UPI</option>
+</select>
+</div>
+
+</div>
+
+<br>
+
+<button class="btn btn-primary">Submit Fee</button>
+
+</div>
+<script>
+
+function calculateTotal(){
+
+let tuition = Number(document.getElementById("tuition").value) || 0
+let transport = Number(document.getElementById("transport").value) || 0
+let books = Number(document.getElementById("books").value) || 0
+let dress = Number(document.getElementById("dress").value) || 0
+let other = Number(document.getElementById("other").value) || 0
+let late = Number(document.getElementById("late").value) || 0
+let concession = Number(document.getElementById("concession").value) || 0
+
+let total = tuition + transport + books + dress + other + late - concession
+
+document.getElementById("total").value = total
+
+calculateBalance()
+
+}
+
+function calculateBalance(){
+
+let total = Number(document.getElementById("total").value) || 0
+let received = Number(document.getElementById("received").value) || 0
+
+document.getElementById("balance").value = total - received
+
+}
+
+</script>
+<script>
+
+function loadStudentFee(student_id){
+
+if(student_id==""){
+return;
+}
+
+fetch("/get-student-fee/"+student_id+"/")
+.then(response => response.json())
+.then(data => {
+
+document.getElementById("tuition").value = data.tuition
+document.getElementById("transport").value = data.transport
+
+calculateTotal()
+
+})
+
+}
+
+</script>
+{% endblock %}

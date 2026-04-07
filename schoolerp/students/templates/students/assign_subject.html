@@ -1,0 +1,50 @@
+{% extends 'base_layout.html' %}
+
+{% block content %}
+<style>
+  .shell { max-width: 980px; margin: 0 auto; background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 18px; }
+  .head h2 { margin: 0; color: #0f172a; }
+  .head p { margin: 6px 0 0; color: #64748b; font-size: 13px; }
+  .subject-grid { margin-top: 14px; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+  .subject-item { border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px; background: #f8fafc; }
+  .subject-item label { display: flex; gap: 8px; align-items: flex-start; cursor: pointer; }
+  .code { font-size: 12px; color: #64748b; }
+  .actions { margin-top: 16px; display: flex; gap: 8px; }
+  .btn { border: 1px solid #cbd5e1; background: #fff; color: #0f172a; border-radius: 8px; padding: 8px 12px; text-decoration: none; font-size: 13px; cursor: pointer; }
+  .btn-primary { background: #0f766e; border-color: #0f766e; color: #fff; }
+  .empty { color: #64748b; margin-top: 10px; }
+</style>
+
+<div class="shell">
+  <div class="head">
+    <h2>Assign Subjects: {{ student.name }}</h2>
+    <p>Class: {{ student.student_class }} - {{ student.section }} | Admission No: {{ student.admission_number }}</p>
+  </div>
+
+  <form method="post">
+    {% csrf_token %}
+    {% if subjects %}
+      <div class="subject-grid">
+        {% for subject in subjects %}
+        <div class="subject-item">
+          <label>
+            <input type="checkbox" name="subjects" value="{{ subject.id }}" {% if subject.id in assigned_ids %}checked{% endif %}>
+            <span>
+              <strong>{{ subject.name }}</strong>
+              <div class="code">Code: {{ subject.code }}</div>
+            </span>
+          </label>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty">No active subjects available. Add subjects from Master menu first.</div>
+    {% endif %}
+
+    <div class="actions">
+      <button class="btn btn-primary" type="submit">Save Subject Assignment</button>
+      <a class="btn" href="/student/{{ student.id }}/">Back</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,503 @@
+{% extends 'base_layout.html' %}
+
+{% block content %}
+
+<style>
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.page-header h2 {
+    margin: 0;
+    color: #333;
+    font-size: 26px;
+    font-weight: 600;
+}
+
+.search-section {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    margin-bottom: 30px;
+}
+
+.search-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+    font-size: 13px;
+    text-transform: uppercase;
+}
+
+.form-group input,
+.form-group select {
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 14px;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #4CAF50;
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+}
+
+.search-button {
+    background: #4CAF50;
+    color: white;
+    padding: 10px 24px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    align-self: flex-end;
+    transition: all 0.3s;
+}
+
+.search-button:hover {
+    background: #45a049;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.students-list {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    margin-bottom: 30px;
+}
+
+.student-item {
+    padding: 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: all 0.3s;
+    background: white;
+}
+
+.student-item:hover {
+    border-color: #4CAF50;
+    background: #f9f9f9;
+    box-shadow: 0 2px 8px rgba(76, 175, 80, 0.15);
+}
+
+.student-name {
+    font-size: 16px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.student-details {
+    font-size: 13px;
+    color: #666;
+    display: flex;
+    gap: 20px;
+}
+
+.student-details span {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.particulars-section {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.particulars-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.particular-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr auto;
+    gap: 15px;
+    padding: 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    align-items: center;
+}
+
+.particular-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.particular-name {
+    font-weight: 600;
+    color: #333;
+    font-size: 14px;
+}
+
+.particular-freq {
+    font-size: 12px;
+    color: #999;
+}
+
+.particular-amount {
+    font-size: 14px;
+    font-weight: 600;
+    color: #4CAF50;
+}
+
+.discount-inputs {
+    display: flex;
+    gap: 8px;
+}
+
+.discount-inputs input,
+.discount-inputs select {
+    padding: 8px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.apply-discount-btn {
+    background: #FFF3E0;
+    color: #E65100;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 12px;
+    transition: all 0.2s;
+}
+
+.apply-discount-btn:hover {
+    background: #FFE0B2;
+}
+
+.alert {
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    display: none;
+}
+
+.alert.success {
+    background: #E8F5E9;
+    color: #2E7D32;
+    border: 1px solid #81C784;
+    display: block;
+}
+
+.alert.error {
+    background: #FFEBEE;
+    color: #C62828;
+    border: 1px solid #EF5350;
+    display: block;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #999;
+}
+
+.empty-state h3 {
+    color: #666;
+    margin-top: 20px;
+}
+</style>
+
+<div class="page-header">
+    <div>
+        <h2>🎁 Apply Fee Discount</h2>
+        <p style="color: #666; margin: 5px 0 0 0;">Search students and apply discounts to their fee</p>
+    </div>
+</div>
+
+<div class="search-section">
+    <div class="search-row">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+        <div class="form-group" style="flex: 1;">
+            <label>Student Name</label>
+            <input type="text" id="searchName" placeholder="Search by name or roll no..." onkeyup="searchStudents()">
+        </div>
+        <div class="form-group" style="flex: 1;">
+            <label>Class</label>
+            <select id="searchClass" onchange="searchStudents()">
+                <option value="">-- All Classes --</option>
+                {% for class in classes %}
+                <option value="{{ class.id }}">{{ class.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group" style="flex: 1;">
+            <label>Section</label>
+            <select id="searchSection" onchange="searchStudents()">
+                <option value="">-- All Sections --</option>
+                <option value="A">A</option>
+                <option value="B">B</option>
+                <option value="C">C</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+<div id="alertBox"></div>
+
+<div class="students-list" id="studentsList" style="display: none;">
+    <div id="studentsContainer"></div>
+</div>
+
+<div class="particulars-section" id="particularsSection" style="display: none;">
+    <div class="particulars-title">📋 Particulars for <span id="studentNameDisplay"></span></div>
+    <div id="particularsContainer"></div>
+</div>
+
+<script>
+let selectedStudent = null;
+
+function searchStudents() {
+    const query = document.getElementById('searchName').value;
+    const classId = document.getElementById('searchClass').value;
+    const section = document.getElementById('searchSection').value;
+    
+    if (!query && !classId && !section) {
+        document.getElementById('studentsList').style.display = 'none';
+        return;
+    }
+    
+    fetch(`/fee/api/search-students/?q=${query}&class_id=${classId}&section=${section}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const container = document.getElementById('studentsContainer');
+                container.innerHTML = '';
+                
+                if (data.students.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: #999;">No students found</p>';
+                    document.getElementById('studentsList').style.display = 'block';
+                    return;
+                }
+                
+                data.students.forEach(student => {
+                    const studentDiv = document.createElement('div');
+                    studentDiv.className = 'student-item';
+                    studentDiv.onclick = () => selectStudent(student);
+                    studentDiv.innerHTML = `
+                        <div class="student-name">${student.name}</div>
+                        <div class="student-details">
+                            <span>📚 ${student.class_model__name}</span>
+                            <span>🏷️ Roll No: ${student.roll_no}</span>
+                        </div>
+                    `;
+                    container.appendChild(studentDiv);
+                });
+                
+                document.getElementById('studentsList').style.display = 'block';
+            } else {
+                showAlert(data.error, 'error');
+            }
+        })
+        .catch(error => {
+            showAlert('Error searching students: ' + error, 'error');
+        });
+}
+
+function selectStudent(student) {
+    selectedStudent = student;
+    
+    fetch(`/fee/api/student-particulars/?student_id=${student.id}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('studentNameDisplay').textContent = data.student.name;
+                
+                const container = document.getElementById('particularsContainer');
+                container.innerHTML = '';
+                
+                if (data.particulars.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: #999;">No particulars found for this student</p>';
+                } else {
+                    data.particulars.forEach(particular => {
+                        const rowDiv = document.createElement('div');
+                        rowDiv.className = 'particular-row';
+                        rowDiv.innerHTML = `
+                            <div class="particular-info">
+                                <div class="particular-name">${particular.particular_name}</div>
+                                <div class="particular-freq">${particular.frequency}</div>
+                            </div>
+                            <div>${particular.month}</div>
+                            <div class="particular-amount">₹ ${particular.amount}</div>
+                            <div class="discount-inputs">
+                                <select onchange="updateDiscountType(this)" class="discount-type-select" data-particular-id="${particular.id}">
+                                    <option value="">Select Type</option>
+                                    <option value="percentage">Percentage</option>
+                                    <option value="fixed">Fixed</option>
+                                </select>
+                                <input type="number" placeholder="Value" step="0.01" class="discount-value-input" data-particular-id="${particular.id}">
+                            </div>
+                            <button class="apply-discount-btn" onclick="applyDiscount(${particular.id}, ${particular.amount}, '${particular.particular_name}')">Apply</button>
+                        `;
+                        container.appendChild(rowDiv);
+                    });
+                }
+                
+                document.getElementById('particularsSection').style.display = 'block';
+            } else {
+                showAlert(data.error, 'error');
+            }
+        })
+        .catch(error => {
+            showAlert('Error loading particulars: ' + error, 'error');
+        });
+}
+
+function updateDiscountType(selectElement) {
+    // Placeholder for discount type update logic
+}
+
+function applyDiscount(particularId, originalAmount, particularName) {
+    if (!selectedStudent) {
+        showAlert('Please select a student first', 'error');
+        return;
+    }
+    
+    const discountType = document.querySelector(`.discount-type-select[data-particular-id="${particularId}"]`).value;
+    const discountValue = document.querySelector(`.discount-value-input[data-particular-id="${particularId}"]`).value;
+    
+    if (!discountType || !discountValue) {
+        showAlert('Please select discount type and value', 'error');
+        return;
+    }
+    
+    // Show loading state
+    const btn = event.target;
+    const originalText = btn.innerText;
+    btn.innerText = 'Saving...';
+    btn.disabled = true;
+    
+    // Create form data
+    const formData = new FormData();
+    formData.append('student_id', selectedStudent.id);
+    formData.append('particular_id', particularId);
+    formData.append('discount_type', discountType);
+    formData.append('discount_value', discountValue);
+    formData.append('original_amount', originalAmount);
+    formData.append('csrfmiddlewaretoken', getCookie('csrftoken'));
+    
+    // Save discount
+    fetch('/fee/discount/save/', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert(`✓ Discount saved successfully! Final amount: ₹ ${data.discount.final_amount}`, 'success');
+            
+            // Reset inputs
+            document.querySelector(`.discount-type-select[data-particular-id="${particularId}"]`).value = '';
+            document.querySelector(`.discount-value-input[data-particular-id="${particularId}"]`).value = '';
+        } else {
+            showAlert('Error: ' + data.error, 'error');
+        }
+        
+        // Restore button state
+        btn.innerText = originalText;
+        btn.disabled = false;
+    })
+    .catch(error => {
+        showAlert('Error saving discount: ' + error, 'error');
+        btn.innerText = originalText;
+        btn.disabled = false;
+    });
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function showAlert(message, type) {
+    const alertBox = document.getElementById('alertBox');
+    const alert = document.createElement('div');
+    alert.className = `alert ${type}`;
+    alert.innerText = message;
+    alertBox.innerHTML = '';
+    alertBox.appendChild(alert);
+    
+    setTimeout(() => {
+        alert.remove();
+    }, 4000);
+}
+</script>
+
+{% endblock %}

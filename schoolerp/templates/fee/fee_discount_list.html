@@ -1,0 +1,581 @@
+{% extends 'base_layout.html' %}
+
+{% block content %}
+
+<style>
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.page-header h2 {
+    margin: 0;
+    color: #333;
+    font-size: 26px;
+    font-weight: 600;
+}
+
+.btn-primary {
+    background: #b80b36;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s;
+}
+
+.btn-primary:hover {
+    background: #9a0a2d;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(184, 11, 54, 0.3);
+}
+
+.discount-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.discount-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.discount-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.12);
+}
+
+.discount-ribbon {
+    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.discount-type {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    opacity: 0.9;
+}
+
+.discount-badge {
+    background: rgba(255,255,255,0.3);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.discount-content {
+    padding: 25px;
+}
+
+.discount-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.discount-description {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 15px;
+    line-height: 1.4;
+    min-height: 30px;
+}
+
+.discount-value-section {
+    background: #f8f8f8;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    text-align: center;
+    border-left: 4px solid #4CAF50;
+}
+
+.discount-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: #4CAF50;
+    margin-bottom: 3px;
+}
+
+.discount-value-label {
+    font-size: 11px;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.discount-meta {
+    display: flex;
+    gap: 3px;
+    font-size: 12px;
+    color: #999;
+    margin-bottom: 15px;
+    padding-top: 10px;
+    border-top: 1px solid #f0f0f0;
+}
+
+.meta-item {
+    flex: 1;
+}
+
+.meta-label {
+    font-weight: 600;
+    color: #666;
+    margin-bottom: 2px;
+}
+
+.discount-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-sm {
+    flex: 1;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.btn-edit {
+    background: #FFF3E0;
+    color: #E65100;
+}
+
+.btn-edit:hover {
+    background: #FFE0B2;
+}
+
+.btn-delete {
+    background: #FFEBEE;
+    color: #C62828;
+}
+
+.btn-delete:hover {
+    background: #FFCDD2;
+}
+
+.stats-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.stat-box {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border-top: 4px solid #4CAF50;
+    text-align: center;
+}
+
+.stat-value {
+    font-size: 32px;
+    font-weight: 700;
+    color: #4CAF50;
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    font-size: 13px;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #999;
+}
+
+.empty-state h3 {
+    color: #666;
+    margin-top: 20px;
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+}
+
+.modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-header {
+    margin-bottom: 20px;
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: #333;
+    font-size: 20px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #4CAF50;
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 60px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 25px;
+}
+
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.btn-submit {
+    background: #4CAF50;
+    color: white;
+}
+
+.btn-submit:hover {
+    background: #45a049;
+}
+
+.btn-cancel {
+    background: #f0f0f0;
+    color: #333;
+}
+
+.btn-cancel:hover {
+    background: #e0e0e0;
+}
+
+.alert {
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    display: none;
+}
+
+.alert.success {
+    background: #E8F5E9;
+    color: #2E7D32;
+    border: 1px solid #81C784;
+    display: block;
+}
+
+.alert.error {
+    background: #FFEBEE;
+    color: #C62828;
+    border: 1px solid #EF5350;
+    display: block;
+}
+</style>
+
+<div class="page-header">
+    <div>
+        <h2>🎁 Fee Discount</h2>
+        <p style="color: #666; margin: 5px 0 0 0;">Manage student fee discount schemes</p>
+    </div>
+    <button class="btn-primary" onclick="openModal()">+ Add Discount</button>
+</div>
+
+<!-- Stats Section -->
+<div class="stats-container">
+    <div class="stat-box">
+        <div class="stat-value">{{ discounts|length }}</div>
+        <div class="stat-label">Total Discounts</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-value">{{ discounts|length }}</div>
+        <div class="stat-label">Active</div>
+    </div>
+</div>
+
+<!-- Discount Cards Grid -->
+<div id="alertBox"></div>
+{% if discounts %}
+<div class="discount-grid">
+    {% for discount in discounts %}
+    <div class="discount-card">
+        <div class="discount-ribbon">
+            <div class="discount-type">{{ discount.get_discount_type_display }}</div>
+            <div class="discount-badge" style="{% if discount.discount_type == 'percentage' %}background: rgba(76, 175, 80, 0.3); color: #4CAF50;{% else %}background: rgba(33, 150, 243, 0.3); color: #2196F3;{% endif %}">
+                {{ discount.discount_type|upper }}
+            </div>
+        </div>
+        <div class="discount-content">
+            <div class="discount-name">{{ discount.name }}</div>
+            <div class="discount-description">{{ discount.description|truncatewords:10 }}</div>
+            
+            <div class="discount-value-section">
+                <div class="discount-value">
+                    {% if discount.discount_type == 'percentage' %}
+                    {{ discount.discount_value }}%
+                    {% else %}
+                    ₹ {{ discount.discount_value }}
+                    {% endif %}
+                </div>
+                <div class="discount-value-label">Discount Value</div>
+            </div>
+            
+            <div class="discount-meta">
+                <div class="meta-item">
+                    <div class="meta-label">MAX CAP</div>
+                    <div>{% if discount.max_discount_amount %}₹ {{ discount.max_discount_amount }}{% else %}—{% endif %}</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label">STATUS</div>
+                    <div>✓ Active</div>
+                </div>
+            </div>
+            
+            <div class="discount-actions">
+                <button class="btn-sm btn-edit" onclick="editDiscount({{ discount.id }})">Edit</button>
+                <button class="btn-sm btn-delete" onclick="deleteDiscount({{ discount.id }})">Delete</button>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <h3>😕 No Discounts Found</h3>
+    <p>Start by adding a new discount plan</p>
+    <button class="btn-primary" onclick="openModal()" style="margin-top: 15px;">Add Discount</button>
+</div>
+{% endif %}
+
+<!-- Modal Form -->
+<div id="discountModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Add Fee Discount</h3>
+        </div>
+        
+        <form id="discountForm" method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="modalName">Discount Name *</label>
+                <input type="text" id="modalName" name="name" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="modalDescription">Description</label>
+                <textarea id="modalDescription" name="description" placeholder="Describe the discount scheme..."></textarea>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="modalType">Discount Type *</label>
+                    <select id="modalType" name="discount_type" required>
+                        <option value="">-- Select Type --</option>
+                        <option value="percentage">Percentage (%)</option>
+                        <option value="fixed">Fixed Amount (₹)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="modalValue">Discount Value *</label>
+                    <input type="number" id="modalValue" name="discount_value" step="0.01" required>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="modalMaxDiscount">Max Discount Amount (₹)</label>
+                <input type="number" id="modalMaxDiscount" name="max_discount_amount" step="0.01" placeholder="Leave blank for no limit">
+            </div>
+            
+            <div class="form-actions">
+                <button type="button" class="btn btn-cancel" onclick="closeModal()">Cancel</button>
+                <button type="submit" class="btn btn-submit">Save Discount</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+let currentDiscountId = null;
+
+function openModal() {
+    currentDiscountId = null;
+    document.getElementById('discountForm').reset();
+    document.querySelector('.modal-header h3').innerText = 'Add Fee Discount';
+    document.getElementById('discountModal').classList.add('active');
+}
+
+function closeModal() {
+    document.getElementById('discountModal').classList.remove('active');
+    currentDiscountId = null;
+}
+
+function editDiscount(id) {
+    fetch(`/fee/discount/${id}/data/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                currentDiscountId = id;
+                document.getElementById('modalName').value = data.discount.name;
+                document.getElementById('modalDescription').value = data.discount.description;
+                document.getElementById('modalType').value = data.discount.discount_type;
+                document.getElementById('modalValue').value = data.discount.discount_value;
+                document.getElementById('modalMaxDiscount').value = data.discount.max_discount_amount;
+                document.querySelector('.modal-header h3').innerText = 'Edit Fee Discount';
+                document.getElementById('discountModal').classList.add('active');
+            }
+        });
+}
+
+function deleteDiscount(id) {
+    if (confirm('Are you sure you want to delete this discount?')) {
+        fetch(`/fee/discount/${id}/delete/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name="csrfmiddlewaretoken"]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                showAlert(data.error, 'error');
+            }
+        });
+    }
+}
+
+document.getElementById('discountForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const url = currentDiscountId 
+        ? `/fee/discount/${currentDiscountId}/edit/`
+        : '/fee/discount/add/';
+    
+    fetch(url, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert(data.message, 'success');
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        } else {
+            showAlert(data.error, 'error');
+        }
+    })
+    .catch(error => {
+        showAlert('Error: ' + error, 'error');
+    });
+});
+
+function showAlert(message, type) {
+    const alertBox = document.getElementById('alertBox');
+    if (!alertBox) return;
+    
+    const alert = document.createElement('div');
+    alert.className = `alert ${type}`;
+    alert.innerText = message;
+    alertBox.innerHTML = '';
+    alertBox.appendChild(alert);
+    
+    setTimeout(() => {
+        alert.remove();
+    }, 3000);
+}
+
+// Close modal on backdrop click
+document.getElementById('discountModal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+});
+</script>
+
+{% endblock %}

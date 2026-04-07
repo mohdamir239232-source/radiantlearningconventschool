@@ -1,0 +1,248 @@
+{% extends 'base_layout.html' %}
+
+{% block content %}
+
+<style>
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.page-header h2 {
+    margin: 0;
+    color: #333;
+    font-size: 26px;
+    font-weight: 600;
+}
+
+.btn-primary {
+    background: #b80b36;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s;
+}
+
+.btn-primary:hover {
+    background: #9a0a2d;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(184, 11, 54, 0.3);
+}
+
+.search-box {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.search-box input {
+    flex: 1;
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.search-box input:focus {
+    outline: none;
+    border-color: #b80b36;
+}
+
+.table-container {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+table thead {
+    background: #f5f5f5;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+table th {
+    padding: 15px;
+    text-align: left;
+    color: #666;
+    font-weight: 600;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+table td {
+    padding: 15px;
+    border-bottom: 1px solid #f0f0f0;
+    color: #333;
+}
+
+table tbody tr:hover {
+    background: #f9f9f9;
+}
+
+.badge {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.badge-primary {
+    background: #E3F2FD;
+    color: #1565C0;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-sm {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.btn-view {
+    background: #E3F2FD;
+    color: #1565C0;
+}
+
+.btn-view:hover {
+    background: #BBDEFB;
+}
+
+.btn-edit {
+    background: #FFF3E0;
+    color: #E65100;
+}
+
+.btn-edit:hover {
+    background: #FFE0B2;
+}
+
+.btn-delete {
+    background: #FFEBEE;
+    color: #C62828;
+}
+
+.btn-delete:hover {
+    background: #FFCDD2;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #999;
+}
+
+.empty-state h3 {
+    margin-bottom: 10px;
+}
+</style>
+
+<div class="page-header">
+    <div>
+        <h2>👥 Students List</h2>
+        <p style="color: #666; margin: 5px 0 0 0;">Manage all enrolled students</p>
+    </div>
+    <a href="/student/admission/" class="btn-primary">+ Add New Student</a>
+</div>
+
+<div class="search-box">
+    <input type="text" id="searchInput" placeholder="Search by name, roll no, or class..." onkeyup="filterTable()">
+</div>
+
+<div class="table-container">
+    {% if students %}
+    <table id="studentsTable">
+        <thead>
+            <tr>
+                <th>Student Name</th>
+                <th>Roll No</th>
+                <th>Class</th>
+                <th>Section</th>
+                <th>DOB</th>
+                <th>Parent Name</th>
+                <th>Phone</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for student in students %}
+            <tr>
+                <td><b>{{ student.name }}</b></td>
+                <td>{{ student.roll_no }}</td>
+                <td>{{ student.student_class }}</td>
+                <td>{{ student.section }}</td>
+                <td>{{ student.admission_date|date:"d M Y" }}</td>
+                <td>Guardian</td>
+                <td>{{ student.contact|default:"-" }}</td>
+                <td><span class="badge badge-primary">Active</span></td>
+                <td>
+                    <div class="action-buttons">
+                        <a href="#" class="btn-sm btn-view">View</a>
+                        <a href="#" class="btn-sm btn-edit">Edit</a>
+                        <a href="#" class="btn-sm btn-delete">Delete</a>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <h3>😕 No Students Found</h3>
+        <p>Start by adding a new student to the system</p>
+        <a href="/student/admission/" class="btn-primary" style="display: inline-block; margin-top: 15px;">Add Student</a>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function filterTable() {
+    const input = document.getElementById("searchInput");
+    const filter = input.value.toUpperCase();
+    const table = document.getElementById("studentsTable");
+    
+    if (!table) return;
+    
+    const rows = table.getElementsByTagName("tr");
+    
+    for (let i = 1; i < rows.length; i++) {
+        const row = rows[i];
+        const text = row.textContent.toUpperCase();
+        
+        if (text.includes(filter)) {
+            row.style.display = "";
+        } else {
+            row.style.display = "none";
+        }
+    }
+}
+</script>
+
+</table>
+
+{% endblock %}

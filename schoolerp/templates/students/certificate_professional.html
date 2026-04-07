@@ -1,0 +1,653 @@
+{% extends 'base_layout.html' %}
+
+{% block content %}
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;800&family=Cormorant+Garamond:wght@400;500;600;700&display=swap');
+
+.cert-shell {
+    display: grid;
+    grid-template-columns: 330px 1fr;
+    gap: 18px;
+}
+
+.cert-panel,
+.cert-preview-wrap {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+}
+
+.cert-panel {
+    padding: 14px;
+}
+
+.cert-panel h3 {
+    margin: 0;
+    font-size: 17px;
+    color: #1f2937;
+}
+
+.cert-panel p {
+    margin: 6px 0 14px;
+    color: #6b7280;
+    font-size: 13px;
+}
+
+.field {
+    margin-bottom: 12px;
+}
+
+.field label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #334155;
+}
+
+.field select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.field textarea {
+    width: 100%;
+    min-height: 170px;
+    resize: vertical;
+    padding: 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 14px;
+    line-height: 1.5;
+    font-family: 'Cormorant Garamond', serif;
+}
+
+.field select:focus {
+    outline: none;
+    border-color: #7f1d1d;
+    box-shadow: 0 0 0 3px rgba(127, 29, 29, 0.15);
+}
+
+.field textarea:focus {
+    outline: none;
+    border-color: #7f1d1d;
+    box-shadow: 0 0 0 3px rgba(127, 29, 29, 0.15);
+}
+
+.print-btn {
+    width: 100%;
+    border: none;
+    border-radius: 10px;
+    padding: 10px;
+    background: linear-gradient(135deg, #7f1d1d, #b91c1c);
+    color: #ffffff;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.print-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.cert-preview-wrap {
+    padding: 14px;
+    background: linear-gradient(160deg, #f7f3ea, #efe7d9);
+}
+
+.certificate {
+    --accent: #6b4f1d;
+    --accent-soft: #a78642;
+    --ink: #1f2937;
+    --paper: #fffdf8;
+    min-height: 590px;
+    border-radius: 18px;
+    padding: 46px 48px;
+    position: relative;
+    background:
+      radial-gradient(circle at top left, rgba(167, 134, 66, 0.16), transparent 40%),
+      radial-gradient(circle at bottom right, rgba(107, 79, 29, 0.12), transparent 42%),
+      var(--paper);
+    border: 1px solid #d8c08e;
+    box-shadow:
+      0 18px 30px rgba(69, 53, 24, 0.18),
+      inset 0 0 0 2px #efe1bf,
+      inset 0 0 0 12px #fffdf7,
+      inset 0 0 0 13px #e7d4a4;
+    font-family: 'Cormorant Garamond', serif;
+}
+
+.certificate[data-theme='royal'] {
+        --accent: #6b4f1d;
+        --paper: #fffdf8;
+}
+
+.certificate[data-theme='emerald'] {
+        --accent: #14532d;
+        --paper: #f7fffa;
+        border-color: #9ad2ac;
+        box-shadow:
+            0 18px 30px rgba(18, 66, 45, 0.17),
+            inset 0 0 0 2px #cfe9d7,
+            inset 0 0 0 12px #fcfffd,
+            inset 0 0 0 13px #add7bc;
+}
+
+.certificate[data-theme='navy'] {
+        --accent: #1e3a8a;
+        --paper: #fbfdff;
+        border-color: #bfd2f7;
+        box-shadow:
+            0 18px 30px rgba(23, 44, 92, 0.16),
+            inset 0 0 0 2px #dbe7fb,
+            inset 0 0 0 12px #ffffff,
+            inset 0 0 0 13px #cbdbf8;
+}
+
+.certificate[data-theme='rose'] {
+        --accent: #9d174d;
+        --paper: #fffafb;
+        border-color: #f1c4d2;
+        box-shadow:
+            0 18px 30px rgba(125, 24, 66, 0.16),
+            inset 0 0 0 2px #f6dbe4,
+            inset 0 0 0 12px #fffdfd,
+            inset 0 0 0 13px #efcad8;
+}
+
+.certificate[data-theme='minimal'] {
+        --accent: #111827;
+        --paper: #ffffff;
+        border-color: #d1d5db;
+        box-shadow:
+            0 14px 24px rgba(17, 24, 39, 0.14),
+            inset 0 0 0 2px #edf0f4,
+            inset 0 0 0 12px #ffffff,
+            inset 0 0 0 13px #e5e7eb;
+}
+
+.watermark {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-size: 122px;
+    letter-spacing: 0.17em;
+    color: rgba(107, 79, 29, 0.06);
+    font-weight: 800;
+    pointer-events: none;
+    font-family: 'Cinzel', serif;
+    text-transform: uppercase;
+}
+
+.cert-header {
+    text-align: center;
+    position: relative;
+    z-index: 1;
+}
+
+.cert-ribbon {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 14px;
+    border-radius: 999px;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: linear-gradient(90deg, #4f3a14, #927238);
+    color: #fff8e6;
+    font-family: 'Cinzel', serif;
+}
+
+.certificate[data-theme='emerald'] .cert-ribbon {
+    background: linear-gradient(90deg, #0f3b22, #1f7a45);
+}
+
+.certificate[data-theme='navy'] .cert-ribbon {
+    background: linear-gradient(90deg, #1e3a8a, #1d4ed8);
+}
+
+.certificate[data-theme='rose'] .cert-ribbon {
+    background: linear-gradient(90deg, #831843, #be185d);
+}
+
+.certificate[data-theme='minimal'] .cert-ribbon {
+    background: linear-gradient(90deg, #374151, #111827);
+}
+
+.cert-header h1 {
+    margin: 14px 0 0;
+    color: var(--accent);
+    font-family: 'Cinzel', serif;
+    font-size: 42px;
+    font-weight: 800;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+}
+
+.cert-header p {
+    margin: 10px auto 0;
+    font-size: 16px;
+    color: #4b5563;
+    max-width: 76%;
+}
+
+.cert-body {
+    position: relative;
+    z-index: 1;
+    margin-top: 42px;
+    color: var(--ink);
+    font-size: 28px;
+    line-height: 1.65;
+    text-align: center;
+}
+
+.fill {
+    border-bottom: 1px solid rgba(17, 24, 39, 0.28);
+    font-weight: 700;
+    padding: 0 6px;
+}
+
+.cert-footer {
+    margin-top: 58px;
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    position: relative;
+    z-index: 1;
+}
+
+.date-box {
+    font-size: 19px;
+    color: #374151;
+}
+
+.seal {
+    width: 94px;
+    height: 94px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-family: 'Cinzel', serif;
+    font-size: 12px;
+    text-align: center;
+    line-height: 1.2;
+    color: #ffffff;
+    background: radial-gradient(circle at 30% 30%, #d4af62, #7d5a26 72%);
+    box-shadow: inset 0 0 0 3px #f3e0b3, 0 8px 14px rgba(79, 58, 20, 0.25);
+}
+
+.certificate[data-theme='emerald'] .seal {
+    background: radial-gradient(circle at 30% 30%, #72d59d, #166534 72%);
+    box-shadow: inset 0 0 0 3px #c7f3d7, 0 8px 14px rgba(20, 83, 45, 0.24);
+}
+
+.certificate[data-theme='navy'] .seal {
+    background: radial-gradient(circle at 30% 30%, #7aa9ff, #1d4ed8 72%);
+    box-shadow: inset 0 0 0 3px #dbeafe, 0 8px 14px rgba(30, 58, 138, 0.24);
+}
+
+.certificate[data-theme='rose'] .seal {
+    background: radial-gradient(circle at 30% 30%, #f08cb3, #be185d 72%);
+    box-shadow: inset 0 0 0 3px #fde2ec, 0 8px 14px rgba(157, 23, 77, 0.24);
+}
+
+.certificate[data-theme='minimal'] .seal {
+    background: radial-gradient(circle at 30% 30%, #9ca3af, #374151 72%);
+    box-shadow: inset 0 0 0 3px #f3f4f6, 0 8px 14px rgba(55, 65, 81, 0.24);
+}
+
+.sign-box {
+    min-width: 220px;
+    text-align: center;
+}
+
+.sign-line {
+    border-top: 1px solid #1f2937;
+    margin-top: 24px;
+    padding-top: 6px;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.hint {
+    margin-top: 190px;
+    text-align: center;
+    color: #64748b;
+    font-size: 19px;
+    font-family: 'Cormorant Garamond', serif;
+}
+
+.corner {
+    position: absolute;
+    width: 58px;
+    height: 58px;
+    border-color: #b89145;
+    opacity: 0.9;
+}
+
+.corner.tl {
+    top: 18px;
+    left: 18px;
+    border-top: 3px solid;
+    border-left: 3px solid;
+    border-top-left-radius: 16px;
+}
+
+.corner.tr {
+    top: 18px;
+    right: 18px;
+    border-top: 3px solid;
+    border-right: 3px solid;
+    border-top-right-radius: 16px;
+}
+
+.corner.bl {
+    bottom: 18px;
+    left: 18px;
+    border-bottom: 3px solid;
+    border-left: 3px solid;
+    border-bottom-left-radius: 16px;
+}
+
+.corner.br {
+    bottom: 18px;
+    right: 18px;
+    border-bottom: 3px solid;
+    border-right: 3px solid;
+    border-bottom-right-radius: 16px;
+}
+
+@media (max-width: 990px) {
+    .cert-shell {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media print {
+    .topbar,
+    .sidebar,
+    .cert-panel,
+    .crumb {
+        display: none !important;
+    }
+
+    .main {
+        margin-left: 0 !important;
+        width: 100% !important;
+    }
+
+    .content {
+        background: #ffffff !important;
+        padding: 0 !important;
+    }
+
+    .cert-preview-wrap {
+        border: none;
+        padding: 0;
+    }
+
+    .certificate {
+        border: none;
+        box-shadow: none;
+        min-height: auto;
+        padding: 20px;
+    }
+
+    .watermark {
+        font-size: 98px;
+    }
+}
+</style>
+
+<div class="crumb" style="margin-bottom:8px;color:#6b7280;">Certificate > {{ certificate_title }}</div>
+
+<div class="cert-shell">
+    <div class="cert-panel">
+        <h3>{{ certificate_title }}</h3>
+        <p>Class, section aur student select karte hi professional certificate ready ho jayega.</p>
+
+        <div class="field">
+            <label for="classSel">Class</label>
+            <select id="classSel" onchange="onClassChange()">
+                <option value="">Select Class</option>
+                {% for class_name in class_names %}
+                <option value="{{ class_name }}">{{ class_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="field">
+            <label for="sectionSel">Section</label>
+            <select id="sectionSel" onchange="onSectionChange()" disabled>
+                <option value="">Select Section</option>
+            </select>
+        </div>
+
+        <div class="field">
+            <label for="studentSel">Student</label>
+            <select id="studentSel" onchange="onStudentChange()" disabled>
+                <option value="">Select Student</option>
+            </select>
+        </div>
+
+        <div class="field">
+            <label for="designSel">Certificate Design</label>
+            <select id="designSel" onchange="onDesignChange()">
+                <option value="royal">Royal Gold</option>
+                <option value="emerald">Emerald Crest</option>
+                <option value="navy">Midnight Navy</option>
+                <option value="rose">Rose Signature</option>
+                <option value="minimal">Ivory Minimal</option>
+            </select>
+        </div>
+
+        <div class="field">
+            <label for="contentEditor">Certificate Content (Editable)</label>
+            <textarea id="contentEditor" placeholder="Student select karte hi default content aa jayega. Aap is text ko edit kar sakte hain." oninput="onContentInput()"></textarea>
+        </div>
+
+        <button id="printBtn" class="print-btn" onclick="printCertificate()" disabled>Print Certificate</button>
+    </div>
+
+    <div class="cert-preview-wrap">
+        <div class="certificate" id="certificateBox">
+            <div class="hint">Student select karne ke baad certificate preview yahin dikhega.</div>
+        </div>
+    </div>
+</div>
+
+<script>
+const CERT_KEY = '{{ certificate_key }}';
+const CERT_HEADLINE = '{{ certificate_headline|escapejs }}';
+const CERT_SUBTITLE = '{{ certificate_subtitle|escapejs }}';
+
+let studentsCache = [];
+let selectedStudent = null;
+let defaultCertificateContent = '';
+
+function esc(text) {
+    const value = String(text || '');
+    return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+function resetPreview() {
+    document.getElementById('certificateBox').innerHTML = '<div class="hint">Student select karne ke baad certificate preview yahin dikhega.</div>';
+    document.getElementById('certificateBox').removeAttribute('data-theme');
+    document.getElementById('contentEditor').value = '';
+    document.getElementById('printBtn').disabled = true;
+}
+
+function getSelectedTheme() {
+    return document.getElementById('designSel').value || 'royal';
+}
+
+function formatEditableContent(rawText) {
+    const clean = String(rawText || '').trim();
+    if (!clean) {
+        return '';
+    }
+
+    return esc(clean).replace(/\n/g, '<br>');
+}
+
+function onDesignChange() {
+    renderCertificatePreview();
+}
+
+function onContentInput() {
+    renderCertificatePreview();
+}
+
+function onClassChange() {
+    const className = document.getElementById('classSel').value;
+    const sectionSel = document.getElementById('sectionSel');
+    const studentSel = document.getElementById('studentSel');
+
+    selectedStudent = null;
+    studentsCache = [];
+    sectionSel.innerHTML = '<option value="">Select Section</option>';
+    studentSel.innerHTML = '<option value="">Select Student</option>';
+    sectionSel.disabled = true;
+    studentSel.disabled = true;
+    resetPreview();
+
+    if (!className) return;
+
+    fetch(`/certificate/api/students/?class_name=${encodeURIComponent(className)}`)
+        .then((r) => r.json())
+        .then((data) => {
+            if (!data.success) {
+                alert(data.error || 'Unable to load sections');
+                return;
+            }
+            const sections = Array.isArray(data.sections) ? data.sections : [];
+            sections.forEach((sec) => {
+                sectionSel.innerHTML += `<option value="${esc(sec)}">${esc(sec)}</option>`;
+            });
+            sectionSel.disabled = false;
+        })
+        .catch(() => alert('Network error while loading sections'));
+}
+
+function onSectionChange() {
+    const className = document.getElementById('classSel').value;
+    const section = document.getElementById('sectionSel').value;
+    const studentSel = document.getElementById('studentSel');
+
+    selectedStudent = null;
+    studentsCache = [];
+    studentSel.innerHTML = '<option value="">Select Student</option>';
+    studentSel.disabled = true;
+    resetPreview();
+
+    if (!className || !section) return;
+
+    const params = new URLSearchParams({ class_name: className, section: section });
+    fetch('/certificate/api/students/?' + params.toString())
+        .then((r) => r.json())
+        .then((data) => {
+            if (!data.success) {
+                alert(data.error || 'Unable to load students');
+                return;
+            }
+            studentsCache = Array.isArray(data.students) ? data.students : [];
+            studentsCache.forEach((stu) => {
+                studentSel.innerHTML += `<option value="${stu.id}">${esc(stu.name)} (${esc(String(stu.roll_no))})</option>`;
+            });
+            studentSel.disabled = false;
+        })
+        .catch(() => alert('Network error while loading students'));
+}
+
+function buildBodyText(student, issueDate) {
+    if (CERT_KEY === 'appreciation') {
+        return `This certificate is proudly awarded to <span class="fill">${esc(student.name)}</span>, student of Class <span class="fill">${esc(student.student_class)} - ${esc(student.section)}</span>, in appreciation of sincere conduct, responsible behavior, and valuable contribution to the school environment during the academic session.`;
+    }
+    if (CERT_KEY === 'participation') {
+        return `This is to certify that <span class="fill">${esc(student.name)}</span>, Admission No. <span class="fill">${esc(student.admission_number)}</span>, actively participated in school activities as a student of Class <span class="fill">${esc(student.student_class)} - ${esc(student.section)}</span> and showed enthusiastic involvement throughout the program.`;
+    }
+    return `This certificate is awarded to <span class="fill">${esc(student.name)}</span>, Roll No. <span class="fill">${esc(String(student.roll_no))}</span>, for remarkable achievement and commendable performance as a student of Class <span class="fill">${esc(student.student_class)} - ${esc(student.section)}</span>. The institution appreciates the hard work and dedication shown.`;
+}
+
+function onStudentChange() {
+    const studentId = parseInt(document.getElementById('studentSel').value || '0', 10);
+    selectedStudent = studentsCache.find((s) => s.id === studentId) || null;
+
+    if (!selectedStudent) {
+        resetPreview();
+        return;
+    }
+
+    defaultCertificateContent = buildBodyText(selectedStudent);
+    document.getElementById('contentEditor').value = defaultCertificateContent;
+    renderCertificatePreview();
+}
+
+function renderCertificatePreview() {
+    if (!selectedStudent) {
+        resetPreview();
+        return;
+    }
+
+    const issueDate = new Date().toLocaleDateString('en-IN', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric'
+    });
+
+    const contentEditor = document.getElementById('contentEditor');
+    const rawContent = contentEditor.value || defaultCertificateContent;
+    const bodyHtml = formatEditableContent(rawContent);
+    if (!bodyHtml) {
+        document.getElementById('printBtn').disabled = true;
+        return;
+    }
+
+    const serial = `${CERT_KEY.toUpperCase()}-${String(selectedStudent.id).padStart(4, '0')}-${new Date().getFullYear()}`;
+    const certificateBox = document.getElementById('certificateBox');
+    certificateBox.setAttribute('data-theme', getSelectedTheme());
+
+    certificateBox.innerHTML = `
+        <div class="corner tl"></div>
+        <div class="corner tr"></div>
+        <div class="corner bl"></div>
+        <div class="corner br"></div>
+        <div class="watermark">RLCS</div>
+        <div class="cert-header">
+            <div class="cert-ribbon">Certificate No. ${esc(serial)}</div>
+            <h1>${CERT_HEADLINE}</h1>
+            <p>${CERT_SUBTITLE}</p>
+        </div>
+
+        <div class="cert-body">${bodyHtml}</div>
+
+        <div class="cert-footer">
+            <div style="display:flex;align-items:center;gap:16px;">
+                <div class="seal">Official Seal<br>RLCS</div>
+                <div class="date-box">Date: <strong>${esc(issueDate)}</strong></div>
+            </div>
+            <div class="sign-box">
+                <div class="sign-line">Principal / Authorized Signatory</div>
+            </div>
+        </div>
+    `;
+
+    document.getElementById('printBtn').disabled = false;
+}
+
+function printCertificate() {
+    if (!selectedStudent) {
+        alert('Please select a student first.');
+        return;
+    }
+    window.print();
+}
+</script>
+{% endblock %}

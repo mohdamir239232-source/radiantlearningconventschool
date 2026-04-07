@@ -1,0 +1,40 @@
+{% extends 'base_layout.html' %}
+
+{% block content %}
+<style>
+  .shell { max-width: 760px; margin: 0 auto; background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 18px; }
+  .head h2 { margin: 0; color: #0f172a; }
+  .meta { margin: 8px 0 0; color: #64748b; font-size: 13px; }
+  .panel { margin-top: 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; }
+  .label { display: block; font-size: 13px; font-weight: 600; color: #334155; margin-bottom: 6px; }
+  .select { width: 100%; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px; }
+  .actions { margin-top: 14px; display: flex; gap: 8px; }
+  .btn { border: 1px solid #cbd5e1; background: #fff; border-radius: 8px; padding: 9px 12px; text-decoration: none; color: #0f172a; font-size: 13px; cursor: pointer; }
+  .btn-primary { background: #0f766e; border-color: #0f766e; color: #fff; }
+</style>
+
+<div class="shell">
+  <div class="head">
+    <h2>Promote Student: {{ student.name }}</h2>
+    <p class="meta">Admission No: {{ student.admission_number }} | Current Class: {{ student.student_class }} - {{ student.section }}</p>
+  </div>
+
+  <form method="post">
+    {% csrf_token %}
+    <div class="panel">
+      <label class="label" for="next_class">Promote to Class</label>
+      <select class="select" id="next_class" name="next_class" required>
+        <option value="">Select class</option>
+        {% for class_name in class_names %}
+          <option value="{{ class_name }}">{{ class_name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-primary" type="submit">Promote Student</button>
+      <a class="btn" href="/student/{{ student.id }}/">Back</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

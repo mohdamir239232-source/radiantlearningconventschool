@@ -1,0 +1,80 @@
+{% extends 'base_layout.html' %}
+
+{% block content %}
+<style>
+  .placeholder-shell {
+    max-width: 900px;
+    margin: 0 auto;
+    background: linear-gradient(135deg, #f8fafc, #fff7ed);
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 24px;
+  }
+  .placeholder-kicker {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: #ecfeff;
+    color: #0e7490;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .placeholder-shell h2 {
+    margin: 10px 0 8px;
+    color: #0f172a;
+  }
+  .placeholder-shell p {
+    margin: 0 0 14px;
+    color: #475569;
+    line-height: 1.55;
+  }
+  .next-list {
+    margin: 0;
+    padding-left: 18px;
+    color: #334155;
+  }
+  .next-list li {
+    margin-bottom: 6px;
+  }
+  .actions {
+    margin-top: 16px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .btn {
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    padding: 9px 12px;
+    text-decoration: none;
+    color: #0f172a;
+    background: #fff;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .btn-primary {
+    background: #0f766e;
+    border-color: #0f766e;
+    color: #fff;
+  }
+</style>
+
+<div class="placeholder-shell">
+  <span class="placeholder-kicker">{{ section_name }}</span>
+  <h2>{{ feature_name }}</h2>
+  <p>{{ message }}</p>
+
+  <ul class="next-list">
+    <li>Professional form layout with validations.</li>
+    <li>Dashboard-ready reporting widgets.</li>
+    <li>Bulk actions and export-ready table flow.</li>
+  </ul>
+
+  <div class="actions">
+    <a class="btn btn-primary" href="/dashboard/">Go To Dashboard</a>
+    <a class="btn" href="/student/list/">Go To Students</a>
+  </div>
+</div>
+{% endblock %}

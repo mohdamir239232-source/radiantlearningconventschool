@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2>Edit Fee Particular</h2>
+
+<form method="POST">
+{% csrf_token %}
+
+<label>Particular Name</label><br>
+<input type="text" name="name" value="{{data.name}}" required>
+
+<br><br>
+
+<label>Fee Mode</label><br>
+<select name="fee_mode">
+
+<option value="monthly" {% if data.fee_mode == "monthly" %}selected{% endif %}>Monthly</option>
+
+<option value="yearly" {% if data.fee_mode == "yearly" %}selected{% endif %}>Yearly</option>
+
+<option value="once" {% if data.fee_mode == "once" %}selected{% endif %}>Once</option>
+
+</select>
+
+<br><br>
+
+<button type="submit">Update</button>
+
+</form>
+
+{% endblock %}

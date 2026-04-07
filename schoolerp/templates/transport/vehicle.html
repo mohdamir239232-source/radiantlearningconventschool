@@ -1,0 +1,606 @@
+{% extends 'base_layout.html' %}
+
+{% block content %}
+
+<style>
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.page-header h2 {
+    margin: 0;
+    color: #333;
+    font-size: 26px;
+    font-weight: 600;
+}
+
+.btn-primary {
+    background: #b80b36;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s;
+}
+
+.btn-primary:hover {
+    background: #9a0a2d;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(184, 11, 54, 0.3);
+}
+
+.stats-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.stat-box {
+    background: linear-gradient(135deg, #b80b36 0%, #9a0a2d 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(184, 11, 54, 0.2);
+    text-align: center;
+}
+
+.stat-value {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    font-size: 13px;
+    opacity: 0.9;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.vehicle-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.vehicle-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: transform 0.3s, box-shadow 0.3s;
+    border-left: 5px solid #b80b36;
+}
+
+.vehicle-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(184, 11, 54, 0.15);
+}
+
+.vehicle-header {
+    background: linear-gradient(135deg, #b80b36 0%, #9a0a2d 100%);
+    color: white;
+    padding: 20px;
+}
+
+.vehicle-number {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.vehicle-type {
+    font-size: 13px;
+    opacity: 0.9;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.vehicle-body {
+    padding: 20px;
+}
+
+.vehicle-detail {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 14px;
+}
+
+.vehicle-detail:last-child {
+    border-bottom: none;
+}
+
+.detail-label {
+    font-weight: 600;
+    color: #666;
+}
+
+.detail-value {
+    color: #333;
+}
+
+.vehicle-capacity {
+    background: #E8F5E9;
+    color: #2E7D32;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-block;
+    margin-top: 10px;
+}
+
+.vehicle-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 15px;
+}
+
+.btn-sm {
+    flex: 1;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.btn-edit {
+    background: #FFF3E0;
+    color: #E65100;
+}
+
+.btn-edit:hover {
+    background: #FFE0B2;
+}
+
+.btn-delete {
+    background: #FFEBEE;
+    color: #C62828;
+}
+
+.btn-delete:hover {
+    background: #FFCDD2;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #999;
+}
+
+.empty-state h3 {
+    color: #666;
+    margin-top: 20px;
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+}
+
+.modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background: #05bd3c;
+    border-radius: 12px;
+    padding: 30px;
+    width: 90%;
+    max-width: 600px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-header {
+    margin-bottom: 20px;
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: #333;
+    font-size: 20px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #b80b36;
+    box-shadow: 0 0 0 3px rgba(184, 11, 54, 0.1);
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 25px;
+}
+
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.btn-submit {
+    background: #b80b36;
+    color: white;
+}
+
+.btn-submit:hover {
+    background: #9a0a2d;
+}
+
+.btn-cancel {
+    background: #f0f0f0;
+    color: #333;
+}
+
+.btn-cancel:hover {
+    background: #e0e0e0;
+}
+
+.alert {
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+}
+
+.alert.success {
+    background: #E8F5E9;
+    color: #2E7D32;
+    border: 1px solid #81C784;
+}
+
+.alert.error {
+    background: #FFEBEE;
+    color: #C62828;
+    border: 1px solid #EF5350;
+}
+
+.status-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+
+.status-active {
+    background: #4CAF50;
+}
+
+.status-expiring {
+    background: #FF9800;
+}
+
+.status-expired {
+    background: #F44336;
+}
+</style>
+
+<div class="page-header">
+    <div>
+        <h2>🚌 Vehicle Management</h2>
+        <p style="color: #666; margin: 5px 0 0 0;">Manage school transport vehicles and drivers</p>
+    </div>
+    <button class="btn-primary" onclick="openModal()">+ Add Vehicle</button>
+</div>
+
+<!-- Stats Section -->
+<div class="stats-container">
+    <div class="stat-box">
+        <div class="stat-value">{{ vehicles|length }}</div>
+        <div class="stat-label">Total Vehicles</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-value">{{ vehicles|length }}</div>
+        <div class="stat-label">Active Vehicles</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-value">{{ vehicles|length }}</div>
+        <div class="stat-label">Drivers</div>
+    </div>
+</div>
+
+<!-- Vehicles Grid -->
+<div id="alertBox"></div>
+{% if vehicles %}
+<div class="vehicle-grid">
+    {% for vehicle in vehicles %}
+    <div class="vehicle-card">
+        <div class="vehicle-header">
+            <div class="vehicle-number">{{ vehicle.vehicle_number }}</div>
+            <div class="vehicle-type">{{ vehicle.get_vehicle_type_display }}</div>
+        </div>
+        <div class="vehicle-body">
+            <div class="vehicle-detail">
+                <span class="detail-label">Registration:</span>
+                <span class="detail-value">{{ vehicle.registration_number }}</span>
+            </div>
+            <div class="vehicle-detail">
+                <span class="detail-label">Driver:</span>
+                <span class="detail-value">{{ vehicle.driver_name }}</span>
+            </div>
+            <div class="vehicle-detail">
+                <span class="detail-label">Phone:</span>
+                <span class="detail-value">{{ vehicle.driver_phone }}</span>
+            </div>
+            {% if vehicle.conductor_name %}
+            <div class="vehicle-detail">
+                <span class="detail-label">Conductor:</span>
+                <span class="detail-value">{{ vehicle.conductor_name }}</span>
+            </div>
+            {% endif %}
+            <div class="vehicle-detail">
+                <span class="detail-label">Insurance:</span>
+                <span class="detail-value">
+                    <span class="status-indicator {% if vehicle.insurance_expiry >= today %}status-active{% elif vehicle.insurance_expiry >= today|date:'Y-m-d'|add:'30' %}status-expiring{% else %}status-expired{% endif %}"></span>
+                    {{ vehicle.insurance_expiry|date:"M d, Y" }}
+                </span>
+            </div>
+            <div class="vehicle-detail">
+                <span class="detail-label">Permit:</span>
+                <span class="detail-value">
+                    <span class="status-indicator {% if vehicle.permit_expiry >= today %}status-active{% elif vehicle.permit_expiry >= today|date:'Y-m-d'|add:'30' %}status-expiring{% else %}status-expired{% endif %}"></span>
+                    {{ vehicle.permit_expiry|date:"M d, Y" }}
+                </span>
+            </div>
+            <div class="vehicle-capacity">Capacity: {{ vehicle.capacity }} seats</div>
+            <div class="vehicle-actions">
+                <button class="btn-sm btn-edit" onclick="editVehicle({{ vehicle.id }})">Edit</button>
+                <button class="btn-sm btn-delete" onclick="deleteVehicle({{ vehicle.id }})">Delete</button>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <h3>😕 No Vehicles Found</h3>
+    <p>Start by adding a new vehicle</p>
+    <button class="btn-primary" onclick="openModal()" style="margin-top: 15px;">Add Vehicle</button>
+</div>
+{% endif %}
+
+<!-- Modal Form -->
+<div id="vehicleModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Add Vehicle</h3>
+        </div>
+
+        <form id="vehicleForm" method="POST">
+            {% csrf_token %}
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="modalVehicleNumber">Vehicle Number *</label>
+                    <input type="text" id="modalVehicleNumber" name="vehicle_number" required>
+                </div>
+                <div class="form-group">
+                    <label for="modalVehicleType">Vehicle Type *</label>
+                    <select id="modalVehicleType" name="vehicle_type" required>
+                        <option value="">-- Select Type --</option>
+                        <option value="bus">Bus</option>
+                        <option value="van">Van</option>
+                        <option value="car">Car</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="modalCapacity">Capacity (seats) *</label>
+                    <input type="number" id="modalCapacity" name="capacity" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="modalRegistration">Registration Number *</label>
+                    <input type="text" id="modalRegistration" name="registration_number" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="modalDriverName">Driver Name *</label>
+                    <input type="text" id="modalDriverName" name="driver_name" required>
+                </div>
+                <div class="form-group">
+                    <label for="modalDriverPhone">Driver Phone *</label>
+                    <input type="tel" id="modalDriverPhone" name="driver_phone" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="modalConductorName">Conductor Name</label>
+                    <input type="text" id="modalConductorName" name="conductor_name">
+                </div>
+                <div class="form-group">
+                    <label for="modalConductorPhone">Conductor Phone</label>
+                    <input type="tel" id="modalConductorPhone" name="conductor_phone">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="modalInsuranceExpiry">Insurance Expiry *</label>
+                    <input type="date" id="modalInsuranceExpiry" name="insurance_expiry" required>
+                </div>
+                <div class="form-group">
+                    <label for="modalPermitExpiry">Permit Expiry *</label>
+                    <input type="date" id="modalPermitExpiry" name="permit_expiry" required>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn btn-cancel" onclick="closeModal()">Cancel</button>
+                <button type="submit" class="btn btn-submit">Save Vehicle</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+let currentVehicleId = null;
+
+function openModal() {
+    currentVehicleId = null;
+    document.getElementById('vehicleForm').reset();
+    document.querySelector('.modal-header h3').innerText = 'Add Vehicle';
+    document.getElementById('vehicleModal').classList.add('active');
+}
+
+function closeModal() {
+    document.getElementById('vehicleModal').classList.remove('active');
+    currentVehicleId = null;
+}
+
+function editVehicle(id) {
+    fetch(`/transport/vehicle/${id}/data/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                currentVehicleId = id;
+                document.getElementById('modalVehicleNumber').value = data.vehicle.vehicle_number;
+                document.getElementById('modalVehicleType').value = data.vehicle.vehicle_type;
+                document.getElementById('modalCapacity').value = data.vehicle.capacity;
+                document.getElementById('modalRegistration').value = data.vehicle.registration_number;
+                document.getElementById('modalDriverName').value = data.vehicle.driver_name;
+                document.getElementById('modalDriverPhone').value = data.vehicle.driver_phone;
+                document.getElementById('modalConductorName').value = data.vehicle.conductor_name;
+                document.getElementById('modalConductorPhone').value = data.vehicle.conductor_phone;
+                document.getElementById('modalInsuranceExpiry').value = data.vehicle.insurance_expiry;
+                document.getElementById('modalPermitExpiry').value = data.vehicle.permit_expiry;
+                document.querySelector('.modal-header h3').innerText = 'Edit Vehicle';
+                document.getElementById('vehicleModal').classList.add('active');
+            }
+        });
+}
+
+function deleteVehicle(id) {
+    if (confirm('Are you sure you want to delete this vehicle?')) {
+        fetch(`/transport/vehicle/${id}/delete/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name="csrfmiddlewaretoken"]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                showAlert(data.error, 'error');
+            }
+        });
+    }
+}
+
+document.getElementById('vehicleForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const formData = new FormData(this);
+    const url = currentVehicleId
+        ? `/transport/vehicle/${currentVehicleId}/edit/`
+        : '/transport/vehicle/add/';
+
+    fetch(url, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert(data.message, 'success');
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        } else {
+            showAlert(data.error, 'error');
+        }
+    })
+    .catch(error => {
+        showAlert('Error: ' + error, 'error');
+    });
+});
+
+function showAlert(message, type) {
+    const alertBox = document.getElementById('alertBox');
+    if (!alertBox) return;
+
+    const alert = document.createElement('div');
+    alert.className = `alert ${type}`;
+    alert.innerText = message;
+    alertBox.innerHTML = '';
+    alertBox.appendChild(alert);
+
+    setTimeout(() => {
+        alert.remove();
+    }, 3000);
+}
+
+// Close modal on backdrop click
+document.getElementById('vehicleModal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,244 @@
+{% extends "base_layout.html" %}
+{% block title %}Syllabus Planner{% endblock %}
+{% block content %}
+<style>
+  .academic-page .page-hero {
+    background: linear-gradient(120deg, #ecfdf5 0%, #ffffff 55%, #f8fafc 100%);
+    border: 1px solid #bbf7d0;
+    border-radius: 16px;
+    padding: 16px 18px;
+    margin-bottom: 14px;
+  }
+  .academic-page .hero-title {
+    margin: 0;
+    font-size: 1.2rem;
+    color: #0f172a;
+  }
+  .academic-page .hero-subtitle {
+    margin: 2px 0 0;
+    color: #475569;
+    font-size: 0.86rem;
+  }
+  .academic-page .hero-chip {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 999px;
+    padding: 6px 12px;
+    font-size: 0.78rem;
+    color: #1e293b;
+    font-weight: 600;
+  }
+  .academic-page .academic-card {
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.07);
+  }
+  .academic-page .card-header {
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .academic-page .academic-table thead th {
+    background: #0f172a;
+    color: #f8fafc;
+    font-size: 0.72rem;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+  .academic-page .filter-bar {
+    position: sticky;
+    top: 0;
+    z-index: 7;
+    background: #ffffff;
+  }
+  .academic-page .academic-table tbody tr {
+    transition: background-color 0.2s ease;
+  }
+  .academic-page .academic-table tbody tr:hover {
+    background: #f8fafc;
+  }
+  .academic-page .field-badge {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 999px;
+    padding: 2px 10px;
+    font-size: 0.74rem;
+    font-weight: 600;
+    color: #0f172a;
+  }
+  .academic-page .action-btn {
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+  }
+  .academic-page .empty-state {
+    padding: 26px 12px;
+    text-align: center;
+    color: #64748b;
+  }
+  .academic-page .empty-state i {
+    font-size: 1.1rem;
+    margin-bottom: 6px;
+    color: #94a3b8;
+  }
+</style>
+<div class="container-fluid py-3 academic-page">
+  <div class="page-hero d-flex justify-content-between align-items-center flex-wrap gap-3">
+    <div class="d-flex align-items-center gap-2">
+      <i class="fas fa-book-open text-success fs-4"></i>
+      <div>
+        <h4 class="hero-title fw-bold">Syllabus Planner</h4>
+        <p class="hero-subtitle">Organize units, topics, and teaching hours for each class and subject.</p>
+      </div>
+    </div>
+    <div class="d-flex align-items-center gap-2 flex-wrap">
+      <span class="hero-chip"><i class="fas fa-list me-1 text-success"></i>{{ syllabi|length }} Units</span>
+      <span class="hero-chip"><i class="fas fa-layer-group me-1 text-success"></i>Curriculum Ready</span>
+    </div>
+  </div>
+
+  {% if messages %}
+    {% for msg in messages %}
+      <div class="alert alert-{{ msg.tags|default:'info' }} alert-dismissible fade show py-2" role="alert">
+        {{ msg }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <div class="row g-3">
+    <!-- LEFT: Form -->
+    <div class="col-lg-5">
+      <div class="card shadow-sm border-0 academic-card">
+        <div class="card-header bg-success text-white py-2">
+          <i class="fas fa-{% if edit_obj %}edit{% else %}plus-circle{% endif %} me-2"></i>
+          {% if edit_obj %}Edit Syllabus Unit{% else %}Add Syllabus Unit{% endif %}
+        </div>
+        <div class="card-body">
+          <form method="post">
+            {% csrf_token %}
+            {% if edit_obj %}
+              <input type="hidden" name="record_id" value="{{ edit_obj.pk }}">
+            {% endif %}
+            <div class="row g-2">
+              <div class="col-6">
+                <label class="form-label fw-semibold small">Class <span class="text-danger">*</span></label>
+                <input list="classList" name="class_name" class="form-control form-control-sm"
+                       value="{{ edit_obj.class_name|default:'' }}" placeholder="e.g. 9" required>
+                <datalist id="classList">
+                  {% for c in class_names %}<option value="{{ c }}">{% endfor %}
+                </datalist>
+              </div>
+              <div class="col-6">
+                <label class="form-label fw-semibold small">Academic Year</label>
+                <input name="academic_year" class="form-control form-control-sm"
+                       value="{{ edit_obj.academic_year|default:'2025-26' }}" placeholder="2025-26">
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-semibold small">Subject <span class="text-danger">*</span></label>
+                <input name="subject_name" class="form-control form-control-sm"
+                       value="{{ edit_obj.subject_name|default:'' }}" placeholder="Subject Name" required>
+              </div>
+              <div class="col-6">
+                <label class="form-label fw-semibold small">Unit No. <span class="text-danger">*</span></label>
+                <input type="number" name="unit_number" class="form-control form-control-sm" min="1"
+                       value="{{ edit_obj.unit_number|default:'' }}" required>
+              </div>
+              <div class="col-6">
+                <label class="form-label fw-semibold small">Teaching Hours</label>
+                <input type="number" name="teaching_hours" class="form-control form-control-sm" min="1"
+                       value="{{ edit_obj.teaching_hours|default:'1' }}">
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-semibold small">Unit Title <span class="text-danger">*</span></label>
+                <input name="unit_title" class="form-control form-control-sm"
+                       value="{{ edit_obj.unit_title|default:'' }}" placeholder="Unit Title" required>
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-semibold small">Topics / Content <span class="text-danger">*</span></label>
+                <textarea name="topics" class="form-control form-control-sm" rows="4"
+                          placeholder="List topics covered in this unit..." required>{{ edit_obj.topics|default:'' }}</textarea>
+              </div>
+            </div>
+            <div class="d-flex gap-2 mt-3">
+              <button type="submit" class="btn btn-success btn-sm px-4">
+                <i class="fas fa-save me-1"></i>{% if edit_obj %}Update{% else %}Add Unit{% endif %}
+              </button>
+              {% if edit_obj %}
+                <a href="/academic/syllabus/" class="btn btn-secondary btn-sm">
+                  <i class="fas fa-times me-1"></i>Cancel
+                </a>
+              {% endif %}
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Records -->
+    <div class="col-lg-7">
+      <div class="card shadow-sm border-0 academic-card">
+        <div class="card-header py-2 d-flex align-items-center justify-content-between filter-bar">
+          <span class="fw-semibold"><i class="fas fa-list me-1 text-success"></i>Syllabus Units</span>
+          <form method="get" class="d-flex gap-2 align-items-center">
+            <input list="classList2" name="class_name" class="form-control form-control-sm" style="width:90px"
+                   placeholder="Class" value="{{ filter_class }}">
+            <datalist id="classList2">{% for c in class_names %}<option value="{{ c }}">{% endfor %}</datalist>
+            <input name="subject_name" class="form-control form-control-sm" style="width:110px"
+                   placeholder="Subject" value="{{ filter_subject }}">
+            <button class="btn btn-sm btn-outline-success"><i class="fas fa-search"></i></button>
+            {% if filter_class or filter_subject %}
+              <a href="/academic/syllabus/" class="btn btn-sm btn-outline-secondary"><i class="fas fa-times"></i></a>
+            {% endif %}
+          </form>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive" style="max-height:500px;overflow-y:auto;">
+            <table class="table table-sm table-hover table-bordered mb-0 small academic-table">
+              <thead class="sticky-top">
+                <tr>
+                  <th>#</th><th>Class</th><th>Subject</th><th>Unit</th><th>Title</th>
+                  <th>Hours</th><th>Year</th><th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in syllabi %}
+                <tr>
+                  <td>{{ forloop.counter }}</td>
+                  <td><span class="field-badge">Class {{ item.class_name }}</span></td>
+                  <td>{{ item.subject_name }}</td>
+                  <td class="text-center fw-bold"><span class="badge rounded-pill bg-success-subtle text-success-emphasis">Unit {{ item.unit_number }}</span></td>
+                  <td>{{ item.unit_title }}</td>
+                  <td class="text-center">{{ item.teaching_hours }}h</td>
+                  <td>{{ item.academic_year }}</td>
+                  <td>
+                    <a href="/academic/syllabus/?edit={{ item.pk }}" class="btn btn-sm btn-outline-success action-btn" title="Edit">
+                      <i class="fas fa-pen"></i></a>
+                    <form method="post" class="d-inline" onsubmit="return confirm('Delete this unit?')">
+                      {% csrf_token %}
+                      <input type="hidden" name="action" value="delete">
+                      <input type="hidden" name="record_id" value="{{ item.pk }}">
+                      <button class="btn btn-sm btn-outline-danger action-btn" title="Delete"><i class="fas fa-trash"></i></button>
+                    </form>
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="8">
+                    <div class="empty-state">
+                      <i class="fas fa-book-open d-block"></i>
+                      No syllabus units added yet. Add your first unit to build the curriculum.
+                    </div>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

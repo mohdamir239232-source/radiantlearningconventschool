@@ -1,0 +1,297 @@
+{% extends 'base_layout.html' %}
+
+{% block content %}
+<style>
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.page-header h2 {
+    margin: 0;
+    color: #1f2937;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.search-wrap {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+    background: #fff;
+    padding: 14px;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+}
+
+.search-wrap input {
+    flex: 1;
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.search-wrap input:focus {
+    outline: none;
+    border-color: #b80b36;
+    box-shadow: 0 0 0 3px rgba(184, 11, 54, 0.12);
+}
+
+.search-wrap button {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    background: #b80b36;
+    color: #fff;
+}
+
+.search-wrap button:hover {
+    background: #9a0a2d;
+}
+
+.table-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.table-scroll {
+    overflow-x: auto;
+}
+
+.receipt-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 1200px;
+}
+
+.receipt-table thead th {
+    background: #f9fafb;
+    color: #374151;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    font-weight: 700;
+    padding: 12px 10px;
+    border-bottom: 1px solid #e5e7eb;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.receipt-table tbody td {
+    padding: 11px 10px;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 13px;
+    color: #111827;
+    vertical-align: top;
+}
+
+.receipt-table tbody tr:hover {
+    background: #fcfcfd;
+}
+
+.amt {
+    text-align: right;
+    font-weight: 700;
+    color: #0f766e;
+}
+
+.actions {
+    display: flex;
+    gap: 6px;
+}
+
+.btn-action {
+    border: 1px solid #d1d5db;
+    background: #fff;
+    border-radius: 6px;
+    padding: 6px 8px;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.btn-action:hover {
+    background: #f8fafc;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 32px 14px;
+    color: #64748b;
+    font-size: 14px;
+}
+
+.status-line {
+    margin: 0 0 10px 0;
+    color: #6b7280;
+    font-size: 13px;
+}
+</style>
+
+<div class="page-header">
+    <div>
+        <h2>Fee Receipt List</h2>
+        <p class="status-line">Sirf receipt list view. Full receipt card hide kiya gaya hai.</p>
+    </div>
+</div>
+
+<div class="search-wrap">
+    <input type="text" id="searchInput" placeholder="Search by student name, admission number or roll no" onkeyup="searchReceipt()">
+    <button onclick="searchReceipt()">Search</button>
+</div>
+
+<div class="table-card">
+    <div class="table-scroll">
+        <table class="receipt-table">
+            <thead>
+                <tr>
+                    <th>Fee Date</th>
+                    <th>Receipt No.</th>
+                    <th>Adm No.</th>
+                    <th>Roll No.</th>
+                    <th>Name</th>
+                    <th>Father Name</th>
+                    <th>Class</th>
+                    <th>Fee Month</th>
+                    <th>Detail</th>
+                    <th>Received Amt</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="receiptTableBody">
+                <tr>
+                    <td colspan="11" class="empty-state">Loading receipts...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+const MONTH_NAMES = {
+    jan: 'January', feb: 'February', mar: 'March', apr: 'April', may: 'May', jun: 'June',
+    jul: 'July', aug: 'August', sep: 'September', oct: 'October', nov: 'November', dec: 'December'
+};
+const CSRF_TOKEN = '{{ csrf_token }}';
+
+function formatMonth(monthCode) {
+    if (!monthCode) return '-';
+    const parts = String(monthCode).split(',').map(m => m.trim().toLowerCase()).filter(Boolean);
+    return parts.map(m => MONTH_NAMES[m] || m).join(', ');
+}
+
+function searchReceipt() {
+    const searchValue = document.getElementById('searchInput').value.trim();
+    const url = searchValue
+        ? `/fee/api/search-receipts/?q=${encodeURIComponent(searchValue)}`
+        : '/fee/api/search-receipts/';
+
+    loadReceiptRows(url);
+}
+
+function loadReceiptRows(url) {
+    const tbody = document.getElementById('receiptTableBody');
+    tbody.innerHTML = '<tr><td colspan="11" class="empty-state">Loading receipts...</td></tr>';
+
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            if (!data.success || !Array.isArray(data.receipts) || !data.receipts.length) {
+                tbody.innerHTML = '<tr><td colspan="11" class="empty-state">No receipts found</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = data.receipts.map((r) => {
+                const particulars = Array.isArray(r.particulars) ? r.particulars : [];
+                const detailText = particulars.length
+                    ? particulars.map(item => item.name).join(', ')
+                    : '-';
+
+                return `
+                    <tr>
+                        <td>${r.date || '-'}</td>
+                        <td>${r.receipt_number || '-'}</td>
+                        <td>${r.admission_number || '-'}</td>
+                        <td>${r.roll_number || '-'}</td>
+                        <td>${r.student_name || '-'}</td>
+                        <td>${r.father_name || '-'}</td>
+                        <td>${(r.class || '-')}${r.section ? ' - ' + r.section : ''}</td>
+                        <td>${formatMonth(r.fee_month)}</td>
+                        <td title="${detailText.replace(/"/g, '&quot;')}">${detailText}</td>
+                        <td class="amt">${Number(r.paid_amount || 0).toFixed(2)}</td>
+                        <td>
+                            <div class="actions">
+                                <button class="btn-action" onclick="printReceipt(${r.id})">Print</button>
+                                <button class="btn-action" onclick="deleteReceipt(${r.id})">Delete</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        })
+        .catch(() => {
+            tbody.innerHTML = '<tr><td colspan="11" class="empty-state">Error loading receipts</td></tr>';
+        });
+}
+
+function printReceipt(feeId) {
+    const printUrl = `/fee/receipt/pdf/${feeId}/?inline=1`;
+    const printWindow = window.open(printUrl, '_blank');
+
+    if (!printWindow) {
+        alert('Popup blocked. Please allow popups and try again.');
+        return;
+    }
+
+    const triggerPrint = () => {
+        try {
+            printWindow.focus();
+            printWindow.print();
+        } catch (e) {
+            // Ignore cross-browser print trigger timing issues.
+        }
+    };
+
+    // Try both load-event and fallback timer for browser compatibility.
+    printWindow.addEventListener('load', () => setTimeout(triggerPrint, 300));
+    setTimeout(triggerPrint, 1200);
+}
+
+function deleteReceipt(feeId) {
+    if (!confirm('Receipt delete karne par submitted fee record clean ho jayega aur fee fir due me aa jayegi. Continue?')) {
+        return;
+    }
+
+    fetch(`/fee/receipt/delete/${feeId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': CSRF_TOKEN,
+        },
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (!data.success) {
+                alert(data.error || 'Delete failed');
+                return;
+            }
+            searchReceipt();
+            alert('Receipt deleted. Fee record cleaned and due recalculation ho jayegi.');
+        })
+        .catch(() => {
+            alert('Delete request failed. Please try again.');
+        });
+}
+
+// Default load: latest receipts without search.
+loadReceiptRows('/fee/api/search-receipts/');
+</script>
+{% endblock %}

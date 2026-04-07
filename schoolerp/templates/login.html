@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if school_setting and school_setting.school_name %}{{ school_setting.school_name }}{% else %}RLCS School{% endif %} | Super Admin Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background:
+                radial-gradient(circle at top left, rgba(245, 158, 11, 0.18), transparent 28%),
+                radial-gradient(circle at bottom right, rgba(127, 29, 29, 0.24), transparent 30%),
+                linear-gradient(135deg, #fff7ed 0%, #f8fafc 45%, #e2e8f0 100%);
+            color: #0f172a;
+        }
+
+        .login-shell {
+            width: min(1040px, 100%);
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            background: rgba(255, 255, 255, 0.88);
+            border: 1px solid rgba(226, 232, 240, 0.9);
+            border-radius: 28px;
+            overflow: hidden;
+            box-shadow: 0 28px 60px rgba(15, 23, 42, 0.14);
+            backdrop-filter: blur(12px);
+        }
+
+        .login-brand {
+            padding: 42px;
+            background: linear-gradient(160deg, #7f1d1d 0%, #5b1212 45%, #431407 100%);
+            color: #fff7ed;
+            position: relative;
+        }
+
+        .login-brand::after {
+            content: '';
+            position: absolute;
+            inset: auto -80px -80px auto;
+            width: 220px;
+            height: 220px;
+            border-radius: 50%;
+            background: rgba(245, 158, 11, 0.16);
+            filter: blur(2px);
+        }
+
+        .kicker {
+            display: inline-block;
+            margin-bottom: 14px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.12);
+            font-size: 12px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .login-brand h1 {
+            font-size: 34px;
+            line-height: 1.2;
+            margin-bottom: 14px;
+        }
+
+        .login-brand p {
+            color: rgba(255, 247, 237, 0.86);
+            line-height: 1.7;
+            max-width: 440px;
+            margin-bottom: 28px;
+        }
+
+        .feature-list {
+            display: grid;
+            gap: 14px;
+        }
+
+        .feature-card {
+            padding: 16px 18px;
+            border-radius: 18px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .feature-card strong {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 15px;
+        }
+
+        .feature-card span {
+            font-size: 13px;
+            color: rgba(255, 247, 237, 0.8);
+        }
+
+        .login-panel {
+            padding: 42px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .login-panel h2 {
+            font-size: 28px;
+            margin-bottom: 8px;
+            color: #111827;
+        }
+
+        .login-panel p {
+            color: #64748b;
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        .credential-note,
+        .message {
+            margin-bottom: 16px;
+            padding: 14px 16px;
+            border-radius: 16px;
+            font-size: 14px;
+        }
+
+        .credential-note {
+            background: #fff7ed;
+            border: 1px solid #fdba74;
+            color: #9a3412;
+        }
+
+        .message.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+
+        .message.success {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #86efac;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #475569;
+        }
+
+        input {
+            width: 100%;
+            border: 1px solid #cbd5e1;
+            background: #f8fafc;
+            border-radius: 14px;
+            padding: 14px 16px;
+            font-size: 15px;
+            color: #0f172a;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #f59e0b;
+            box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.15);
+        }
+
+        .login-btn {
+            width: 100%;
+            border: none;
+            border-radius: 16px;
+            padding: 14px 18px;
+            background: linear-gradient(135deg, #7f1d1d, #b45309);
+            color: #fff7ed;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 18px 32px rgba(127, 29, 29, 0.2);
+        }
+
+        .login-footer {
+            margin-top: 18px;
+            font-size: 12px;
+            color: #64748b;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 900px) {
+            .login-shell {
+                grid-template-columns: 1fr;
+            }
+
+            .login-brand,
+            .login-panel {
+                padding: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-shell">
+        <section class="login-brand">
+            <span class="kicker">{% if school_setting and school_setting.school_code %}{{ school_setting.school_code }}{% else %}ERP Access{% endif %}</span>
+            <h1>{% if school_setting and school_setting.school_name %}{{ school_setting.school_name }}{% else %}School ERP{% endif %} Super Admin Login</h1>
+            <p>Sign in to access the complete school operations dashboard, fee analytics, academic controls, and system-wide administration tools.</p>
+
+            <div class="feature-list">
+                <div class="feature-card">
+                    <strong>Unified Operations Desk</strong>
+                    <span>Students, fees, transport, settings, and master controls in one workspace.</span>
+                </div>
+                <div class="feature-card">
+                    <strong>Live Dashboard Access</strong>
+                    <span>Login redirects directly into the fully functional admin dashboard.</span>
+                </div>
+                <div class="feature-card">
+                    <strong>Protected Admin Area</strong>
+                    <span>Unauthorized access is redirected to login automatically.</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="login-panel">
+            <h2>Sign In</h2>
+            <p>Use your Super Admin credentials to continue.</p>
+
+            {% if show_default_credentials %}
+            <div class="credential-note">
+                <strong>Development Super Admin:</strong><br>
+                Username: {{ default_username }}<br>
+                Password: {{ default_password }}
+                {% if created_default_user %}<br><br>A default super admin was created automatically because no users existed in the database.{% endif %}
+            </div>
+            {% endif %}
+
+            {% if messages %}
+                {% for message in messages %}
+                <div class="message {{ message.tags|default:'error' }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ next_url }}">
+
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input id="username" type="text" name="username" placeholder="Enter username" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input id="password" type="password" name="password" placeholder="Enter password" required>
+                </div>
+
+                <button type="submit" class="login-btn">Open Dashboard</button>
+            </form>
+
+            <div class="login-footer">
+                After successful login, you will be redirected to the admin dashboard and all protected modules will become accessible.
+            </div>
+        </section>
+    </div>
+</body>
+</html>

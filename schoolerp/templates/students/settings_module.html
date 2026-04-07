@@ -1,0 +1,1033 @@
+{% extends 'base_layout.html' %}
+
+{% block content %}
+<style>
+  .settings-shell {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 18px;
+  }
+
+  .settings-nav,
+  .settings-panel {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 18px;
+    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.06);
+  }
+
+  .settings-nav {
+    padding: 16px;
+    position: sticky;
+    top: 14px;
+    height: fit-content;
+  }
+
+  .settings-nav h3 {
+    margin: 0 0 12px;
+    font-size: 16px;
+    color: #7f1d1d;
+  }
+
+  .settings-link {
+    display: block;
+    text-decoration: none;
+    margin-bottom: 8px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    color: #334155;
+    background: #f8fafc;
+    font-weight: 600;
+    font-size: 14px;
+  }
+
+  .settings-link:hover {
+    background: #fff7ed;
+    border-color: #fdba74;
+    color: #9a3412;
+  }
+
+  .settings-link.active {
+    background: linear-gradient(135deg, #7f1d1d, #b45309);
+    border-color: transparent;
+    color: #fff7ed;
+  }
+
+  .settings-panel {
+    padding: 24px;
+  }
+
+  .panel-kicker {
+    display: inline-block;
+    margin-bottom: 10px;
+    padding: 5px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #9a3412;
+    background: #fff7ed;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .settings-panel h2 {
+    margin: 0 0 10px;
+    color: #0f172a;
+    font-size: 28px;
+  }
+
+  .settings-panel p {
+    margin: 0 0 18px;
+    color: #475569;
+    line-height: 1.6;
+  }
+
+  .setting-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 12px;
+  }
+
+  .setting-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 14px;
+    background: linear-gradient(160deg, #ffffff 0%, #f8fafc 100%);
+  }
+
+  .setting-card strong {
+    display: block;
+    color: #0f172a;
+    margin-bottom: 6px;
+    font-size: 14px;
+  }
+
+  .setting-card span {
+    color: #64748b;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .panel-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 18px;
+  }
+
+  .panel-btn {
+    text-decoration: none;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    padding: 9px 12px;
+    color: #334155;
+    font-size: 13px;
+    font-weight: 600;
+    background: #ffffff;
+  }
+
+  .panel-btn.primary {
+    background: #0f766e;
+    border-color: #0f766e;
+    color: #ffffff;
+  }
+
+  .user-management-shell {
+    margin-top: 18px;
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    gap: 14px;
+  }
+
+  .user-form,
+  .user-table {
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 14px;
+    background: #ffffff;
+  }
+
+  .user-form h4,
+  .user-table h4 {
+    margin: 0 0 10px;
+    color: #0f172a;
+    font-size: 16px;
+  }
+
+  .input-row {
+    margin-bottom: 10px;
+  }
+
+  .input-row label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 12px;
+    color: #64748b;
+    font-weight: 600;
+  }
+
+  .input-row input,
+  .input-row select {
+    width: 100%;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    padding: 9px 10px;
+    font-size: 13px;
+    background: #f8fafc;
+  }
+
+  .submit-btn {
+    width: 100%;
+    border: none;
+    border-radius: 11px;
+    padding: 10px 12px;
+    background: linear-gradient(135deg, #7f1d1d, #b45309);
+    color: #fff7ed;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .user-grid {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .user-grid th,
+  .user-grid td {
+    border-bottom: 1px solid #e2e8f0;
+    padding: 9px 8px;
+    font-size: 13px;
+    text-align: left;
+    color: #334155;
+  }
+
+  .user-grid th {
+    font-size: 12px;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .chip {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .chip-admin {
+    background: #fee2e2;
+    color: #991b1b;
+  }
+
+  .chip-staff {
+    background: #dcfce7;
+    color: #166534;
+  }
+
+  .chip-inactive {
+    background: #e2e8f0;
+    color: #334155;
+  }
+
+  .action-form {
+    display: inline-block;
+    margin-right: 6px;
+  }
+
+  .mini-btn {
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: #ffffff;
+    padding: 5px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #334155;
+    cursor: pointer;
+  }
+
+  .mini-btn.warn {
+    background: #fff7ed;
+    border-color: #fdba74;
+    color: #9a3412;
+  }
+
+  .helper-note {
+    margin-top: 8px;
+    font-size: 11px;
+    color: #64748b;
+    line-height: 1.5;
+  }
+
+  .settings-form-shell {
+    margin-top: 18px;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 16px;
+    background: #ffffff;
+  }
+
+  .settings-form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+  }
+
+  .settings-form-grid .input-row textarea {
+    width: 100%;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    padding: 9px 10px;
+    font-size: 13px;
+    background: #f8fafc;
+    min-height: 76px;
+    resize: vertical;
+  }
+
+  .settings-check-grid {
+    margin-top: 10px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 10px;
+  }
+
+  .check-card {
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    border-radius: 10px;
+    padding: 10px;
+    font-size: 13px;
+    color: #334155;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .check-card input {
+    width: 16px;
+    height: 16px;
+  }
+
+  .settings-submit-row {
+    margin-top: 14px;
+  }
+
+  .month-picker {
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    border-radius: 10px;
+    padding: 10px;
+  }
+
+  .month-picker-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .month-item {
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: #ffffff;
+    padding: 6px 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #334155;
+  }
+
+  .month-item input {
+    width: 14px;
+    height: 14px;
+  }
+
+  @media (max-width: 980px) {
+    .settings-shell {
+      grid-template-columns: 1fr;
+    }
+
+    .settings-nav {
+      position: static;
+    }
+
+    .user-management-shell {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<div class="settings-shell">
+  <aside class="settings-nav">
+    <h3>All Settings</h3>
+    <a href="/settings/user/" class="settings-link {% if current_key == 'user' %}active{% endif %}">User</a>
+    <a href="/settings/permissions/" class="settings-link {% if current_key == 'permissions' %}active{% endif %}">User Permissions</a>
+    <a href="/settings/school/" class="settings-link {% if current_key == 'school' %}active{% endif %}">School Setting</a>
+    <a href="/settings/option/" class="settings-link {% if current_key == 'option' %}active{% endif %}">Option Setting</a>
+    <a href="/settings/payment/" class="settings-link {% if current_key == 'payment' %}active{% endif %}">Payment Option Setting</a>
+    <a href="/settings/whatsapp/" class="settings-link {% if current_key == 'whatsapp' %}active{% endif %}">WhatsApp API</a>
+    <a href="/settings/mobileapp/" class="settings-link {% if current_key == 'mobileapp' %}active{% endif %}">Mobile App Control</a>
+  </aside>
+
+  <section class="settings-panel">
+    <span class="panel-kicker">Settings Center</span>
+    <h2>{{ current_module.title }}</h2>
+    <p>{{ current_module.description }}</p>
+
+    <div class="setting-grid">
+      {% for item in current_module.items %}
+      <div class="setting-card">
+        <strong>{{ item }}</strong>
+        <span>Professional workflow panel is configured and ready for business logic integration.</span>
+      </div>
+      {% endfor %}
+    </div>
+
+    {% if current_key == 'user' %}
+    <div class="user-management-shell">
+      <div class="user-form">
+        <h4>Create New User</h4>
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="create_user">
+
+          <div class="input-row">
+            <label for="id_username">Username</label>
+            <input id="id_username" name="username" type="text" required>
+          </div>
+
+          <div class="input-row">
+            <label for="id_email">Email</label>
+            <input id="id_email" name="email" type="email" placeholder="optional">
+          </div>
+
+          <div class="input-row">
+            <label for="id_password">Password</label>
+            <input id="id_password" name="password" type="password" minlength="8" required>
+          </div>
+
+          <div class="input-row">
+            <label for="id_role">Role</label>
+            <select id="id_role" name="role">
+              {% for role_key, role_label in role_options %}
+              <option value="{{ role_key }}">{{ role_label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <button class="submit-btn" type="submit">Create User Account</button>
+        </form>
+        <div class="helper-note">Only logged-in admin can create users from this panel.</div>
+      </div>
+
+      <div class="user-table">
+        <h4>Existing Users</h4>
+        <table class="user-grid">
+          <thead>
+            <tr>
+              <th>Username</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for entry in user_entries %}
+            <tr>
+              <td>{{ entry.user.username }}</td>
+              <td>{{ entry.user.email|default:'-' }}</td>
+              <td>
+                {% if entry.role_label == 'Super Admin' %}
+                <span class="chip chip-admin">{{ entry.role_label }}</span>
+                {% else %}
+                <span class="chip chip-staff">{{ entry.role_label }}</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if entry.user.is_active %}
+                <span class="chip chip-staff">Active</span>
+                {% else %}
+                <span class="chip chip-inactive">Inactive</span>
+                {% endif %}
+              </td>
+              <td>
+                <form class="action-form" method="post">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="toggle_active">
+                  <input type="hidden" name="user_id" value="{{ entry.user.id }}">
+                  <button class="mini-btn" type="submit">{% if entry.user.is_active %}Deactivate{% else %}Activate{% endif %}</button>
+                </form>
+
+                <form class="action-form" method="post">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="reset_password">
+                  <input type="hidden" name="user_id" value="{{ entry.user.id }}">
+                  <button class="mini-btn warn" type="submit">Reset Password</button>
+                </form>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="5">No users available.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        <div class="helper-note">Password reset default: {{ default_reset_password }}</div>
+      </div>
+    </div>
+    {% endif %}
+
+    {% if current_key == 'permissions' %}
+    <div class="settings-form-shell">
+      <h4 style="margin:0 0 10px;color:#0f172a;">Role Permission Matrix</h4>
+      <form method="get" style="margin-bottom:12px;max-width:260px;">
+        <div class="input-row" style="margin:0;">
+          <label for="perm_role_selector">Select Role</label>
+          <select id="perm_role_selector" name="role" onchange="this.form.submit()">
+            {% for role_key, role_label in role_options %}
+            <option value="{{ role_key }}" {% if selected_role_key == role_key %}selected{% endif %}>{{ role_label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </form>
+
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="save_permissions">
+        <input type="hidden" name="role_key" value="{{ selected_role_key }}">
+
+        <div class="settings-check-grid">
+          <label class="check-card"><input type="checkbox" name="can_access_students" {% if permission_row.can_access_students %}checked{% endif %}> Students Module Access</label>
+          <label class="check-card"><input type="checkbox" name="can_access_fee" {% if permission_row.can_access_fee %}checked{% endif %}> Fee Module Access</label>
+          <label class="check-card"><input type="checkbox" name="can_access_attendance" {% if permission_row.can_access_attendance %}checked{% endif %}> Attendance Module Access</label>
+          <label class="check-card"><input type="checkbox" name="can_access_academic" {% if permission_row.can_access_academic %}checked{% endif %}> Academic Module Access</label>
+          <label class="check-card"><input type="checkbox" name="can_access_staff" {% if permission_row.can_access_staff %}checked{% endif %}> Staff Module Access</label>
+          <label class="check-card"><input type="checkbox" name="can_access_exam" {% if permission_row.can_access_exam %}checked{% endif %}> Exam Module Access</label>
+          <label class="check-card"><input type="checkbox" name="can_access_transport" {% if permission_row.can_access_transport %}checked{% endif %}> Transport Module Access</label>
+          <label class="check-card"><input type="checkbox" name="can_access_settings" {% if permission_row.can_access_settings %}checked{% endif %}> Settings Module Access</label>
+          <label class="check-card"><input type="checkbox" name="can_access_reports" {% if permission_row.can_access_reports %}checked{% endif %}> Reports Module Access</label>
+        </div>
+
+        <div class="settings-submit-row">
+          <button class="submit-btn" type="submit">Save Permission Setup</button>
+        </div>
+      </form>
+    </div>
+    {% endif %}
+
+    {% if current_key == 'school' %}
+    <div class="settings-form-shell">
+      <h4 style="margin:0 0 10px;color:#0f172a;">School Profile Configuration</h4>
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="save_school_settings">
+
+        <div class="settings-form-grid">
+          <div class="input-row">
+            <label for="id_school_name">School Name</label>
+            <input id="id_school_name" name="school_name" type="text" value="{{ school_setting.school_name }}" required>
+          </div>
+          <div class="input-row">
+            <label for="id_school_code">School Code</label>
+            <input id="id_school_code" name="school_code" type="text" value="{{ school_setting.school_code }}">
+          </div>
+          <div class="input-row">
+            <label for="id_principal_name">Principal Name</label>
+            <input id="id_principal_name" name="principal_name" type="text" value="{{ school_setting.principal_name }}">
+          </div>
+          <div class="input-row">
+            <label for="id_contact_number">Contact Number</label>
+            <input id="id_contact_number" name="contact_number" type="text" value="{{ school_setting.contact_number }}">
+          </div>
+          <div class="input-row">
+            <label for="id_school_email">Email</label>
+            <input id="id_school_email" name="email" type="email" value="{{ school_setting.email }}">
+          </div>
+          <div class="input-row">
+            <label for="id_academic_year">Academic Year</label>
+            <input id="id_academic_year" name="academic_year_label" type="text" value="{{ school_setting.academic_year_label }}" placeholder="2026-27">
+          </div>
+        </div>
+
+        <div class="input-row" style="margin-top:12px;">
+          <label for="id_school_address">Address</label>
+          <textarea id="id_school_address" name="address">{{ school_setting.address }}</textarea>
+        </div>
+
+        <div class="settings-form-grid" style="margin-top:12px;">
+          <div class="input-row">
+            <label for="id_school_logo">School Logo</label>
+            <input id="id_school_logo" name="logo" type="file" accept="image/*">
+            {% if school_setting.logo %}
+            <div class="helper-note">Current file: <a href="{{ school_setting.logo.url }}" target="_blank">{{ school_setting.logo.name }}</a></div>
+            <label class="check-card" style="margin-top:8px;"><input type="checkbox" name="remove_logo"> Remove current logo</label>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="settings-submit-row">
+          <button class="submit-btn" type="submit">Save School Settings</button>
+        </div>
+      </form>
+    </div>
+    {% endif %}
+
+    {% if current_key == 'option' %}
+    <div class="settings-form-shell">
+      <h4 style="margin:0 0 10px;color:#0f172a;">Operational Option Controls</h4>
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="save_option_settings">
+
+        <div class="settings-check-grid">
+          <label class="check-card"><input type="checkbox" name="admission_open" {% if option_setting.admission_open %}checked{% endif %}> Admission Open</label>
+          <label class="check-card"><input type="checkbox" name="fee_receipt_auto_number" {% if option_setting.fee_receipt_auto_number %}checked{% endif %}> Auto Receipt Number</label>
+          <label class="check-card"><input type="checkbox" name="sms_notifications_enabled" {% if option_setting.sms_notifications_enabled %}checked{% endif %}> SMS Notifications</label>
+          <label class="check-card"><input type="checkbox" name="email_notifications_enabled" {% if option_setting.email_notifications_enabled %}checked{% endif %}> Email Notifications</label>
+          <label class="check-card"><input type="checkbox" name="allow_student_portal" {% if option_setting.allow_student_portal %}checked{% endif %}> Student Portal Access</label>
+          <label class="check-card"><input type="checkbox" name="require_transport_approval" {% if option_setting.require_transport_approval %}checked{% endif %}> Transport Approval Required</label>
+        </div>
+
+        <div class="settings-submit-row">
+          <button class="submit-btn" type="submit">Save Option Settings</button>
+        </div>
+      </form>
+    </div>
+    {% endif %}
+
+    {% if current_key == 'payment' %}
+    <div class="settings-form-shell">
+      <h4 style="margin:0 0 10px;color:#0f172a;">Payment Configuration</h4>
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="save_payment_settings">
+
+        <div class="settings-check-grid">
+          <label class="check-card"><input type="checkbox" name="allow_cash" {% if payment_setting.allow_cash %}checked{% endif %}> Allow Cash</label>
+          <label class="check-card"><input type="checkbox" name="allow_cheque" {% if payment_setting.allow_cheque %}checked{% endif %}> Allow Cheque</label>
+          <label class="check-card"><input type="checkbox" name="allow_card" {% if payment_setting.allow_card %}checked{% endif %}> Allow Card</label>
+          <label class="check-card"><input type="checkbox" name="allow_online_transfer" {% if payment_setting.allow_online_transfer %}checked{% endif %}> Allow Online Transfer</label>
+          <label class="check-card"><input type="checkbox" name="allow_upi" {% if payment_setting.allow_upi %}checked{% endif %}> Allow UPI</label>
+          <label class="check-card"><input type="checkbox" name="late_fee_enabled" {% if payment_setting.late_fee_enabled %}checked{% endif %}> Enable Late Fee</label>
+        </div>
+
+        <div class="settings-form-grid" style="margin-top:12px;">
+          <div class="input-row">
+            <label for="id_late_fee_amount">Late Fee Amount</label>
+            <input id="id_late_fee_amount" name="late_fee_amount" type="number" min="0" step="0.01" value="{{ payment_setting.late_fee_amount }}">
+          </div>
+          <div class="input-row">
+            <label for="id_payment_note">Payment Terms Note</label>
+            <input id="id_payment_note" name="payment_terms_note" type="text" value="{{ payment_setting.payment_terms_note }}" placeholder="Optional note for payment policy">
+          </div>
+          <div class="input-row">
+            <label for="id_receipt_prefix">Receipt Prefix</label>
+            <input id="id_receipt_prefix" name="receipt_prefix" type="text" value="{{ payment_setting.receipt_prefix }}" placeholder="RCPT">
+          </div>
+          <div class="input-row">
+            <label for="id_receipt_footer">Receipt Footer Message</label>
+            <input id="id_receipt_footer" name="receipt_footer" type="text" value="{{ payment_setting.receipt_footer }}" placeholder="Thank you for your payment">
+          </div>
+          <div class="input-row">
+            <label for="id_quarterly_fee_months">Quarterly Fee Months</label>
+            <input id="id_quarterly_fee_months" name="quarterly_fee_months" type="hidden" value="{{ payment_setting.quarterly_fee_months }}">
+            <div class="month-picker">
+              <div class="month-picker-grid" data-target="id_quarterly_fee_months">
+                <label class="month-item"><input type="checkbox" data-month="apr" {% if 'apr' in payment_setting.quarterly_fee_months %}checked{% endif %}>Apr</label>
+                <label class="month-item"><input type="checkbox" data-month="may" {% if 'may' in payment_setting.quarterly_fee_months %}checked{% endif %}>May</label>
+                <label class="month-item"><input type="checkbox" data-month="jun" {% if 'jun' in payment_setting.quarterly_fee_months %}checked{% endif %}>Jun</label>
+                <label class="month-item"><input type="checkbox" data-month="jul" {% if 'jul' in payment_setting.quarterly_fee_months %}checked{% endif %}>Jul</label>
+                <label class="month-item"><input type="checkbox" data-month="aug" {% if 'aug' in payment_setting.quarterly_fee_months %}checked{% endif %}>Aug</label>
+                <label class="month-item"><input type="checkbox" data-month="sep" {% if 'sep' in payment_setting.quarterly_fee_months %}checked{% endif %}>Sep</label>
+                <label class="month-item"><input type="checkbox" data-month="oct" {% if 'oct' in payment_setting.quarterly_fee_months %}checked{% endif %}>Oct</label>
+                <label class="month-item"><input type="checkbox" data-month="nov" {% if 'nov' in payment_setting.quarterly_fee_months %}checked{% endif %}>Nov</label>
+                <label class="month-item"><input type="checkbox" data-month="dec" {% if 'dec' in payment_setting.quarterly_fee_months %}checked{% endif %}>Dec</label>
+                <label class="month-item"><input type="checkbox" data-month="jan" {% if 'jan' in payment_setting.quarterly_fee_months %}checked{% endif %}>Jan</label>
+                <label class="month-item"><input type="checkbox" data-month="feb" {% if 'feb' in payment_setting.quarterly_fee_months %}checked{% endif %}>Feb</label>
+                <label class="month-item"><input type="checkbox" data-month="mar" {% if 'mar' in payment_setting.quarterly_fee_months %}checked{% endif %}>Mar</label>
+              </div>
+            </div>
+          </div>
+          <div class="input-row">
+            <label for="id_half_yearly_fee_months">Half-Yearly Fee Months</label>
+            <input id="id_half_yearly_fee_months" name="half_yearly_fee_months" type="hidden" value="{{ payment_setting.half_yearly_fee_months }}">
+            <div class="month-picker">
+              <div class="month-picker-grid" data-target="id_half_yearly_fee_months">
+                <label class="month-item"><input type="checkbox" data-month="apr" {% if 'apr' in payment_setting.half_yearly_fee_months %}checked{% endif %}>Apr</label>
+                <label class="month-item"><input type="checkbox" data-month="may" {% if 'may' in payment_setting.half_yearly_fee_months %}checked{% endif %}>May</label>
+                <label class="month-item"><input type="checkbox" data-month="jun" {% if 'jun' in payment_setting.half_yearly_fee_months %}checked{% endif %}>Jun</label>
+                <label class="month-item"><input type="checkbox" data-month="jul" {% if 'jul' in payment_setting.half_yearly_fee_months %}checked{% endif %}>Jul</label>
+                <label class="month-item"><input type="checkbox" data-month="aug" {% if 'aug' in payment_setting.half_yearly_fee_months %}checked{% endif %}>Aug</label>
+                <label class="month-item"><input type="checkbox" data-month="sep" {% if 'sep' in payment_setting.half_yearly_fee_months %}checked{% endif %}>Sep</label>
+                <label class="month-item"><input type="checkbox" data-month="oct" {% if 'oct' in payment_setting.half_yearly_fee_months %}checked{% endif %}>Oct</label>
+                <label class="month-item"><input type="checkbox" data-month="nov" {% if 'nov' in payment_setting.half_yearly_fee_months %}checked{% endif %}>Nov</label>
+                <label class="month-item"><input type="checkbox" data-month="dec" {% if 'dec' in payment_setting.half_yearly_fee_months %}checked{% endif %}>Dec</label>
+                <label class="month-item"><input type="checkbox" data-month="jan" {% if 'jan' in payment_setting.half_yearly_fee_months %}checked{% endif %}>Jan</label>
+                <label class="month-item"><input type="checkbox" data-month="feb" {% if 'feb' in payment_setting.half_yearly_fee_months %}checked{% endif %}>Feb</label>
+                <label class="month-item"><input type="checkbox" data-month="mar" {% if 'mar' in payment_setting.half_yearly_fee_months %}checked{% endif %}>Mar</label>
+              </div>
+            </div>
+          </div>
+          <div class="input-row">
+            <label for="id_yearly_fee_month">Yearly Fee Month</label>
+            <select id="id_yearly_fee_month" name="yearly_fee_month">
+              <option value="apr" {% if payment_setting.yearly_fee_month == 'apr' %}selected{% endif %}>Apr</option>
+              <option value="may" {% if payment_setting.yearly_fee_month == 'may' %}selected{% endif %}>May</option>
+              <option value="jun" {% if payment_setting.yearly_fee_month == 'jun' %}selected{% endif %}>Jun</option>
+              <option value="jul" {% if payment_setting.yearly_fee_month == 'jul' %}selected{% endif %}>Jul</option>
+              <option value="aug" {% if payment_setting.yearly_fee_month == 'aug' %}selected{% endif %}>Aug</option>
+              <option value="sep" {% if payment_setting.yearly_fee_month == 'sep' %}selected{% endif %}>Sep</option>
+              <option value="oct" {% if payment_setting.yearly_fee_month == 'oct' %}selected{% endif %}>Oct</option>
+              <option value="nov" {% if payment_setting.yearly_fee_month == 'nov' %}selected{% endif %}>Nov</option>
+              <option value="dec" {% if payment_setting.yearly_fee_month == 'dec' %}selected{% endif %}>Dec</option>
+              <option value="jan" {% if payment_setting.yearly_fee_month == 'jan' %}selected{% endif %}>Jan</option>
+              <option value="feb" {% if payment_setting.yearly_fee_month == 'feb' %}selected{% endif %}>Feb</option>
+              <option value="mar" {% if payment_setting.yearly_fee_month == 'mar' %}selected{% endif %}>Mar</option>
+            </select>
+          </div>
+          <div class="input-row">
+            <label for="id_once_fee_month">One-Time Fee Month</label>
+            <select id="id_once_fee_month" name="once_fee_month">
+              <option value="apr" {% if payment_setting.once_fee_month == 'apr' %}selected{% endif %}>Apr</option>
+              <option value="may" {% if payment_setting.once_fee_month == 'may' %}selected{% endif %}>May</option>
+              <option value="jun" {% if payment_setting.once_fee_month == 'jun' %}selected{% endif %}>Jun</option>
+              <option value="jul" {% if payment_setting.once_fee_month == 'jul' %}selected{% endif %}>Jul</option>
+              <option value="aug" {% if payment_setting.once_fee_month == 'aug' %}selected{% endif %}>Aug</option>
+              <option value="sep" {% if payment_setting.once_fee_month == 'sep' %}selected{% endif %}>Sep</option>
+              <option value="oct" {% if payment_setting.once_fee_month == 'oct' %}selected{% endif %}>Oct</option>
+              <option value="nov" {% if payment_setting.once_fee_month == 'nov' %}selected{% endif %}>Nov</option>
+              <option value="dec" {% if payment_setting.once_fee_month == 'dec' %}selected{% endif %}>Dec</option>
+              <option value="jan" {% if payment_setting.once_fee_month == 'jan' %}selected{% endif %}>Jan</option>
+              <option value="feb" {% if payment_setting.once_fee_month == 'feb' %}selected{% endif %}>Feb</option>
+              <option value="mar" {% if payment_setting.once_fee_month == 'mar' %}selected{% endif %}>Mar</option>
+            </select>
+          </div>
+        </div>
+        <div class="helper-note">Quarterly aur half-yearly months ko checkbox se select karein. Yearly aur One-Time ke liye single month dropdown use karein.</div>
+
+        <div class="settings-check-grid" style="margin-top:10px;">
+          <label class="check-card"><input type="checkbox" name="show_school_name_on_receipt" {% if payment_setting.show_school_name_on_receipt %}checked{% endif %}> Show School Name on Receipt</label>
+          <label class="check-card"><input type="checkbox" name="show_logo_on_receipt" {% if payment_setting.show_logo_on_receipt %}checked{% endif %}> Show Logo on Receipt</label>
+        </div>
+
+        <div class="settings-submit-row">
+          <button class="submit-btn" type="submit">Save Payment Settings</button>
+        </div>
+      </form>
+    </div>
+    {% endif %}
+
+    {% if current_key == 'whatsapp' %}
+    <div class="settings-form-shell">
+      <h4 style="margin:0 0 10px;color:#0f172a;">WhatsApp API Integration</h4>
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="save_whatsapp_settings">
+
+        <div class="settings-form-grid">
+          <div class="input-row">
+            <label for="id_provider_name">Provider Name</label>
+            <input id="id_provider_name" name="provider_name" type="text" value="{{ whatsapp_setting.provider_name }}" placeholder="Meta WhatsApp Cloud API">
+          </div>
+          <div class="input-row">
+            <label for="id_api_base_url">API Base URL</label>
+            <input id="id_api_base_url" name="api_base_url" type="url" value="{{ whatsapp_setting.api_base_url }}" placeholder="https://graph.facebook.com/v20.0">
+          </div>
+          <div class="input-row">
+            <label for="id_phone_number_id">Phone Number ID</label>
+            <input id="id_phone_number_id" name="phone_number_id" type="text" value="{{ whatsapp_setting.phone_number_id }}">
+          </div>
+          <div class="input-row">
+            <label for="id_business_account_id">Business Account ID</label>
+            <input id="id_business_account_id" name="business_account_id" type="text" value="{{ whatsapp_setting.business_account_id }}">
+          </div>
+          <div class="input-row">
+            <label for="id_instance_id">Instance ID</label>
+            <input id="id_instance_id" name="instance_id" type="text" value="{{ whatsapp_setting.instance_id }}">
+          </div>
+          <div class="input-row">
+            <label for="id_default_country_code">Default Country Code</label>
+            <input id="id_default_country_code" name="default_country_code" type="text" value="{{ whatsapp_setting.default_country_code }}" placeholder="+91">
+          </div>
+        </div>
+
+        <div class="input-row" style="margin-top:12px;">
+          <label for="id_access_token">Access Token</label>
+          <textarea id="id_access_token" name="access_token">{{ whatsapp_setting.access_token }}</textarea>
+        </div>
+
+        <div class="settings-form-grid" style="margin-top:12px;">
+          <div class="input-row">
+            <label for="id_webhook_verify_token">Webhook Verify Token</label>
+            <input id="id_webhook_verify_token" name="webhook_verify_token" type="text" value="{{ whatsapp_setting.webhook_verify_token }}">
+          </div>
+          <div class="input-row">
+            <label for="id_fee_receipt_template">Fee Receipt Template</label>
+            <input id="id_fee_receipt_template" name="fee_receipt_template" type="text" value="{{ whatsapp_setting.fee_receipt_template }}">
+          </div>
+          <div class="input-row">
+            <label for="id_due_fee_template">Due Fee Template</label>
+            <input id="id_due_fee_template" name="due_fee_template" type="text" value="{{ whatsapp_setting.due_fee_template }}">
+          </div>
+          <div class="input-row">
+            <label for="id_attendance_template">Attendance Template</label>
+            <input id="id_attendance_template" name="attendance_template" type="text" value="{{ whatsapp_setting.attendance_template }}">
+          </div>
+        </div>
+
+        <div class="settings-check-grid" style="margin-top:10px;">
+          <label class="check-card"><input type="checkbox" name="is_active" {% if whatsapp_setting.is_active %}checked{% endif %}> Enable WhatsApp API</label>
+          <label class="check-card"><input type="checkbox" name="enable_admission_alerts" {% if whatsapp_setting.enable_admission_alerts %}checked{% endif %}> Admission Alerts</label>
+          <label class="check-card"><input type="checkbox" name="enable_fee_receipt_alerts" {% if whatsapp_setting.enable_fee_receipt_alerts %}checked{% endif %}> Fee Receipt Alerts</label>
+          <label class="check-card"><input type="checkbox" name="enable_attendance_alerts" {% if whatsapp_setting.enable_attendance_alerts %}checked{% endif %}> Attendance Alerts</label>
+          <label class="check-card"><input type="checkbox" name="enable_due_fee_alerts" {% if whatsapp_setting.enable_due_fee_alerts %}checked{% endif %}> Due Fee Alerts</label>
+          <label class="check-card"><input type="checkbox" name="enable_result_alerts" {% if whatsapp_setting.enable_result_alerts %}checked{% endif %}> Result Alerts</label>
+          <label class="check-card"><input type="checkbox" name="enable_general_broadcasts" {% if whatsapp_setting.enable_general_broadcasts %}checked{% endif %}> General Broadcasts</label>
+        </div>
+
+        <div class="helper-note">Yahan credentials save karne ke baad ERP ke admission, fee, attendance aur notice workflows ko WhatsApp notifications se connect kiya ja sakta hai.</div>
+
+        <div class="settings-submit-row">
+          <button class="submit-btn" type="submit">Save WhatsApp API Settings</button>
+        </div>
+      </form>
+    </div>
+    {% endif %}
+
+    {% if current_key == 'mobileapp' %}
+    <div class="settings-form-shell">
+      <h4 style="margin:0 0 10px;color:#0f172a;">Mobile App Control Center</h4>
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="save_mobile_app_settings">
+
+        <div class="settings-form-grid">
+          <div class="input-row">
+            <label for="id_app_name">App Name</label>
+            <input id="id_app_name" name="app_name" type="text" value="{{ mobile_app_setting.app_name }}" placeholder="RLCS School App">
+          </div>
+          <div class="input-row">
+            <label for="id_android_latest_version">Android Latest Version</label>
+            <input id="id_android_latest_version" name="android_latest_version" type="text" value="{{ mobile_app_setting.android_latest_version }}" placeholder="1.0.0">
+          </div>
+          <div class="input-row">
+            <label for="id_android_min_supported_version">Android Min Supported Version</label>
+            <input id="id_android_min_supported_version" name="android_min_supported_version" type="text" value="{{ mobile_app_setting.android_min_supported_version }}" placeholder="1.0.0">
+          </div>
+          <div class="input-row">
+            <label for="id_maintenance_message">Maintenance Message</label>
+            <input id="id_maintenance_message" name="maintenance_message" type="text" value="{{ mobile_app_setting.maintenance_message }}" placeholder="Server maintenance in progress.">
+          </div>
+        </div>
+
+        <div class="input-row" style="margin-top:12px;">
+          <label for="id_app_notice">In-App Notice / Announcement</label>
+          <textarea id="id_app_notice" name="app_notice">{{ mobile_app_setting.app_notice }}</textarea>
+        </div>
+
+        <div class="settings-check-grid" style="margin-top:10px;">
+          <label class="check-card"><input type="checkbox" name="force_update" {% if mobile_app_setting.force_update %}checked{% endif %}> Force Update Mandatory</label>
+          <label class="check-card"><input type="checkbox" name="maintenance_mode" {% if mobile_app_setting.maintenance_mode %}checked{% endif %}> Maintenance Mode</label>
+          <label class="check-card"><input type="checkbox" name="student_app_enabled" {% if mobile_app_setting.student_app_enabled %}checked{% endif %}> Student App Enabled</label>
+          <label class="check-card"><input type="checkbox" name="parent_app_enabled" {% if mobile_app_setting.parent_app_enabled %}checked{% endif %}> Parent App Enabled</label>
+          <label class="check-card"><input type="checkbox" name="staff_app_enabled" {% if mobile_app_setting.staff_app_enabled %}checked{% endif %}> Staff App Enabled</label>
+          <label class="check-card"><input type="checkbox" name="push_notifications_enabled" {% if mobile_app_setting.push_notifications_enabled %}checked{% endif %}> Push Notifications Enabled</label>
+          <label class="check-card"><input type="checkbox" name="regenerate_api_key"> Regenerate App API Key</label>
+        </div>
+
+        <div class="helper-note" style="margin-top:10px;">
+          Config API Endpoint: <strong>/api/mobile/config/</strong><br>
+          Login API Endpoint: <strong>/api/mobile/login/</strong><br>
+          Current App API Key: <strong>{{ mobile_app_setting.config_api_key }}</strong>
+        </div>
+
+        <div class="settings-submit-row">
+          <button class="submit-btn" type="submit">Save Mobile App Control</button>
+        </div>
+      </form>
+
+      <hr style="margin:20px 0;border:none;border-top:1px solid #e2e8f0;">
+
+      <h4 style="margin:0 0 10px;color:#0f172a;">Role-wise App Home Modules</h4>
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="save_mobile_role_home">
+        <div class="settings-form-grid">
+          <div class="input-row">
+            <label for="id_student_home_modules">Student Home Modules (comma separated)</label>
+            <input id="id_student_home_modules" name="student_home_modules" type="text" value="{{ mobile_app_setting.student_home_modules }}" placeholder="dashboard,attendance,fees,results,notices">
+          </div>
+          <div class="input-row">
+            <label for="id_parent_home_modules">Parent Home Modules (comma separated)</label>
+            <input id="id_parent_home_modules" name="parent_home_modules" type="text" value="{{ mobile_app_setting.parent_home_modules }}" placeholder="dashboard,attendance,fees,notices">
+          </div>
+          <div class="input-row">
+            <label for="id_staff_home_modules">Staff Home Modules (comma separated)</label>
+            <input id="id_staff_home_modules" name="staff_home_modules" type="text" value="{{ mobile_app_setting.staff_home_modules }}" placeholder="dashboard,attendance,academics,notices">
+          </div>
+        </div>
+        <div class="settings-submit-row">
+          <button class="submit-btn" type="submit">Save Role Home Modules</button>
+        </div>
+      </form>
+
+      <hr style="margin:20px 0;border:none;border-top:1px solid #e2e8f0;">
+
+      <h4 style="margin:0 0 10px;color:#0f172a;">App Build Release History</h4>
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="add_mobile_release">
+        <div class="settings-form-grid">
+          <div class="input-row">
+            <label for="id_version_name">Version Name</label>
+            <input id="id_version_name" name="version_name" type="text" placeholder="2.1.0">
+          </div>
+          <div class="input-row">
+            <label for="id_version_code">Version Code</label>
+            <input id="id_version_code" name="version_code" type="number" min="1" step="1" value="1">
+          </div>
+        </div>
+        <div class="input-row" style="margin-top:12px;">
+          <label for="id_release_notes">Release Notes</label>
+          <textarea id="id_release_notes" name="release_notes" placeholder="What's new in this build"></textarea>
+        </div>
+        <div class="settings-check-grid" style="margin-top:10px;">
+          <label class="check-card"><input type="checkbox" name="is_mandatory"> Mandatory Update</label>
+          <label class="check-card"><input type="checkbox" name="set_current"> Mark As Current Release</label>
+        </div>
+        <div class="settings-submit-row">
+          <button class="submit-btn" type="submit">Add Release</button>
+        </div>
+      </form>
+
+      <div style="overflow:auto;margin-top:12px;">
+        <table class="user-grid">
+          <thead>
+            <tr>
+              <th>Version</th>
+              <th>Code</th>
+              <th>Mandatory</th>
+              <th>Current</th>
+              <th>Created</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for release in mobile_release_rows %}
+            <tr>
+              <td>{{ release.version_name }}</td>
+              <td>{{ release.version_code }}</td>
+              <td>{% if release.is_mandatory %}Yes{% else %}No{% endif %}</td>
+              <td>{% if release.is_current %}<span class="chip chip-staff">Current</span>{% else %}-{% endif %}</td>
+              <td>{{ release.created_at|date:'d M Y H:i' }}</td>
+              <td>
+                <form class="action-form" method="post">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="set_current_release">
+                  <input type="hidden" name="release_id" value="{{ release.id }}">
+                  <button class="mini-btn" type="submit">Set Current</button>
+                </form>
+                <form class="action-form" method="post">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="rollback_release">
+                  <input type="hidden" name="release_id" value="{{ release.id }}">
+                  <button class="mini-btn warn" type="submit">Rollback To This</button>
+                </form>
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6">No release history available yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <hr style="margin:20px 0;border:none;border-top:1px solid #e2e8f0;">
+
+      <h4 style="margin:0 0 10px;color:#0f172a;">Registered App Devices</h4>
+      <div style="overflow:auto;">
+        <table class="user-grid">
+          <thead>
+            <tr>
+              <th>Device ID</th>
+              <th>Platform</th>
+              <th>User</th>
+              <th>Role</th>
+              <th>Version</th>
+              <th>Last Seen</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for device in mobile_device_rows %}
+            <tr>
+              <td>{{ device.device_id }}</td>
+              <td>{{ device.platform|upper }}</td>
+              <td>{% if device.user %}{{ device.user.username }}{% else %}-{% endif %}</td>
+              <td>{{ device.role_key|default:'-' }}</td>
+              <td>{{ device.app_version|default:'-' }}</td>
+              <td>{{ device.last_seen|date:'d M Y H:i' }}</td>
+              <td>{% if device.is_active %}<span class="chip chip-staff">Active</span>{% else %}<span class="chip chip-inactive">Blocked</span>{% endif %}</td>
+              <td>
+                <form class="action-form" method="post">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="toggle_device">
+                  <input type="hidden" name="device_id" value="{{ device.id }}">
+                  <button class="mini-btn" type="submit">{% if device.is_active %}Block{% else %}Activate{% endif %}</button>
+                </form>
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="8">No mobile device registered yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="panel-actions">
+      <a href="/dashboard/" class="panel-btn">Back to Dashboard</a>
+      <a href="/settings/user/" class="panel-btn primary">Open Primary Setting</a>
+    </div>
+  </section>
+</div>
+<script>
+  (function () {
+    var monthGroups = document.querySelectorAll('.month-picker-grid[data-target]');
+    if (!monthGroups.length) {
+      return;
+    }
+
+    function syncGroup(group) {
+      var targetId = group.getAttribute('data-target');
+      var hiddenInput = document.getElementById(targetId);
+      if (!hiddenInput) {
+        return;
+      }
+
+      var values = [];
+      var boxes = group.querySelectorAll('input[type="checkbox"][data-month]');
+      boxes.forEach(function (box) {
+        if (box.checked) {
+          values.push(box.getAttribute('data-month'));
+        }
+      });
+      hiddenInput.value = values.join(',');
+    }
+
+    monthGroups.forEach(function (group) {
+      group.addEventListener('change', function () {
+        syncGroup(group);
+      });
+      syncGroup(group);
+    });
+  })();
+</script>
+{% endblock %}

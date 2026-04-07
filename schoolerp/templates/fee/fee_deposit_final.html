@@ -1,0 +1,1038 @@
+{% extends 'base_layout.html' %}
+{% block content %}
+<meta name="csrf-token" content="{{ csrf_token }}">
+<style>
+:root{--red:#b80b36;--red-dark:#8a0a28;--green:#16a34a;--blue:#1d4ed8;--amber:#d97706;--gray:#6b7280;--border:#e5e7eb;--bg:#f3f4f6;}
+*{box-sizing:border-box;}
+.fd-wrap{display:grid;grid-template-columns:300px 1fr;min-height:calc(100vh - 56px);background:var(--bg);gap:0;}
+
+/* LEFT */
+.fd-left{background:#fff;border-right:2px solid var(--border);display:flex;flex-direction:column;height:calc(100vh - 56px);position:sticky;top:56px;}
+.left-head{background:var(--red);color:#fff;padding:14px 16px;}
+.left-head h2{font-size:14px;font-weight:700;margin:0 0 2px;}
+.left-head p{font-size:11px;opacity:.8;margin:0;}
+.filter-area{padding:12px 12px 8px;}
+.filter-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
+.filter-area select{width:100%;padding:7px 9px;border:1.5px solid var(--border);border-radius:6px;font-size:12px;}
+.filter-area select:focus{outline:none;border-color:var(--red);}
+.btn-go{width:100%;padding:8px;background:var(--red);color:#fff;border:none;border-radius:6px;font-weight:700;font-size:12px;cursor:pointer;margin-bottom:8px;}
+.btn-go:hover{background:var(--red-dark);}
+.stu-count{font-size:11px;color:var(--gray);padding:5px 12px;background:#f9fafb;border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+.stu-scroll{flex:1;overflow-y:auto;}
+.stu-row{display:flex;align-items:center;gap:9px;padding:9px 12px;border-bottom:1px solid #f3f4f6;cursor:pointer;transition:background .1s;}
+.stu-row:hover{background:#fef2f2;}
+.stu-row.active{background:#fee2e2;border-left:3px solid var(--red);}
+.stu-av{width:32px;height:32px;min-width:32px;border-radius:50%;background:var(--red);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;}
+.stu-nm{font-weight:600;font-size:12px;color:#111;line-height:1.3;}
+.stu-sb{font-size:10px;color:var(--gray);}
+.empty-msg{padding:24px 16px;text-align:center;color:var(--gray);font-size:12px;}
+
+/* RIGHT */
+.fd-right{padding:18px;overflow-y:auto;}
+.ph{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:400px;text-align:center;color:#ccc;gap:8px;font-size:13px;}
+
+/* FORM */
+.step-form{display:none;max-width:800px;margin:0 auto;}
+.step-form.on{display:block;}
+
+/* Student info card */
+.sc{background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:14px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,.06);}
+.sc-av{width:44px;height:44px;min-width:44px;border-radius:50%;background:var(--red);color:#fff;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;}
+.sc-nm{font-size:15px;font-weight:700;color:#111;margin-bottom:3px;}
+.sc-meta{font-size:11px;color:var(--gray);}
+.sc-meta b{color:#374151;}
+.due-badge{margin-left:auto;background:#fef3c7;border:1px solid #fbbf24;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:700;color:#78350f;white-space:nowrap;}
+
+/* Blocks */
+.blk{background:#fff;border:1.5px solid var(--border);border-radius:10px;margin-bottom:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05);}
+.blk-hd{padding:10px 14px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;display:flex;align-items:center;gap:6px;}
+.blk-hd.b{background:#eff6ff;color:#1e40af;border-bottom:1.5px solid #bfdbfe;}
+.blk-hd.g{background:#f0fdf4;color:#14532d;border-bottom:1.5px solid #86efac;}
+.blk-hd.a{background:#fffbeb;color:#78350f;border-bottom:1.5px solid #fde68a;}
+.blk-hd.r{background:#fff1f2;color:#9f1239;border-bottom:1.5px solid #fecdd3;}
+.blk-bd{padding:14px;}
+
+/* Month */
+.month-chip-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;}
+.month-chip{border:1.5px solid var(--border);border-radius:8px;background:#fff;padding:8px 10px;display:flex;align-items:center;gap:7px;cursor:pointer;font-size:12px;font-weight:600;color:#374151;}
+.month-chip:hover{border-color:#93c5fd;background:#eff6ff;}
+.month-chip input{width:14px;height:14px;accent-color:var(--blue);}
+.month-help{margin-top:8px;font-size:11px;color:#6b7280;}
+
+/* Particulars Table */
+.pt{width:100%;border-collapse:collapse;}
+.pt th{background:#f3f4f6;padding:8px 10px;font-size:10px;font-weight:700;text-transform:uppercase;color:var(--gray);border-bottom:1.5px solid var(--border);text-align:left;}
+.pt td{padding:9px 10px;border-bottom:1px solid #f3f4f6;font-size:13px;vertical-align:middle;}
+.pt tbody tr:last-child td{border-bottom:none;}
+.pt tbody tr:hover td{background:#fafafa;}
+.pt input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent-color:var(--red);}
+.pt .r{text-align:right;}
+.pt .fw{font-weight:700;}
+.pt .gr{color:var(--green);}
+.pt .rd{color:var(--red);font-weight:700;}
+.no-slab{padding:20px;text-align:center;color:var(--gray);font-size:13px;}
+
+/* Summary grid */
+.sum-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+.sum-item{background:#f9fafb;border:1.5px solid var(--border);border-radius:8px;padding:11px 12px;}
+.sum-item.hl{background:#fff1f2;border-color:#fca5a5;}
+.sum-item label{display:block;font-size:10px;font-weight:700;text-transform:uppercase;color:var(--gray);margin-bottom:3px;}
+.sum-item .sv{font-size:17px;font-weight:700;color:#111;}
+.sum-item.hl .sv{color:var(--red);}
+
+/* Payment Fields */
+.pr{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.pr.one{grid-template-columns:1fr;}
+.pr.three{grid-template-columns:1fr 1fr;}
+.fld label{display:block;font-size:10px;font-weight:700;text-transform:uppercase;color:var(--gray);margin-bottom:5px;}
+.fld input,.fld select,.fld textarea{width:100%;padding:9px 11px;border:1.5px solid var(--border);border-radius:7px;font-size:13px;font-family:inherit;}
+.fld input:focus,.fld select:focus,.fld textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 3px rgba(184,11,54,.07);}
+.fld input[readonly]{background:#f3f4f6;font-weight:600;color:#374151;}
+.fld textarea{min-height:56px;resize:vertical;}
+
+/* Balance box */
+.bal-box{display:flex;align-items:center;justify-content:space-between;background:#f0fdf4;border:2px solid #86efac;border-radius:9px;padding:12px 16px;margin-bottom:12px;}
+.bal-box.neg{background:#fff1f2;border-color:#fca5a5;}
+.bal-label{font-size:11px;font-weight:700;text-transform:uppercase;color:#166534;}
+.bal-box.neg .bal-label{color:#9f1239;}
+.bal-amt{font-size:24px;font-weight:800;color:var(--green);}
+.bal-box.neg .bal-amt{color:var(--red);}
+
+/* Submit */
+.sub-row{display:flex;gap:10px;justify-content:flex-end;margin-top:4px;}
+.btn-reset{padding:10px 20px;border:1.5px solid var(--border);background:#fff;border-radius:7px;font-weight:600;font-size:13px;cursor:pointer;color:#374151;}
+.btn-reset:hover{background:#f3f4f6;}
+.btn-save{padding:10px 26px;background:var(--red);color:#fff;border:none;border-radius:7px;font-weight:700;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:7px;}
+.btn-save:hover{background:var(--red-dark);}
+.btn-save:disabled{opacity:.55;cursor:not-allowed;}
+
+/* Receipt overlay */
+.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;align-items:center;justify-content:center;}
+.ov.on{display:flex;}
+.rcpt{background:#fff;border-radius:12px;width:460px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 8px 30px rgba(0,0,0,.25);}
+.rh{background:#111827;color:#fff;padding:12px 16px;border-radius:12px 12px 0 0;text-align:center;}
+.rh h3{font-size:14px;margin:0 0 2px;letter-spacing:.3px;}
+.rh p{font-size:11px;opacity:.9;margin:0;}
+.rb{padding:14px;background:#f8fafc;}
+.rcpt-slip{width:100%;max-width:340px;margin:0 auto;background:#fff;border:1.5px solid #374151;padding:8px 8px 10px;color:#111;font-family:Arial,sans-serif;}
+.rcpt-top{display:flex;justify-content:space-between;font-size:10px;margin-bottom:6px;}
+.rcpt-copy{text-align:right;}
+.rcpt-school{text-align:center;border-bottom:1px solid #4b5563;padding-bottom:5px;margin-bottom:5px;}
+.rcpt-school .n{font-size:19px;font-weight:700;line-height:1.1;letter-spacing:.2px;}
+.rcpt-school .a{font-size:10px;line-height:1.35;}
+.rcpt-school .t{font-size:26px;font-weight:700;margin:1px 0;line-height:1;}
+.rcpt-meta,.rcpt-info,.rcpt-totals{font-size:12px;line-height:1.4;}
+.rcpt-meta .rw,.rcpt-info .rw,.rcpt-totals .rw{display:flex;gap:6px;}
+.rcpt-meta .rw span:first-child,.rcpt-info .rw span:first-child,.rcpt-totals .rw span:first-child{min-width:100px;}
+.rcpt-info{margin:4px 0;border-bottom:1px solid #4b5563;padding-bottom:4px;}
+.rcpt-old-bal{display:flex;justify-content:space-between;font-size:12px;font-weight:700;border-bottom:1px solid #4b5563;padding:3px 0;}
+.rcpt-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:2px;}
+.rcpt-table th{font-size:12px;text-align:left;border-bottom:1px solid #4b5563;padding:3px 2px;}
+.rcpt-table td{padding:2px 2px;vertical-align:top;}
+.rcpt-table .num{width:32px;}
+.rcpt-table .amt{text-align:right;white-space:nowrap;}
+.rcpt-totals{border-top:1px solid #4b5563;border-bottom:1px solid #4b5563;padding:3px 0;margin-top:3px;}
+.rcpt-totals .rw{justify-content:space-between;}
+.rcpt-totals .strong{font-weight:700;}
+.rcpt-detail{font-size:12px;margin-top:6px;}
+.rcpt-sign{text-align:right;font-size:12px;margin-top:12px;}
+.ra{display:flex;gap:10px;padding:0 20px 18px;}
+.ra button{flex:1;padding:10px;border:none;border-radius:7px;font-weight:700;font-size:13px;cursor:pointer;}
+.ra .rp{background:var(--red);color:#fff;}
+.ra .rc{background:#f3f4f6;color:#374151;}
+
+/* Spinner */
+.sp{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.35);border-top:2px solid #fff;border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media(max-width:860px){
+  .fd-wrap{grid-template-columns:1fr;height:auto;}
+  .fd-left{height:auto;position:static;}
+  .sum-grid{grid-template-columns:1fr 1fr;}
+}
+
+.fd-wrap{display:block;min-height:auto;background:transparent;}
+.fd-right{padding:0;overflow:visible;}
+.fd-right-full{max-width:1180px;margin:0 auto;}
+.step-form{max-width:none;margin:0;}
+.fd-hero{display:flex;justify-content:space-between;align-items:flex-start;background:#fff;border:1px solid var(--border);border-top:4px solid var(--red);padding:16px 18px;margin-bottom:12px;}
+.fd-hero h2{margin:0;font-size:24px;color:#1f2937;}
+.fd-hero p{margin:4px 0 0;color:#6b7280;font-size:13px;}
+.fd-mini-session{font-size:12px;color:#6b7280;padding-top:4px;}
+.fd-search-panel{background:#fff;border:1px solid var(--border);padding:14px 16px;margin-bottom:14px;}
+.fd-search-row{display:grid;grid-template-columns:1.2fr auto auto 1fr 1fr 1.4fr;gap:10px;align-items:end;}
+.fd-search-field label{display:block;font-size:11px;font-weight:700;color:#6b7280;margin-bottom:4px;text-transform:uppercase;}
+.fd-search-field input,.fd-search-field select{width:100%;padding:9px 10px;border:1px solid #d1d5db;border-radius:4px;font-size:13px;background:#fff;}
+.fd-search-field.grow{min-width:180px;}
+.fd-search-field.grow-lg{min-width:240px;}
+.fd-search-actions{display:flex;gap:8px;align-items:flex-end;padding-bottom:1px;}
+.fd-search-actions .btn-go,.fd-search-actions .btn-reset{margin:0;height:37px;border-radius:4px;padding:0 18px;font-size:12px;text-transform:uppercase;}
+.fd-search-actions .btn-go{min-width:92px;}
+.top-reset{background:#111827;color:#fff;border:none;}
+.top-reset:hover{background:#000;}
+.fd-or{align-self:center;font-weight:700;color:#6b7280;font-size:12px;padding:0 4px 10px;}
+.fd-search-hint{margin-top:10px;font-size:12px;color:#b80b36;}
+.compact-placeholder{min-height:120px;background:#fff;border:1px dashed #cbd5e1;color:#64748b;}
+.compact-placeholder p{margin:0;}
+.erp-sheet{background:#fff;border:1px solid var(--border);padding:14px 16px;margin-bottom:14px;}
+.erp-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;border-bottom:1px solid #e5e7eb;padding-bottom:10px;margin-bottom:12px;}
+.erp-title{font-size:18px;font-weight:700;color:#111827;}
+.erp-note{font-size:12px;color:#6b7280;margin-top:2px;}
+.erp-receipt-box{font-size:12px;color:#6b7280;white-space:nowrap;}
+.erp-receipt-box strong{color:#111827;}
+.erp-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 16px;}
+.erp-field.full{grid-column:1 / -1;}
+.erp-field label,.erp-pay-field label{display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:5px;}
+.erp-value,.erp-readonly,.erp-pay-field input,.erp-pay-field select,.erp-pay-field textarea{width:100%;min-height:38px;padding:9px 11px;border:1px solid #e5e7eb;background:#f8fafc;border-radius:2px;font-size:13px;color:#111827;}
+.erp-pay-field input,.erp-pay-field select,.erp-pay-field textarea{background:#fff;}
+.erp-pay-field textarea{min-height:56px;resize:vertical;}
+.erp-readonly{display:flex;align-items:center;}
+.erp-readonly.erp-highlight{font-weight:700;background:#fff7ed;border-color:#fdba74;}
+.erp-due{margin-top:12px;margin-left:0;width:max-content;}
+.erp-split{display:grid;grid-template-columns:360px 1fr;gap:14px;align-items:start;}
+.erp-block{margin-bottom:14px;}
+.erp-payment-block{margin-bottom:14px;}
+.erp-pay-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 16px;}
+.erp-pay-field.full-row{grid-column:1 / -1;}
+.erp-actions{justify-content:flex-start;margin-top:16px;}
+.erp-actions .btn-save,.erp-actions .btn-reset{border-radius:4px;min-width:120px;justify-content:center;}
+.bal-box.neg,.erp-readonly.neg{background:#fff1f2;border-color:#fecdd3;color:#9f1239;}
+.month-chip-grid{grid-template-columns:repeat(2,minmax(0,1fr));max-height:320px;overflow:auto;}
+.month-chip{font-size:12px;padding:8px 9px;border-radius:4px;}
+.pt th,.pt td{font-size:12px;}
+
+@media(max-width:1100px){
+  .fd-search-row{grid-template-columns:1fr 1fr;}
+  .fd-search-actions{grid-column:1 / -1;}
+  .fd-or{display:none;}
+  .erp-split{grid-template-columns:1fr;}
+}
+
+@media(max-width:700px){
+  .fd-hero{flex-direction:column;gap:8px;}
+  .fd-search-row,.erp-grid,.erp-pay-grid{grid-template-columns:1fr;}
+  .erp-field.full,.erp-pay-field.full-row{grid-column:auto;}
+}
+</style>
+
+<div class="fd-wrap">
+  <div class="fd-right fd-right-full">
+    <div class="fd-hero">
+      <div>
+        <h2>Fee Deposit</h2>
+        <p>Sample ke according compact fee deposit panel</p>
+      </div>
+      <div class="fd-mini-session">Session-driven student fee entry</div>
+    </div>
+
+    <div class="fd-search-panel">
+      <div class="fd-search-row">
+        <div class="fd-search-field grow">
+          <label>Enter Admission No.</label>
+          <input type="text" id="admSearch" placeholder="Enter Admission No.">
+        </div>
+        <div class="fd-search-actions">
+          <button class="btn-go" type="button" onclick="searchByAdmission()">Proceed</button>
+          <button class="btn-reset top-reset" type="button" onclick="resetAll(true)">Reset</button>
+        </div>
+        <div class="fd-or">OR</div>
+        <div class="fd-search-field">
+          <label>Select Class</label>
+          <select id="clsSel" onchange="loadStudents()">
+            <option value="">-- Select Class --</option>
+            {% for c in classes %}
+            <option value="{{ c.name }}">{{ c.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="fd-search-field">
+          <label>Select Section</label>
+          <select id="secSel" onchange="loadStudents()">
+            <option value="">-- Select Section --</option>
+            <option>A</option><option>B</option><option>C</option><option>D</option>
+          </select>
+        </div>
+        <div class="fd-search-field grow-lg">
+          <label>Select Student</label>
+          <select id="stuSel" onchange="handleStudentSelect(this.value)">
+            <option value="">-- Select Student --</option>
+          </select>
+        </div>
+      </div>
+      <div id="stuHeader" class="stu-count" style="display:none;"></div>
+      <div id="searchHint" class="fd-search-hint">Kindly Select Class, Section, Student Name/ OR Admission No.</div>
+      <div id="stuScroll" style="display:none;"></div>
+    </div>
+
+    <div id="ph" class="ph compact-placeholder">
+      <p>Admission No. ya Class/Section ke through student select karein.</p>
+    </div>
+
+    <div id="sf" class="step-form">
+      <span id="sAv" style="display:none;">?</span>
+
+      <div class="erp-sheet">
+        <div class="erp-head">
+          <div>
+            <div class="erp-title">Fee Deposit</div>
+            <div class="erp-note">Student fee details and fee collection form</div>
+          </div>
+          <div class="erp-receipt-box">Receipt No. <strong id="sheetReceiptNo">Auto</strong></div>
+        </div>
+
+        <div class="erp-grid">
+          <div class="erp-field">
+            <label>Admission No</label>
+            <div class="erp-value" id="sAdm">—</div>
+          </div>
+          <div class="erp-field">
+            <label>Roll No.</label>
+            <div class="erp-value" id="sRl">—</div>
+          </div>
+          <div class="erp-field full">
+            <label>Student Name</label>
+            <div class="erp-value" id="sNm">—</div>
+          </div>
+          <div class="erp-field full">
+            <label>Father Name</label>
+            <div class="erp-value" id="sFnm">—</div>
+          </div>
+          <div class="erp-field full">
+            <label>Address</label>
+            <div class="erp-value" id="sAddr">—</div>
+          </div>
+          <div class="erp-field">
+            <label>Class</label>
+            <div class="erp-value" id="sCls">—</div>
+          </div>
+          <div class="erp-field">
+            <label>Session</label>
+            <div class="erp-value" id="sSession">—</div>
+          </div>
+          <div class="erp-field full">
+            <label>Fee For Month</label>
+            <div class="erp-value" id="sMonths">—</div>
+          </div>
+          <div class="erp-field full">
+            <label>Old Balance</label>
+            <div class="erp-value" id="sOldBal">0.00</div>
+          </div>
+        </div>
+        <div id="sDueBadge" class="due-badge erp-due" style="display:none">Previous Due: ₹<span id="sDueAmt">0</span></div>
+      </div>
+
+      <div class="erp-split">
+        <div class="blk erp-block">
+          <div class="blk-hd b">Select Month</div>
+          <div class="blk-bd">
+            <div class="month-chip-grid" id="monthChipGrid"></div>
+            <div class="month-help">Paid months auto hidden rahenge.</div>
+          </div>
+        </div>
+
+        <div class="blk erp-block" id="partBlk" style="display:none">
+          <div class="blk-hd g">Select Particular</div>
+          <div class="blk-bd" id="partBd"><div class="no-slab">Loading…</div></div>
+        </div>
+      </div>
+
+      <div id="paySection" style="display:none">
+        <div class="blk erp-payment-block">
+          <div class="blk-hd r">Payment Summary</div>
+          <div class="blk-bd">
+            <div class="erp-pay-grid">
+              <div class="erp-pay-field">
+                <label>Total Amount</label>
+                <div class="erp-readonly">₹<span id="tSel">0.00</span></div>
+              </div>
+              <div class="erp-pay-field">
+                <label>Late Fee/Last Due (+)</label>
+                <div class="erp-readonly">₹<span id="tPrev">0.00</span></div>
+              </div>
+              <div class="erp-pay-field">
+                <label>Concession (-)</label>
+                <input type="number" id="concAmt" min="0" step="0.01" placeholder="0" oninput="recalc()">
+              </div>
+              <div class="erp-pay-field">
+                <label>Grand Total</label>
+                <div class="erp-readonly erp-highlight">₹<span id="tNet">0.00</span></div>
+                <input type="hidden" id="netFld">
+              </div>
+              <div class="erp-pay-field">
+                <label>Received Amt</label>
+                <input type="number" id="recvAmt" min="0" step="0.01" placeholder="0" oninput="recalc()" required>
+              </div>
+              <div class="erp-pay-field">
+                <label>Balance</label>
+                <div class="erp-readonly" id="balBox">₹<span id="balAmt">0.00</span></div>
+              </div>
+              <div class="erp-pay-field">
+                <label>Payment Mode</label>
+                <select id="payMode" required>
+                  <option value="">Select</option>
+                  <option value="cash">Cash</option>
+                  <option value="cheque">Cheque</option>
+                  <option value="online">Online Transfer</option>
+                  <option value="card">Card</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div class="erp-pay-field">
+                <label>Remark/Details</label>
+                <input type="text" id="refNo" placeholder="Cash / Cheque / Ref No.">
+              </div>
+              <div class="erp-pay-field full-row">
+                <label>Concession Remark</label>
+                <input type="text" id="concRmk" placeholder="Optional concession remark">
+              </div>
+              <div class="erp-pay-field full-row">
+                <label>Remarks</label>
+                <textarea id="remarksFld" placeholder="Additional notes"></textarea>
+              </div>
+            </div>
+
+            <div class="sub-row erp-actions">
+              <button class="btn-reset" type="button" onclick="resetAll(true)">Reset</button>
+              <button class="btn-save" id="saveBtn" type="button" onclick="submitPayment()">
+                <span>Save</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ Receipt Modal ════ -->
+<div class="ov" id="rcptOv">
+  <div class="rcpt">
+    <div class="rh">
+      <h3>Fee Receipt Preview</h3>
+      <p id="rcptDate"></p>
+    </div>
+    <div class="rb" id="rcptBd"></div>
+    <div class="ra">
+      <button class="rp" onclick="printReceipt()">🖨 Print</button>
+      <button class="rc" onclick="closeReceipt()">✖ Close &amp; New</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ────────────────────────────────
+   STATE
+──────────────────────────────── */
+const CSRF      = document.querySelector('meta[name="csrf-token"]').content;
+let curStudent  = null;   // selected student object
+let breakdown   = [];     // fee breakdown from API
+let prevDue     = 0;      // previous due balance
+let selectedMonthTotals = {};
+const MONTHS    = [
+  {code:'apr', name:'April'}, {code:'may', name:'May'}, {code:'jun', name:'June'}, {code:'jul', name:'July'},
+  {code:'aug', name:'August'}, {code:'sep', name:'September'}, {code:'oct', name:'October'}, {code:'nov', name:'November'},
+  {code:'dec', name:'December'}, {code:'jan', name:'January'}, {code:'feb', name:'February'}, {code:'mar', name:'March'}
+];
+
+function renderMonthOptions(availableCodes) {
+  const monthChipGrid = document.getElementById('monthChipGrid');
+  const allowed = new Set(availableCodes || MONTHS.map(m => m.code));
+
+  let html = '';
+  MONTHS.forEach(m => {
+    if (allowed.has(m.code)) {
+      html += `<label class="month-chip"><input type="checkbox" data-month="${m.code}" onchange="loadParticulars()">${m.name}</label>`;
+    }
+  });
+
+  if (!html) {
+    html = '<div class="no-slab" style="grid-column:1/-1;padding:12px;">All months already fully paid</div>';
+  }
+
+  monthChipGrid.innerHTML = html;
+  updateSelectedMonthLabel();
+}
+
+function getSelectedMonths() {
+  return Array.from(document.querySelectorAll('#monthChipGrid input[type="checkbox"][data-month]:checked'))
+    .map(el => el.getAttribute('data-month'));
+}
+
+function formatSelectedMonths(months) {
+  return (months || []).map(code => {
+    const found = MONTHS.find(item => item.code === code);
+    return found ? found.name : code;
+  }).join(', ');
+}
+
+function updateSelectedMonthLabel() {
+  const months = getSelectedMonths();
+  document.getElementById('sMonths').textContent = months.length ? formatSelectedMonths(months) : '—';
+}
+
+function updateStudentOptions(list, selectedId = '') {
+  const stuSel = document.getElementById('stuSel');
+  stuSel.innerHTML = '<option value="">-- Select Student --</option>';
+
+  (list || []).forEach(student => {
+    const option = document.createElement('option');
+    option.value = student.id;
+    option.textContent = `${student.name}${student.admission_number ? ' (' + student.admission_number + ')' : ''}`;
+    stuSel.appendChild(option);
+  });
+
+  if (selectedId) {
+    stuSel.value = String(selectedId);
+  }
+}
+
+function handleStudentSelect(id) {
+  if (!id) {
+    resetDepositArea();
+    return;
+  }
+  selectStudent(parseInt(id, 10));
+}
+
+function searchByAdmission() {
+  const admissionNo = document.getElementById('admSearch').value.trim();
+  if (!admissionNo) {
+    alert('Admission number enter karein.');
+    return;
+  }
+
+  const hint = document.getElementById('searchHint');
+  hint.textContent = 'Searching student...';
+
+  fetch(`/fee/api/search-students/?search_type=admission_no&query=${encodeURIComponent(admissionNo)}`)
+    .then(r => r.json())
+    .then(data => {
+      const students = data.students || [];
+      window._stuCache = students;
+      updateStudentOptions(students, students[0] ? students[0].id : '');
+
+      const hdr = document.getElementById('stuHeader');
+      hdr.style.display = 'block';
+      hdr.textContent = students.length ? `${students.length} student found` : 'No student found';
+
+      if (!students.length) {
+        hint.textContent = 'Admission no. ke liye koi student nahi mila.';
+        resetDepositArea();
+        return;
+      }
+
+      const first = students[0];
+      document.getElementById('clsSel').value = first.student_class || '';
+      document.getElementById('secSel').value = first.section || '';
+      hint.textContent = `Student loaded for admission no. ${admissionNo}`;
+      selectStudent(first.id);
+    })
+    .catch(() => {
+      hint.textContent = 'Admission search failed.';
+    });
+}
+
+function loadAvailableMonthsForStudent(studentId) {
+  return fetch(`/fee/api/student-fee-months/?student_id=${studentId}`)
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        renderMonthOptions(data.available_months || []);
+      } else {
+        renderMonthOptions();
+      }
+    })
+    .catch(() => {
+      renderMonthOptions();
+    });
+}
+
+/* ────────────────────────────────
+   LOAD STUDENTS BY CLASS
+──────────────────────────────── */
+function loadStudents() {
+  const cls = document.getElementById('clsSel').value;
+  const sec = document.getElementById('secSel').value;
+
+  if (!cls) {
+    updateStudentOptions([]);
+    document.getElementById('stuHeader').style.display = 'none';
+    document.getElementById('searchHint').textContent = 'Pehle class select karein.';
+    resetDepositArea();
+    return;
+  }
+
+  document.getElementById('searchHint').textContent = 'Loading students...';
+
+  const p = new URLSearchParams({ class_name: cls });
+  if (sec) p.append('section', sec);
+
+  fetch('/fee/api/students-by-class/?' + p)
+    .then(r => r.json())
+    .then(data => {
+      if (!data.success) {
+        document.getElementById('searchHint').textContent = data.error || 'Unable to load students';
+        return;
+      }
+
+      const list = data.students;
+      window._stuCache = list;
+      updateStudentOptions(list);
+
+      const hdr = document.getElementById('stuHeader');
+      hdr.style.display = 'block';
+      hdr.textContent   = list.length + ' students found';
+
+      if (!list.length) {
+        document.getElementById('searchHint').textContent = 'Koi student nahi mila is class mein';
+        resetDepositArea();
+        return;
+      }
+
+      document.getElementById('searchHint').textContent = 'Student dropdown se student select karein.';
+    })
+    .catch(() => {
+      document.getElementById('searchHint').textContent = 'Network error';
+    });
+}
+
+function resetDepositArea() {
+  curStudent = null;
+  breakdown = [];
+  prevDue = 0;
+  selectedMonthTotals = {};
+
+  document.getElementById('ph').style.display = '';
+  document.getElementById('sf').classList.remove('on');
+  document.getElementById('partBlk').style.display = 'none';
+  document.getElementById('paySection').style.display = 'none';
+  document.getElementById('sNm').textContent = '—';
+  document.getElementById('sAdm').textContent = '—';
+  document.getElementById('sCls').textContent = '—';
+  document.getElementById('sRl').textContent = '—';
+  document.getElementById('sFnm').textContent = '—';
+  document.getElementById('sAddr').textContent = '—';
+  document.getElementById('sSession').textContent = '—';
+  document.getElementById('sMonths').textContent = '—';
+  document.getElementById('sOldBal').textContent = '0.00';
+  document.getElementById('sheetReceiptNo').textContent = 'Auto';
+  document.getElementById('sDueBadge').style.display = 'none';
+  document.getElementById('tSel').textContent = '0.00';
+  document.getElementById('tPrev').textContent = '0.00';
+  document.getElementById('tNet').textContent = '0.00';
+  document.getElementById('netFld').value = '';
+  document.getElementById('balAmt').textContent = '0.00';
+  document.getElementById('balBox').classList.remove('neg');
+  ['concAmt','recvAmt','concRmk','refNo','remarksFld'].forEach(id => { document.getElementById(id).value = ''; });
+  document.getElementById('payMode').value = '';
+  renderMonthOptions();
+}
+
+/* ────────────────────────────────
+   SELECT STUDENT
+──────────────────────────────── */
+function selectStudent(id) {
+  const s = (window._stuCache || []).find(x => x.id === id);
+  if (!s) { alert('Student data not found, dobara search karein.'); return; }
+
+  curStudent = s;
+  prevDue    = 0;
+  breakdown  = [];
+
+  document.getElementById('sAv').textContent  = s.name.charAt(0).toUpperCase();
+  document.getElementById('sNm').textContent  = s.name;
+  document.getElementById('sAdm').textContent = s.admission_number || 'N/A';
+  document.getElementById('sCls').textContent = `${s.student_class || document.getElementById('clsSel').value || ''} ${s.section ? s.section : ''}`.trim();
+  document.getElementById('sRl').textContent  = s.roll_no || '—';
+  document.getElementById('sFnm').textContent = s.father_name || '—';
+  document.getElementById('sAddr').textContent = s.address || '—';
+  document.getElementById('sSession').textContent = s.session || '—';
+  document.getElementById('sMonths').textContent = '—';
+  document.getElementById('sOldBal').textContent = '0.00';
+  document.getElementById('sheetReceiptNo').textContent = 'Auto';
+  document.getElementById('sDueBadge').style.display = 'none';
+  document.getElementById('stuSel').value = String(s.id);
+  document.getElementById('searchHint').textContent = `Selected: ${s.name}`;
+
+  renderMonthOptions();
+  loadAvailableMonthsForStudent(s.id);
+
+  document.getElementById('partBlk').style.display  = 'none';
+  document.getElementById('paySection').style.display = 'none';
+
+  document.getElementById('ph').style.display = 'none';
+  document.getElementById('sf').classList.add('on');
+}
+
+/* ────────────────────────────────
+   LOAD FEE PARTICULARS FOR MONTH
+──────────────────────────────── */
+function loadParticulars() {
+  const months = getSelectedMonths();
+  updateSelectedMonthLabel();
+  if (!months.length || !curStudent) return;
+
+  const partBlk = document.getElementById('partBlk');
+  partBlk.style.display = 'block';
+  document.getElementById('partBd').innerHTML = '<div class="no-slab">⏳ Loading particulars…</div>';
+  document.getElementById('paySection').style.display = 'none';
+
+  fetch(`/fee/api/calculate-student-fees/?student_id=${curStudent.id}&fee_months=${months.join(',')}`)
+    .then(r => r.json())
+    .then(data => {
+      if (!data.success) {
+        document.getElementById('partBd').innerHTML = '<div class="no-slab">❌ ' + (data.error || 'Error') + '</div>';
+        return;
+      }
+
+      if (data.fully_paid) {
+        document.getElementById('partBd').innerHTML = '<div class="no-slab">✅ ' + (data.message || 'Is month ki fee already fully paid hai.') + '</div>';
+        document.getElementById('paySection').style.display = 'none';
+        return;
+      }
+
+      prevDue   = parseFloat(data.previous_due_balance) || 0;
+      breakdown = data.fee_breakdown || [];
+      selectedMonthTotals = {};
+
+      // Previous due badge
+      if (prevDue > 0) {
+        document.getElementById('sDueBadge').style.display = 'block';
+        document.getElementById('sDueAmt').textContent = prevDue.toFixed(2);
+      } else {
+        document.getElementById('sDueBadge').style.display = 'none';
+      }
+      document.getElementById('sOldBal').textContent = prevDue.toFixed(2);
+
+      if (!breakdown.length) {
+        document.getElementById('partBd').innerHTML =
+          '<div class="no-slab">⚠️ Is class + month ke liye koi fee slab setup nahi hai.<br>Pehle <strong>Fee Master → Fee Amount Slab</strong> mein slab add karein.</div>';
+        document.getElementById('paySection').style.display = 'none';
+        return;
+      }
+
+      // Build table
+      let slabInfo = '';
+      if (data.slab_fallback_used === true) {
+        slabInfo = '<div style="margin-bottom:10px;padding:8px 10px;border:1px solid #fde68a;background:#fffbeb;border-radius:8px;font-size:12px;color:#92400e;">Selected month ke liye exact slab nahi mila. Class ka available slab use kiya gaya hai.</div>';
+      }
+
+      if (data.has_fee_slab === false) {
+        slabInfo = '<div style="margin-bottom:10px;padding:8px 10px;border:1px solid #fecaca;background:#fff1f2;border-radius:8px;font-size:12px;color:#9f1239;">Is class ke liye fee slab setup nahi hai. Isliye normal fee particulars nahi aa rahe.</div>';
+      }
+
+      const rows = breakdown.map((p, i) => `
+        <tr>
+          <td><input type="checkbox" id="c${i}" checked onchange="recalcPart()"></td>
+          <td><span style="font-size:11px;color:#6b7280;">${p.month_display || p.month_code || ''}</span><br>${p.particular_name}</td>
+          <td class="r">₹${parseFloat(p.original_amount).toFixed(2)}</td>
+          <td class="r gr">${p.discount_amount > 0 ? '- ₹' + parseFloat(p.discount_amount).toFixed(2) : '—'}</td>
+          <td class="r rd">₹${parseFloat(p.final_amount).toFixed(2)}</td>
+        </tr>`).join('');
+
+      document.getElementById('partBd').innerHTML = `
+        ${slabInfo}
+        <table class="pt">
+          <thead>
+            <tr>
+              <th style="width:36px"></th>
+              <th>Particular</th>
+              <th class="r">Amount</th>
+              <th class="r">Discount</th>
+              <th class="r">Payable</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>`;
+
+      // Show payment section
+      document.getElementById('paySection').style.display = 'block';
+
+      // Reset payment inputs
+      ['concAmt','recvAmt'].forEach(id => { document.getElementById(id).value = ''; });
+      ['concRmk','refNo','remarksFld'].forEach(id => { document.getElementById(id).value = ''; });
+      document.getElementById('payMode').value = '';
+
+      recalcPart();
+    })
+    .catch(() => {
+      document.getElementById('partBd').innerHTML = '<div class="no-slab">❌ Network error</div>';
+    });
+}
+
+/* ────────────────────────────────
+   RECALC FROM CHECKBOX SELECTION
+──────────────────────────────── */
+function recalcPart() {
+  let sel = 0;
+  selectedMonthTotals = {};
+  breakdown.forEach((p, i) => {
+    const chk = document.getElementById('c' + i);
+    if (chk && chk.checked) {
+      const amt = parseFloat(p.final_amount) || 0;
+      sel += amt;
+      const monthCode = p.month_code || 'na';
+      selectedMonthTotals[monthCode] = (selectedMonthTotals[monthCode] || 0) + amt;
+    }
+  });
+  document.getElementById('tSel').textContent  = sel.toFixed(2);
+  document.getElementById('tPrev').textContent = prevDue.toFixed(2);
+  recalc();
+}
+
+/* ────────────────────────────────
+   RECALC NET / BALANCE
+──────────────────────────────── */
+function recalc() {
+  const sel   = parseFloat(document.getElementById('tSel').textContent)  || 0;
+  const prev  = parseFloat(document.getElementById('tPrev').textContent) || 0;
+  const conc  = parseFloat(document.getElementById('concAmt').value)     || 0;
+  const gross = sel + prev;
+  const net   = Math.max(0, gross - conc);
+  const recv  = parseFloat(document.getElementById('recvAmt').value)     || 0;
+  const bal   = net - recv;
+
+  document.getElementById('tNet').textContent = net.toFixed(2);
+  document.getElementById('netFld').value     = net.toFixed(2);
+  document.getElementById('balAmt').textContent = bal.toFixed(2);
+
+  // Color balance box
+  const box = document.getElementById('balBox');
+  box.classList.toggle('neg', bal > 0);
+}
+
+/* ────────────────────────────────
+   SUBMIT PAYMENT
+──────────────────────────────── */
+function submitPayment() {
+  const months = getSelectedMonths();
+  if (!curStudent || !months.length) { alert('Student aur month select karo.'); return; }
+
+  if (!breakdown.length) {
+    alert('Is month ke liye koi payable fee item available nahi hai.');
+    return;
+  }
+
+  let selTotal  = 0;
+  const selItems = [];
+  breakdown.forEach((p, i) => {
+    const chk = document.getElementById('c' + i);
+    if (chk && chk.checked) {
+      const lineAmt = parseFloat(p.final_amount) || 0;
+      selTotal += lineAmt;
+      selItems.push({
+        name: p.particular_name,
+        month_display: p.month_display || p.month_code || '',
+        amount: lineAmt,
+      });
+    }
+  });
+
+  if (!selItems.length) { alert('Kam se kam ek particular select karein.'); return; }
+
+  const conc     = parseFloat(document.getElementById('concAmt').value)  || 0;
+  const recv     = parseFloat(document.getElementById('recvAmt').value)  || 0;
+  const netPayable = parseFloat(document.getElementById('netFld').value) || 0;
+  const payMode  = document.getElementById('payMode').value;
+
+  if (!payMode) { alert('Payment mode select karein.'); return; }
+
+  const today = new Date();
+  const dd = String(today.getDate()).padStart(2,'0');
+  const mm = String(today.getMonth()+1).padStart(2,'0');
+  const payDate = today.getFullYear() + '-' + mm + '-' + dd;
+
+  const btn = document.getElementById('saveBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="sp"></span> Saving…';
+
+  const fd = new FormData();
+  fd.append('csrfmiddlewaretoken', CSRF);
+  fd.append('student_id',           curStudent.id);
+  fd.append('total_fee',            selTotal.toFixed(2));
+  fd.append('previous_due_balance', prevDue.toFixed(2));
+  fd.append('concession_amount',    conc.toFixed(2));
+  fd.append('concession_remarks',   document.getElementById('concRmk').value);
+  fd.append('paid_amount',          recv.toFixed(2));
+  fd.append('payment_date',         payDate);
+  fd.append('fee_month',            months[0]);
+  fd.append('fee_months',           months.join(','));
+  fd.append('selected_month_totals', JSON.stringify(selectedMonthTotals || {}));
+  fd.append('payment_mode',         payMode);
+  fd.append('reference_number',     document.getElementById('refNo').value);
+  fd.append('remarks',
+    document.getElementById('remarksFld').value || ('Particulars: ' + selItems.map(item => item.name).join(', ')));
+
+  fetch('/fee/deposit/save/', { method: 'POST', body: fd })
+    .then(r => r.json())
+    .then(data => {
+      btn.disabled = false;
+      btn.innerHTML = '<span>Save</span>';
+      if (data.success) {
+        document.getElementById('sheetReceiptNo').textContent = data.receipt_data.receipt_number || 'Auto';
+        showReceipt(data.receipt_data, selItems, conc, netPayable, recv);
+      } else {
+        alert('Error: ' + (data.error || 'Unknown error'));
+      }
+    })
+    .catch(() => {
+      btn.disabled = false;
+      btn.innerHTML = '<span>Save</span>';
+      alert('Network error. Please retry.');
+    });
+}
+
+/* ────────────────────────────────
+   RECEIPT MODAL
+──────────────────────────────── */
+const MN = {apr:'Apr',may:'May',jun:'Jun',jul:'Jul',aug:'Aug',sep:'Sep',
+             oct:'Oct',nov:'Nov',dec:'Dec',jan:'Jan',feb:'Feb',mar:'Mar'};
+
+function escHtml(val) {
+  return String(val || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function showReceipt(d, items, conc, net, recv) {
+  const bal = Math.max(0, net - recv);
+  const now = new Date();
+  const stamp = now.toLocaleString('en-IN', { day:'2-digit', month:'numeric', year:'2-digit', hour:'numeric', minute:'2-digit' });
+  document.getElementById('rcptDate').textContent = stamp;
+
+  const receiptNo = d.receipt_number || (d.fee_id ? ('RCPT-' + String(d.fee_id).padStart(5, '0')) : '-');
+  const feeMonths = String(d.fee_month || '').split(',').map(m => m.trim()).filter(Boolean).map(m => MN[m] || m).join(' ');
+  const itemTotal = items.reduce((t, item) => t + (parseFloat(item.amount) || 0), 0);
+
+  const tableRows = items.map((item, idx) => `
+    <tr>
+      <td class="num">${idx + 1}.</td>
+      <td>${escHtml(item.name)}</td>
+      <td class="amt">${(parseFloat(item.amount) || 0).toFixed(2)}</td>
+    </tr>
+  `).join('');
+
+  const html = `
+    <div class="rcpt-slip" id="printSlip">
+      <div class="rcpt-top">
+        <div>${escHtml(stamp)}</div>
+        <div class="rcpt-copy">${escHtml(receiptNo)}<br>Student Copy</div>
+      </div>
+
+      <div class="rcpt-school">
+        <div class="n">RADIANT LEARNING<br>CONVENT SCHOOL</div>
+        <div class="a">Village and Post Rajamau Bachhrawan,<br>Raebareli</div>
+        <div class="t">Fee Receipt</div>
+      </div>
+
+      <div class="rcpt-meta">
+        <div class="rw"><span>Receipt No.</span><span>: ${escHtml(receiptNo)}</span></div>
+        <div class="rw"><span>Date</span><span>: ${escHtml(stamp)}</span></div>
+        <div class="rw"><span>Session</span><span>: ${escHtml(d.session || curStudent?.session || '')}</span></div>
+      </div>
+
+      <div class="rcpt-info">
+        <div class="rw"><span>Admission No.</span><span>: ${escHtml(d.admission_number || '')}</span></div>
+        <div class="rw"><span>Roll No.</span><span>: ${escHtml(d.roll_no || '')}</span></div>
+        <div class="rw"><span>Student Name</span><span>: ${escHtml(d.student_name || '')}</span></div>
+        <div class="rw"><span>Father's Name</span><span>: ${escHtml(d.father_name || curStudent?.father_name || '')}</span></div>
+        <div class="rw"><span>Address</span><span>: ${escHtml(d.address || curStudent?.address || '')}</span></div>
+        <div class="rw"><span>Class/Section</span><span>: ${escHtml((d.class || '') + '/' + (d.section || ''))}</span></div>
+        <div class="rw"><span>Fee for Month(s)</span><span>: ${escHtml(feeMonths || '-')}</span></div>
+      </div>
+
+      <div class="rcpt-old-bal"><span>Old Balance</span><span>${prevDue.toFixed(2)}</span></div>
+
+      <table class="rcpt-table">
+        <thead>
+          <tr>
+            <th class="num">S. No.</th>
+            <th>Particulars</th>
+            <th class="amt">Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${tableRows}
+        </tbody>
+      </table>
+
+      <div class="rcpt-totals">
+        <div class="rw strong"><span>Total Amount</span><span>${itemTotal.toFixed(2)}</span></div>
+        <div class="rw"><span>(+) Late Fee/Last Due</span><span>${prevDue.toFixed(2)}</span></div>
+        <div class="rw"><span>(-) Concession</span><span>${conc.toFixed(2)}</span></div>
+        <div class="rw strong"><span>Grand Total</span><span>${net.toFixed(2)}</span></div>
+        <div class="rw strong"><span>Received Amount</span><span>${recv.toFixed(2)}</span></div>
+        <div class="rw"><span>Balance</span><span>${bal.toFixed(2)}</span></div>
+      </div>
+
+      <div class="rcpt-detail">Details: ${escHtml(d.payment_mode || '')}${d.reference_number ? ' / ' + escHtml(d.reference_number) : ''}</div>
+      <div class="rcpt-sign">Auth. Sign.</div>
+    </div>`;
+
+  window._rcptHTML = html;
+  document.getElementById('rcptBd').innerHTML = html;
+  document.getElementById('rcptOv').classList.add('on');
+}
+
+function closeReceipt() {
+  document.getElementById('rcptOv').classList.remove('on');
+  resetAll(true);
+}
+
+function printReceipt() {
+  const w = window.open('','_blank','width=520,height=760');
+  w.document.write(`<html><head><title>Fee Receipt</title>
+  <style>
+    body{font-family:Arial,sans-serif;padding:8px;margin:0;background:#fff;color:#111;}
+    .rcpt-slip{width:330px;margin:0 auto;border:1.5px solid #374151;padding:8px 8px 10px;}
+    .rcpt-top{display:flex;justify-content:space-between;font-size:10px;margin-bottom:6px;}
+    .rcpt-copy{text-align:right;}
+    .rcpt-school{text-align:center;border-bottom:1px solid #4b5563;padding-bottom:5px;margin-bottom:5px;}
+    .rcpt-school .n{font-size:19px;font-weight:700;line-height:1.1;}
+    .rcpt-school .a{font-size:10px;line-height:1.35;}
+    .rcpt-school .t{font-size:26px;font-weight:700;line-height:1;}
+    .rcpt-meta,.rcpt-info,.rcpt-totals{font-size:12px;line-height:1.4;}
+    .rw{display:flex;gap:6px;}
+    .rw span:first-child{min-width:100px;}
+    .rcpt-info{margin:4px 0;border-bottom:1px solid #4b5563;padding-bottom:4px;}
+    .rcpt-old-bal{display:flex;justify-content:space-between;font-size:12px;font-weight:700;border-bottom:1px solid #4b5563;padding:3px 0;}
+    .rcpt-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:2px;}
+    .rcpt-table th{font-size:12px;text-align:left;border-bottom:1px solid #4b5563;padding:3px 2px;}
+    .rcpt-table td{padding:2px 2px;}
+    .num{width:32px;}
+    .amt{text-align:right;}
+    .rcpt-totals{border-top:1px solid #4b5563;border-bottom:1px solid #4b5563;padding:3px 0;margin-top:3px;}
+    .rcpt-totals .rw{justify-content:space-between;}
+    .strong{font-weight:700;}
+    .rcpt-detail{font-size:12px;margin-top:6px;}
+    .rcpt-sign{text-align:right;font-size:12px;margin-top:12px;}
+    @page{size:auto;margin:6mm;}
+  </style></head><body>
+  ${(window._rcptHTML || '')}
+  </body></html>`);
+  w.document.close();
+  setTimeout(() => w.print(), 600);
+}
+
+/* ────────────────────────────────
+   RESET ALL
+──────────────────────────────── */
+function resetAll(fullReset = false) {
+  resetDepositArea();
+
+  if (fullReset) {
+    document.getElementById('admSearch').value = '';
+    document.getElementById('clsSel').value = '';
+    document.getElementById('secSel').value = '';
+    updateStudentOptions([]);
+    document.getElementById('stuHeader').style.display = 'none';
+    document.getElementById('searchHint').textContent = 'Kindly Select Class, Section, Student Name/ OR Admission No.';
+  }
+}
+
+renderMonthOptions();
+</script>
+{% endblock %}

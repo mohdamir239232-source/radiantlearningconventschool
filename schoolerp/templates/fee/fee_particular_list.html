@@ -1,0 +1,489 @@
+{% extends 'base_layout.html' %}
+
+{% block content %}
+
+<style>
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.page-header h2 {
+    margin: 0;
+    color: #333;
+    font-size: 26px;
+    font-weight: 600;
+}
+
+.btn-primary {
+    background: #b80b36;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s;
+}
+
+.btn-primary:hover {
+    background: #9a0a2d;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(184, 11, 54, 0.3);
+}
+
+.stats-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.stat-box {
+    background: linear-gradient(135deg, #b80b36 0%, #9a0a2d 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(184, 11, 54, 0.2);
+    text-align: center;
+}
+
+.stat-value {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    font-size: 13px;
+    opacity: 0.9;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.table-wrapper {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+table thead {
+    background: linear-gradient(135deg, #f9f9f9 0%, #f0f0f0 100%);
+    border-bottom: 2px solid #e0e0e0;
+}
+
+table th {
+    padding: 15px;
+    text-align: left;
+    color: #333;
+    font-weight: 700;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+table td {
+    padding: 15px;
+    border-bottom: 1px solid #f0f0f0;
+    color: #555;
+}
+
+table tbody tr {
+    transition: background 0.2s;
+}
+
+table tbody tr:hover {
+    background: #f9f9f9;
+}
+
+.amount-badge {
+    background: #E8F5E9;
+    color: #2E7D32;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-sm {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.btn-edit {
+    background: #FFF3E0;
+    color: #E65100;
+}
+
+.btn-edit:hover {
+    background: #FFE0B2;
+}
+
+.btn-delete {
+    background: #FFEBEE;
+    color: #C62828;
+}
+
+.btn-delete:hover {
+    background: #FFCDD2;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #999;
+}
+
+.empty-state h3 {
+    color: #666;
+    margin-top: 20px;
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+}
+
+.modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+}
+
+.modal-header {
+    margin-bottom: 20px;
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: #333;
+    font-size: 20px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #b80b36;
+    box-shadow: 0 0 0 3px rgba(184, 11, 54, 0.1);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 25px;
+}
+
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.btn-submit {
+    background: #b80b36;
+    color: white;
+}
+
+.btn-submit:hover {
+    background: #9a0a2d;
+}
+
+.btn-cancel {
+    background: #f0f0f0;
+    color: #333;
+}
+
+.btn-cancel:hover {
+    background: #e0e0e0;
+}
+
+.alert {
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    display: none;
+}
+
+.alert.success {
+    background: #E8F5E9;
+    color: #2E7D32;
+    border: 1px solid #81C784;
+    display: block;
+}
+
+.alert.error {
+    background: #FFEBEE;
+    color: #C62828;
+    border: 1px solid #EF5350;
+    display: block;
+}
+</style>
+
+<div class="page-header">
+    <div>
+        <h2>💰 Fee Particular</h2>
+        <p style="color: #666; margin: 5px 0 0 0;">Manage fee categories and frequency</p>
+    </div>
+    <button class="btn-primary" onclick="openModal()">+ Add Fee Particular</button>
+</div>
+
+<!-- Stats Section -->
+<div class="stats-container">
+    <div class="stat-box">
+        <div class="stat-value">{{ particulars|length }}</div>
+        <div class="stat-label">Total Particulars</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-value">{{ particulars|length }}</div>
+        <div class="stat-label">Active</div>
+    </div>
+</div>
+
+<!-- Table Section -->
+<div class="table-wrapper">
+    {% if particulars %}
+    <div id="alertBox"></div>
+    <table>
+        <thead>
+            <tr>
+                <th>Particular Name</th>
+                <th>Description</th>
+                <th>Frequency</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for particular in particulars %}
+            <tr>
+                <td><b>{{ particular.name }}</b></td>
+                <td>{{ particular.description|truncatewords:8 }}</td>
+                <td><span class="amount-badge">{{ particular.get_frequency_display }}</span></td>
+                <td><span style="color: #2E7D32; font-weight: 600;">● Active</span></td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="btn-sm btn-edit" onclick="editParticular({{ particular.id }})">Edit</button>
+                        <button class="btn-sm btn-delete" onclick="deleteParticular({{ particular.id }})">Delete</button>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <h3>😕 No Fee Particulars Found</h3>
+        <p>Start by adding a new fee particular</p>
+        <button class="btn-primary" onclick="openModal()" style="margin-top: 15px;">Add Fee Particular</button>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Modal Form -->
+<div id="particularModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Add Fee Particular</h3>
+        </div>
+        
+        <form id="particularForm" method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="modalName">Particular Name *</label>
+                <input type="text" id="modalName" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="modalDescription">Description</label>
+                <textarea id="modalDescription" name="description" placeholder="Enter particulars details..."></textarea>
+            </div>
+            <div class="form-group">
+                <label for="modalFrequency">Frequency *</label>
+                <select id="modalFrequency" name="frequency" required>
+                    <option value="">-- Select Frequency --</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="quarterly">Quarterly</option>
+                    <option value="half_yearly">Half Yearly</option>
+                    <option value="yearly">Yearly</option>
+                    <option value="once">Once</option>
+                </select>
+            </div>
+            
+            <div class="form-actions">
+                <button type="button" class="btn btn-cancel" onclick="closeModal()">Cancel</button>
+                <button type="submit" class="btn btn-submit">Save Particular</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+let currentParticularId = null;
+
+function openModal() {
+    currentParticularId = null;
+    document.getElementById('particularForm').reset();
+    document.querySelector('.modal-header h3').innerText = 'Add Fee Particular';
+    document.getElementById('particularModal').classList.add('active');
+}
+
+function closeModal() {
+    document.getElementById('particularModal').classList.remove('active');
+    currentParticularId = null;
+}
+
+function editParticular(id) {
+    fetch(`/fee/particular/${id}/data/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                currentParticularId = id;
+                document.getElementById('modalName').value = data.particular.name;
+                document.getElementById('modalDescription').value = data.particular.description;
+                document.getElementById('modalFrequency').value = data.particular.frequency;
+                document.querySelector('.modal-header h3').innerText = 'Edit Fee Particular';
+                document.getElementById('particularModal').classList.add('active');
+            }
+        });
+}
+
+function deleteParticular(id) {
+    if (confirm('Are you sure you want to delete this particular?')) {
+        fetch(`/fee/particular/${id}/delete/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name="csrfmiddlewaretoken"]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                showAlert(data.error, 'error');
+            }
+        });
+    }
+}
+
+document.getElementById('particularForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const url = currentParticularId 
+        ? `/fee/particular/${currentParticularId}/edit/`
+        : '/fee/particular/add/';
+    
+    fetch(url, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert(data.message, 'success');
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        } else {
+            showAlert(data.error, 'error');
+        }
+    })
+    .catch(error => {
+        showAlert('Error: ' + error, 'error');
+    });
+});
+
+function showAlert(message, type) {
+    const alertBox = document.getElementById('alertBox');
+    if (!alertBox) return;
+    
+    const alert = document.createElement('div');
+    alert.className = `alert ${type}`;
+    alert.innerText = message;
+    alertBox.innerHTML = '';
+    alertBox.appendChild(alert);
+    
+    setTimeout(() => {
+        alert.remove();
+    }, 3000);
+}
+
+// Close modal on backdrop click
+document.getElementById('particularModal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+});
+</script>
+
+{% endblock %}

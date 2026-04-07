@@ -1,0 +1,1286 @@
+{% extends 'base_layout.html' %}
+
+{% block content %}
+
+<style>
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.page-header h2 {
+    margin: 0;
+    color: #333;
+    font-size: 26px;
+    font-weight: 600;
+}
+
+.search-container {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    margin-bottom: 30px;
+}
+
+.search-tabs {
+    display: flex;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.tab-btn {
+    padding: 10px 20px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-weight: 600;
+    color: #666;
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s;
+}
+
+.tab-btn.active {
+    color: #b80b36;
+    border-bottom-color: #b80b36;
+}
+
+.search-form {
+    display: none;
+}
+
+.search-form.active {
+    display: block;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 14px;
+    box-sizing: border-box;
+    transition: border-color 0.3s;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #b80b36;
+    box-shadow: 0 0 0 3px rgba(184, 11, 54, 0.1);
+}
+
+.btn-search {
+    background: #2196F3;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.btn-search:hover {
+    background: #1976D2;
+    transform: translateY(-1px);
+}
+
+.student-results {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    margin-bottom: 30px;
+    display: none;
+}
+
+.student-card {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.student-card:hover {
+    border-color: #b80b36;
+    background: #FFF5F5;
+}
+
+.student-card.selected {
+    border-color: #b80b36;
+    background: #FFF5F5;
+    box-shadow: 0 2px 8px rgba(184, 11, 54, 0.2);
+}
+
+.student-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 15px;
+	font-size: 14px;
+}
+
+.student-detail {
+    background: #f5f5f5;
+    padding: 10px;
+    border-radius: 6px;
+}
+
+.student-detail-label {
+    font-weight: 600;
+    color: #333;
+    font-size: 12px;
+    text-transform: uppercase;
+    color: #999;
+    margin-bottom: 4px;
+}
+
+.student-detail-value {
+    color: #333;
+    font-weight: 600;
+}
+
+.fee-calculation-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.fee-section {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    display: none;
+}
+
+.fee-section.active {
+    display: block;
+}
+
+.fee-section h3 {
+    margin: 0 0 20px 0;
+    color: #333;
+    font-size: 18px;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 15px;
+}
+
+.fee-breakdown {
+    margin-bottom: 20px;
+}
+
+.fee-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 13px;
+}
+
+.fee-item:last-child {
+    border-bottom: none;
+}
+
+.fee-label {
+    color: #666;
+    flex: 1;
+}
+
+.fee-amount {
+    color: #333;
+    font-weight: 600;
+    text-align: right;
+    min-width: 80px;
+}
+
+.balance-box {
+    background: #f0f4ff;
+    border: 2px solid #2196F3;
+    color: #0d3680;
+    padding: 12px;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 14px;
+    margin: 15px 0;
+}
+
+.balance-box.warning {
+    background: #FFF3CD;
+    border-color: #FFC107;
+    color: #856404;
+}
+
+.balance-box.due {
+    background: #F8D7DA;
+    border-color: #F5C6CB;
+    color: #721C24;
+}
+
+.balance-amount {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 5px 0;
+}
+
+.total-box {
+    background: #E8F5E9;
+    color: #2E7D32;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 700;
+    margin: 20px 0;
+    border: 2px solid #81C784;
+}
+
+.total-label {
+    font-size: 12px;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+}
+
+.total-amount {
+    font-size: 24px;
+}
+
+.deposit-form {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    display: none;
+}
+
+.deposit-form.active {
+    display: block;
+}
+
+.form-section {
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.form-section:last-child {
+    border-bottom: none;
+}
+
+.form-section h4 {
+    color: #333;
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin: 0 0 15px 0;
+    color: #999;
+}
+
+.btn-submit {
+    background: #b80b36;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.btn-submit:hover {
+    background: #9a0a2d;
+    transform: translateY(-1px);
+}
+
+.btn-cancel {
+    background: #f0f0f0;
+    color: #333;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.btn-cancel:hover {
+    background: #e0e0e0;
+}
+
+.alert {
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+}
+
+.alert.success {
+    background: #E8F5E9;
+    color: #2E7D32;
+    border: 1px solid #81C784;
+}
+
+.alert.error {
+    background: #FFEBEE;
+    color: #C62828;
+    border: 1px solid #EF5350;
+}
+
+.loading {
+    text-align: center;
+    padding: 20px;
+    color: #666;
+}
+
+.spinner {
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #b80b36;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    animation: spin 1s linear infinite;
+    display: inline-block;
+    margin-right: 10px;
+    vertical-align: middle;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.action-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 30px;
+}
+
+.month-select-box {
+    background: #e3f2fd;
+    border: 2px solid #2196F3;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.month-select-box label {
+    margin-bottom: 10px;
+}
+
+.auto-fill-btn {
+    background: #4CAF50;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 13px;
+    transition: all 0.2s;
+}
+
+.auto-fill-btn:hover {
+    background: #45a049;
+}
+
+.full-width-row {
+    display: grid;
+    grid-template-columns: 1fr;
+}
+
+@media (max-width: 1024px) {
+    .fee-calculation-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+</style>
+
+<div class="page-header">
+    <div>
+        <h2>💳 Fee Deposit (Enhanced)</h2>
+        <p style="color: #666; margin: 5px 0 0 0;">Auto-calculate fee with month selection, transport, and previous due balance</p>
+    </div>
+</div>
+
+<!-- Search Container -->
+<div class="search-container">
+    <div class="search-tabs">
+        <button class="tab-btn active" data-tab="admission" onclick="switchTab('admission')">Search by Admission No.</button>
+        <button class="tab-btn" data-tab="class" onclick="switchTab('class')">Search by Class & Section</button>
+    </div>
+
+    <!-- Admission Number Search -->
+    <div id="admissionForm" class="search-form active">
+        <div class="form-group">
+            <label for="admissionNo">Admission Number *</label>
+            <input type="text" id="admissionNo" placeholder="e.g., RLCS001" autocomplete="off">
+        </div>
+        <button class="btn-search" onclick="searchByAdmission()">🔍 Search Student</button>
+    </div>
+
+    <!-- Class & Section Search -->
+    <div id="classForm" class="search-form">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="className">Class *</label>
+                <select id="className">
+                    <option value="">-- Select Class --</option>
+                    {% for class_obj in classes %}
+                    <option value="{{ class_obj.name }}">{{ class_obj.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="section">Section</label>
+                <select id="section">
+                    <option value="">-- All Sections --</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                </select>
+            </div>
+        </div>
+        <button class="btn-search" onclick="searchByClass()">🔍 Search Students</button>
+    </div>
+</div>
+
+<!-- Student Results -->
+<div id="studentResults" class="student-results">
+    <h3>Select Student</h3>
+    <div id="studentList"></div>
+</div>
+
+<!-- Month Selection & Fee Calculation -->
+<div id="monthSelectionSection" style="display: none;">
+    <div class="fee-calculation-container">
+        <!-- Left: Month Selection & Fee Breakdown -->
+        <div class="fee-section active" id="feeBreakdownSection">
+            <h3>📋 Fee Details</h3>
+            
+            <div class="month-select-box">
+                <div class="form-group">
+                    <label for="feeMonth">Select Month for Fee Payment *</label>
+                    <select id="feeMonth" onchange="recalculateFees()">
+                        <option value="">-- Select Month --</option>
+                        <option value="jan">January</option>
+                        <option value="feb">February</option>
+                        <option value="mar">March</option>
+                        <option value="apr">April</option>
+                        <option value="may">May</option>
+                        <option value="jun">June</option>
+                        <option value="jul">July</option>
+                        <option value="aug">August</option>
+                        <option value="sep">September</option>
+                        <option value="oct">October</option>
+                        <option value="nov">November</option>
+                        <option value="dec">December</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="feeBreakdown"></div>
+
+            <div class="balance-box warning" id="previousDueBox" style="display: none;">
+                <div>Previous Due Balance</div>
+                <div class="balance-amount" id="previousDueAmount">₹0</div>
+            </div>
+
+            <div class="total-box">
+                <div class="total-label">Total Amount Due (Current + Previous)</div>
+                <div class="total-amount" id="totalAmountDue">₹0</div>
+            </div>
+
+            <button class="btn-primary" onclick="proceedToDeposit()" style="width: 100%; padding: 14px; font-size: 16px; margin-top: 15px;">
+                💳 Proceed to Deposit Payment
+            </button>
+        </div>
+
+        <!-- Right: Student Info & Payment -->
+        <div class="fee-section active" id="studentInfoSection">
+            <h3>👤 Student Information</h3>
+            
+            <div id="studentDetails"></div>
+
+            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e0e0e0;">
+                <h4 style="color: #333; font-weight: 600; margin-bottom: 15px;">Quick Payment Entry</h4>
+                
+                <div class="form-group">
+                    <label for="paymentMode">Payment Mode *</label>
+                    <select id="paymentMode">
+                        <option value="">-- Select Payment Mode --</option>
+                        <option value="cash">💰 Cash</option>
+                        <option value="cheque">📋 Cheque</option>
+                        <option value="online">🌐 Online Transfer</option>
+                        <option value="card">💳 Card</option>
+                        <option value="other">📌 Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="paidAmount">Paid Amount (₹) *</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="number" id="paidAmount" placeholder="0" step="0.01" min="0" onchange="calculateBalance()" style="flex: 1;">
+                        <button class="auto-fill-btn" onclick="autofillPaidAmount()">Auto Fill</button>
+                    </div>
+                </div>
+
+                <div class="balance-box due" id="balanceBox">
+                    <div>Remaining Balance</div>
+                    <div class="balance-amount" id="balanceAmount">₹0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Receipt Modal -->
+<div id="receiptModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; padding: 20px;">
+    <div style="background: white; border-radius: 12px; max-width: 900px; margin: 30px auto; max-height: 90vh; overflow-y: auto;">
+        <div style="padding: 30px;">
+            <!-- Receipt Header -->
+            <div style="text-align: center; border-bottom: 3px solid #0f766e; padding-bottom: 20px; margin-bottom: 30px;">
+                <h2 style="margin: 0 0 5px 0; color: #333;">🧾 FEE PAYMENT RECEIPT</h2>
+                <p style="margin: 5px 0; color: #999; font-size: 14px;">School ERP System</p>
+            </div>
+
+            <!-- Receipt Content -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px;">
+                <!-- Student Details -->
+                <div>
+                    <h4 style="color: #0f766e; margin: 0 0 15px 0; text-transform: uppercase; font-size: 12px;">Student Information</h4>
+                    <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; font-size: 14px;">
+                        <p style="margin: 8px 0;"><strong>Name:</strong> <span id="receiptName">-</span></p>
+                        <p style="margin: 8px 0;"><strong>Admission No:</strong> <span id="receiptAdmission">-</span></p>
+                        <p style="margin: 8px 0;"><strong>Class:</strong> <span id="receiptClass">-</span></p>
+                        <p style="margin: 8px 0;"><strong>Roll No:</strong> <span id="receiptRoll">-</span></p>
+                    </div>
+                </div>
+
+                <!-- Payment Details -->
+                <div>
+                    <h4 style="color: #0f766e; margin: 0 0 15px 0; text-transform: uppercase; font-size: 12px;">Payment Information</h4>
+                    <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; font-size: 14px;">
+                        <p style="margin: 8px 0;"><strong>Date:</strong> <span id="receiptDate">-</span></p>
+                        <p style="margin: 8px 0;"><strong>Mode:</strong> <span id="receiptMode">-</span></p>
+                        <p style="margin: 8px 0;"><strong>Reference:</strong> <span id="receiptReference">-</span></p>
+                        <p style="margin: 8px 0;"><strong>Month:</strong> <span id="receiptMonth">-</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fee Breakdown -->
+            <div style="background: #f9f9f9; border: 1px solid #ddd; border-radius: 8px; padding: 20px; margin-bottom: 30px;">
+                <h4 style="color: #0f766e; margin: 0 0 15px 0; text-transform: uppercase; font-size: 12px;">Fee Breakdown</h4>
+                <table style="width: 100%; font-size: 14px; border-collapse: collapse;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid #0f766e;">
+                            <th style="text-align: left; padding: 10px 0; color: #333;">Particular</th>
+                            <th style="text-align: right; padding: 10px 0; color: #333;">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody id="receiptBreakdown">
+                        <tr><td>-</td><td>-</td></tr>
+                    </tbody>
+                    <tfoot>
+                        <tr style="border-top: 2px solid #0f766e; border-bottom: 2px solid #0f766e; font-weight: 600;">
+                            <td style="padding: 10px 0;">Current Month Fee</td>
+                            <td style="text-align: right; padding: 10px 0;">₹<span id="receiptCurrentFee">0</span></td>
+                        </tr>
+                    </tfoot>
+                </table>
+
+                <!-- Previous Due & Concession -->
+                <div style="margin-top: 15px; font-size: 14px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div style="background: #fff3cd; padding: 12px; border-radius: 6px; border-left: 4px solid #ffc107;">
+                            <p style="margin: 0 0 5px 0; font-size: 12px; color: #856404; text-transform: uppercase;">Previous Due</p>
+                            <p style="margin: 0; font-size: 18px; font-weight: 700; color: #856404;">₹<span id="receiptPreviousDue">0</span></p>
+                        </div>
+                        <div style="background: #e8f5e9; padding: 12px; border-radius: 6px; border-left: 4px solid #4caf50;">
+                            <p style="margin: 0 0 5px 0; font-size: 12px; color: #2e7d32; text-transform: uppercase;">Concession</p>
+                            <p style="margin: 0; font-size: 18px; font-weight: 700; color: #2e7d32;">₹<span id="receiptConcession">0</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Amount Summary -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 30px;">
+                <div style="background: #e3f2fd; padding: 20px; border-radius: 8px; text-align: center; border: 2px solid #2196F3;">
+                    <p style="margin: 0 0 8px 0; font-size: 12px; color: #1976d2; text-transform: uppercase; font-weight: 600;">Total Amount Due</p>
+                    <p style="margin: 0; font-size: 24px; font-weight: 700; color: #1976d2;">₹<span id="receiptTotalDue">0</span></p>
+                </div>
+                <div style="background: #e8f5e9; padding: 20px; border-radius: 8px; text-align: center; border: 2px solid #4caf50;">
+                    <p style="margin: 0 0 8px 0; font-size: 12px; color: #2e7d32; text-transform: uppercase; font-weight: 600;">Amount Paid</p>
+                    <p style="margin: 0; font-size: 24px; font-weight: 700; color: #2e7d32;">₹<span id="receiptPaid">0</span></p>
+                </div>
+                <div style="background: #f3e5f5; padding: 20px; border-radius: 8px; text-align: center; border: 2px solid #9c27b0;">
+                    <p style="margin: 0 0 8px 0; font-size: 12px; color: #7b1fa2; text-transform: uppercase; font-weight: 600;">Remaining Balance</p>
+                    <p style="margin: 0; font-size: 24px; font-weight: 700; color: #7b1fa2;">₹<span id="receiptBalance">0</span></p>
+                </div>
+            </div>
+
+            <!-- Concession Remarks -->
+            <div id="receiptConcessionDiv" style="display: none; background: #fffde7; border: 1px solid #ffd54f; border-radius: 8px; padding: 15px; margin-bottom: 30px;">
+                <h4 style="margin: 0 0 8px 0; color: #f57f17; font-size: 12px;">Concession Details</h4>
+                <p id="receiptConcessionRemarks" style="margin: 0; color: #666; font-size: 13px;">-</p>
+            </div>
+
+            <!-- Footer -->
+            <div style="border-top: 1px solid #ddd; padding-top: 20px; text-align: center; color: #999; font-size: 12px;">
+                <p style="margin: 0;">✓ This is a system-generated receipt</p>
+                <p style="margin: 5px 0 0 0;">Payment Date: <span id="receiptFooterDate">-</span></p>
+            </div>
+
+            <!-- Action Buttons -->
+            <div style="display: flex; gap: 10px; justify-content: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd;">
+                <button onclick="printReceipt()" style="background: #2196F3; color: white; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                    🖨️ Print Receipt
+                </button>
+                <button onclick="downloadReceipt()" style="background: #4CAF50; color: white; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                    📥 Download PDF
+                </button>
+                <button onclick="closeReceipt()" style="background: #f44336; color: white; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                    ✕ Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Deposit Form -->
+    <h3>💾 Complete Fee Deposit</h3>
+    <div id="alertBox"></div>
+
+    <form id="paymentForm">
+        {% csrf_token %}
+        <input type="hidden" id="selectedStudentId" name="student_id">
+        <input type="hidden" id="totalFeeAmount" name="total_fee">
+        <input type="hidden" id="previousDueBalance" name="previous_due_balance">
+
+        <!-- Payment Details Section -->
+        <div class="form-section">
+            <h4>Payment Information</h4>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="paymentDate">Payment Date *</label>
+                    <input type="date" id="paymentDate" name="payment_date" required>
+                </div>
+                <div class="form-group">
+                    <label for="paymentModeForm">Payment Mode *</label>
+                    <select id="paymentModeForm" name="payment_mode" required>
+                        <option value="">-- Select --</option>
+                        <option value="cash">Cash</option>
+                        <option value="cheque">Cheque</option>
+                        <option value="online">Online Transfer</option>
+                        <option value="card">Card</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="referenceNumber">Reference/Check/Transaction No.</label>
+                    <input type="text" id="referenceNumber" name="reference_number" placeholder="Enter reference number if applicable">
+                </div>
+                <div class="form-group">
+                    <label for="paidAmountForm">Paid Amount (₹) *</label>
+                    <input type="number" id="paidAmountForm" name="paid_amount" step="0.01" min="0" required>
+                </div>
+            </div>
+        </div>
+
+        <!-- Concession Section -->
+        <div class="form-section">
+            <h4>Concession / Discount</h4>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="concessionAmount">Concession Amount (₹)</label>
+                    <input type="number" id="concessionAmount" name="concession_amount" step="0.01" min="0" value="0">
+                </div>
+                <div class="full-width-row">
+                    <div class="form-group">
+                        <label for="concessionRemarks">Reason for Concession</label>
+                        <textarea id="concessionRemarks" name="concession_remarks" placeholder="e.g., Merit scholarship, Financial hardship, etc." style="min-height: 60px;"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Remarks Section -->
+        <div class="form-section">
+            <h4>Additional Notes</h4>
+            <div class="form-group">
+                <label for="remarksForm">Remarks</label>
+                <textarea id="remarksForm" name="remarks" placeholder="Any additional notes about this payment..." style="min-height: 80px;"></textarea>
+            </div>
+        </div>
+
+        <!-- Hidden Fields -->
+        <input type="hidden" id="feeMonthForm" name="fee_month">
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <button type="button" class="btn-cancel" onclick="backToFeeCalc()">← Back</button>
+            <button type="submit" class="btn-submit">✓ Save Deposit & Print Receipt</button>
+        </div>
+    </form>
+</div>
+
+<script>
+let selectedStudent = null;
+let feeData = null;
+
+// Month display mapping
+const monthNames = {
+    'jan': 'January', 'feb': 'February', 'mar': 'March', 'apr': 'April',
+    'may': 'May', 'jun': 'June', 'jul': 'July', 'aug': 'August',
+    'sep': 'September', 'oct': 'October', 'nov': 'November', 'dec': 'December'
+};
+
+// Tab switching
+function switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.search-form').forEach(form => form.classList.remove('active'));
+
+    document.querySelector('button[data-tab="' + tab + '"]').classList.add('active');
+    document.getElementById(tab + 'Form').classList.add('active');
+
+    // Reset search state
+    document.getElementById('admissionNo').value = '';
+    document.getElementById('className').value = '';
+    document.getElementById('section').value = '';
+    document.getElementById('studentList').innerHTML = '';
+    document.getElementById('studentResults').style.display = 'none';
+    document.getElementById('monthSelectionSection').style.display = 'none';
+    document.getElementById('depositForm').style.display = 'none';
+    selectedStudent = null;
+    feeData = null;
+}
+
+// Search functions
+function searchByAdmission() {
+    const admissionNo = document.getElementById('admissionNo').value.trim();
+    if (!admissionNo) {
+        alert('Please enter admission number');
+        return;
+    }
+    searchStudents('admission_no', admissionNo);
+}
+
+function searchByClass() {
+    const className = document.getElementById('className').value;
+    const section = document.getElementById('section').value;
+    if (!className) {
+        alert('Please select a class');
+        return;
+    }
+    searchStudents('class_section', '', className, section);
+}
+
+function searchStudents(searchType, query = '', className = '', section = '') {
+    const params = new URLSearchParams({
+        search_type: searchType,
+        query: query,
+        class_name: className,
+        section: section
+    });
+
+    document.getElementById('studentList').innerHTML = '<div class="loading"><div class="spinner"></div>Searching...</div>';
+    document.getElementById('studentResults').style.display = 'block';
+
+    fetch(`/fee/api/search-students/?${params}`)
+        .then(response => response.json())
+        .then(data => {
+            displayStudents(data.students);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('studentList').innerHTML = '<p style="color: red;">Error searching students</p>';
+        });
+}
+
+function displayStudents(students) {
+    const studentList = document.getElementById('studentList');
+    if (students.length === 0) {
+        studentList.innerHTML = '<p style="color: #666;">No students found</p>';
+        return;
+    }
+
+    let html = '';
+    students.forEach(student => {
+        const transportInfo = student.transport_route ?
+            `<br><small style="color: #666;">🚌 ${student.transport_route}: ₹${student.transport_route.fare_amount}</small>` : '';
+
+        html += `
+            <div class="student-card" onclick="selectStudent(this, ${student.id}, '${student.name.replace(/'/g, "\\'")}', '${(student.admission_number || '').replace(/'/g, "\\'")}')">
+                <div class="student-info">
+                    <div class="student-detail">
+                        <div class="student-detail-label">Name</div>
+                        <div class="student-detail-value">${student.name}</div>
+                    </div>
+                    <div class="student-detail">
+                        <div class="student-detail-label">Admission / Roll</div>
+                        <div class="student-detail-value">${student.admission_number || 'N/A'} / ${student.roll_no}</div>
+                    </div>
+                    <div class="student-detail">
+                        <div class="student-detail-label">Class & Section</div>
+                        <div class="student-detail-value">${student.student_class} ${student.section}${transportInfo}</div>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    studentList.innerHTML = html;
+}
+
+function selectStudent(cardElement, studentId, studentName, admissionNumber) {
+    document.querySelectorAll('.student-card').forEach(card => card.classList.remove('selected'));
+    cardElement.classList.add('selected');
+
+    selectedStudent = { id: studentId, name: studentName, admission_number: admissionNumber };
+
+    // Show month selection
+    document.getElementById('monthSelectionSection').style.display = 'block';
+    document.getElementById('depositForm').style.display = 'none';
+    document.getElementById('feeMonth').value = '';
+
+    // Display student info
+    displayStudentInfo(studentId);
+}
+
+function displayStudentInfo(studentId) {
+    // This would be fetched via API in production
+    // For now, we just show it from the selected student data
+    const html = `
+        <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <p style="margin: 5px 0;"><strong>Name:</strong> ${selectedStudent.name}</p>
+            <p style="margin: 5px 0;"><strong>Admission No:</strong> ${selectedStudent.admission_number}</p>
+            <p id="studentClassInfo" style="margin: 5px 0;"><strong>Class & Section:</strong> Loading...</p>
+            <p id="studentTransportInfo" style="margin: 5px 0; display: none;"><strong>Transport:</strong> <span id="transportDetails"></span></p>
+        </div>
+    `;
+    document.getElementById('studentDetails').innerHTML = html;
+}
+
+function recalculateFees() {
+    const feeMonth = document.getElementById('feeMonth').value;
+    if (!feeMonth) {
+        alert('Please select a month');
+        return;
+    }
+
+    document.getElementById('feeBreakdown').innerHTML = '<div class="loading"><div class="spinner"></div>Calculating fees...</div>';
+
+    fetch(`/fee/api/calculate-student-fees/?student_id=${selectedStudent.id}&fee_month=${feeMonth}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                displayFeeCalculation(data);
+                feeData = data;
+            } else {
+                document.getElementById('feeBreakdown').innerHTML = `<p style="color: red;">❌ ${data.error}</p>`;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('feeBreakdown').innerHTML = '<p style="color: red;">Error calculating fees</p>';
+        });
+}
+
+function displayFeeCalculation(data) {
+    // Display student info
+    const studentHtml = `
+        <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+            <p style="margin: 5px 0;"><strong>Name:</strong> ${data.student.name}</p>
+            <p style="margin: 5px 0;"><strong>Admission No:</strong> ${data.student.admission_number}</p>
+            <p style="margin: 5px 0;"><strong>Class:</strong> ${data.student.student_class} - ${data.student.section}</p>
+            <p style="margin: 5px 0;"><strong>Roll No:</strong> ${data.student.roll_no}</p>
+            ${data.student.transport_route ? `<p style="margin: 5px 0;"><strong>🚌 Transport:</strong> ${data.student.transport_route} (Village: ${data.student.transport_village || 'N/A'})</p>` : ''}
+        </div>
+    `;
+    document.getElementById('studentDetails').innerHTML = studentHtml;
+
+    // Display fee breakdown
+    let breakdownHtml = '<div class="fee-breakdown">';
+    breakdownHtml += '<div style="font-weight: 600; color: #333; margin-bottom: 10px; padding: 8px 0; border-bottom: 2px solid #0066cc;">Current Month Fees</div>';
+    
+    data.fee_breakdown.forEach(item => {
+        if (item.particular_name !== 'Transport Fee') {
+            const subtotal = (item.original_amount - item.discount_amount).toFixed(2);
+            breakdownHtml += `
+                <div class="fee-item">
+                    <span class="fee-label">${item.particular_name}</span>
+                    <span class="fee-amount">₹${subtotal}</span>
+                </div>
+            `;
+        }
+    });
+
+    // Add transport fee if present
+    const transportItem = data.fee_breakdown.find(f => f.particular_name === 'Transport Fee');
+    if (transportItem) {
+        breakdownHtml += `
+            <div style="padding: 10px 0; border-top: 2px solid #0066cc; margin-top: 10px; font-weight: 600;">
+                <div class="fee-item">
+                    <span class="fee-label">🚌 ${transportItem.particular_name}</span>
+                    <span class="fee-amount">₹${transportItem.final_amount.toFixed(2)}</span>
+                </div>
+            </div>
+        `;
+    }
+
+    breakdownHtml += '</div>';
+
+    document.getElementById('feeBreakdown').innerHTML = breakdownHtml;
+
+    // Display previous due
+    if (data.previous_due_balance > 0) {
+        document.getElementById('previousDueBox').style.display = 'block';
+        document.getElementById('previousDueAmount').textContent = `₹${data.previous_due_balance.toFixed(2)}`;
+    } else {
+        document.getElementById('previousDueBox').style.display = 'none';
+    }
+
+    // Display total due
+    document.getElementById('totalAmountDue').textContent = `₹${data.total_amount_due.toFixed(2)}`;
+
+    // Auto-fill paid amount to total due
+    document.getElementById('paidAmount').value = data.total_amount_due.toFixed(2);
+
+    // Store fee month for later
+    document.getElementById('feeMonthForm').value = feeMonth;
+    document.getElementById('selectedStudentId').value = data.student.id;
+    document.getElementById('totalFeeAmount').value = data.total_amount_due.toFixed(2);
+    document.getElementById('previousDueBalance').value = data.previous_due_balance.toFixed(2);
+
+    // Set payment date to today
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('paymentDate').value = today;
+    document.getElementById('paymentDate').valueAsDate = new Date();
+
+    // Calculate balance
+    calculateBalance();
+}
+
+function calculateBalance() {
+    const totalDue = parseFloat(document.getElementById('totalAmountDue').textContent.replace('₹', ''));
+    const paidAmount = parseFloat(document.getElementById('paidAmount').value) || 0;
+    const balance = totalDue - paidAmount;
+
+    document.getElementById('balanceAmount').textContent = `₹${Math.max(0, balance).toFixed(2)}`;
+    
+    // Copy to form
+    document.getElementById('paidAmountForm').value = paidAmount.toFixed(2);
+    
+    // Update balance box styling
+    const balanceBox = document.getElementById('balanceBox');
+    if (balance > 0) {
+        balanceBox.classList.remove('success');
+        balanceBox.classList.add('due');
+        balanceBox.querySelector('div:first-child').textContent = 'Remaining Balance';
+    } else if (balance === 0) {
+        balanceBox.classList.remove('due');
+        balanceBox.classList.add('success');
+        balanceBox.querySelector('div:first-child').textContent = 'Fully Paid ✓';
+    } else {
+        balanceBox.classList.remove('due');
+        balanceBox.classList.add('success');
+        balanceBox.querySelector('div:first-child').textContent = 'Over Payment';
+        document.getElementById('balanceAmount').textContent = `₹${Math.abs(balance).toFixed(2)} (Excess)`;
+    }
+}
+
+function autofillPaidAmount() {
+    const totalDue = parseFloat(document.getElementById('totalAmountDue').textContent.replace('₹', ''));
+    document.getElementById('paidAmount').value = totalDue.toFixed(2);
+    calculateBalance();
+}
+
+function proceedToDeposit() {
+    const feeMonth = document.getElementById('feeMonth').value;
+    const paymentMode = document.getElementById('paymentMode').value;
+
+    if (!feeMonth) {
+        alert('Please select a month');
+        return;
+    }
+
+    if (!paymentMode) {
+        alert('Please select a payment mode');
+        return;
+    }
+
+    // Copy values to deposit form
+    document.getElementById('paymentModeForm').value = paymentMode;
+    document.getElementById('feeMonthForm').value = feeMonth;
+    document.getElementById('paidAmountForm').value = document.getElementById('paidAmount').value;
+    document.getElementById('paymentDate').value = new Date().toISOString().split('T')[0];
+
+    // Show form
+    document.getElementById('depositForm').style.display = 'block';
+    document.getElementById('monthSelectionSection').scrollIntoView({ behavior: 'smooth' });
+}
+
+function backToFeeCalc() {
+    document.getElementById('depositForm').style.display = 'none';
+}
+
+// Form submission
+document.getElementById('paymentForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    if (!selectedStudent || !feeData) {
+        alert('Please select a student and month first');
+        return;
+    }
+
+    const formData = new FormData(this);
+    const paidAmount = parseFloat(formData.get('paid_amount'));
+    const totalDue = parseFloat(document.getElementById('totalAmountDue').textContent.replace('₹', ''));
+    const concession = parseFloat(formData.get('concession_amount')) || 0;
+    const feeMonth = document.getElementById('feeMonth').value;
+
+    // Validation
+    if (!formData.get('payment_date')) {
+        alert('Please select payment date');
+        return;
+    }
+
+    if (!formData.get('payment_mode')) {
+        alert('Please select payment mode');
+        return;
+    }
+
+    if (!paidAmount || paidAmount <= 0) {
+        alert('Please enter paid amount');
+        return;
+    }
+
+    // Prepare form data
+    const finalFormData = new FormData();
+    finalFormData.append('student_id', selectedStudent.id);
+    finalFormData.append('total_fee', feeData.current_month_fee);
+    finalFormData.append('previous_due_balance', feeData.previous_due_balance);
+    finalFormData.append('paid_amount', paidAmount);
+    finalFormData.append('payment_date', formData.get('payment_date'));
+    finalFormData.append('fee_month', feeMonth);
+    finalFormData.append('concession_amount', concession);
+    finalFormData.append('concession_remarks', formData.get('concession_remarks') || '');
+    finalFormData.append('payment_mode', formData.get('payment_mode'));
+    finalFormData.append('reference_number', formData.get('reference_number') || '');
+    finalFormData.append('remarks', formData.get('remarks') || '');
+    finalFormData.append('csrfmiddlewaretoken', document.querySelector('[name="csrfmiddlewaretoken"]').value);
+
+    // Show loading state
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner"></span>Processing...';
+
+    fetch('/fee/deposit/save/', {
+        method: 'POST',
+        body: finalFormData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert('✓ Fee deposit saved successfully!', 'success');
+            
+            // Display receipt
+            displayReceipt(data.receipt_data, feeData, formData.get('payment_mode'), formData.get('reference_number'), formData.get('concession_remarks'));
+            
+            setTimeout(() => {
+                // Reset after showing receipt
+                document.getElementById('paymentForm').reset();
+                document.getElementById('depositForm').style.display = 'none';
+                document.getElementById('monthSelectionSection').style.display = 'none';
+                document.getElementById('studentResults').style.display = 'none';
+                selectedStudent = null;
+                feeData = null;
+                document.querySelectorAll('.student-card').forEach(card => card.classList.remove('selected'));
+            }, 1500);
+        } else {
+            showAlert('❌ ' + (data.error || 'Error saving fee deposit'), 'error');
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('❌ Network error: ' + error.message, 'error');
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+    })
+    .finally(() => {
+        if (submitBtn.textContent === '<span class="spinner"></span>Processing...') {
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
+        }
+    });
+});
+
+// Receipt display functions
+function displayReceipt(receiptData, feeData, paymentMode, referenceNo, concessionRemarks) {
+    const monthNames = {
+        'jan': 'January', 'feb': 'February', 'mar': 'March', 'apr': 'April',
+        'may': 'May', 'jun': 'June', 'jul': 'July', 'aug': 'August',
+        'sep': 'September', 'oct': 'October', 'nov': 'November', 'dec': 'December'
+    };
+
+    const monthDisplay = monthNames[receiptData.fee_month] || receiptData.fee_month;
+    const receiptDate = new Date(receiptData.payment_date);
+    const formattedDate = receiptDate.toLocaleDateString('en-IN', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+
+    // Fill receipt data
+    document.getElementById('receiptName').textContent = receiptData.student_name;
+    document.getElementById('receiptAdmission').textContent = receiptData.admission_number;
+    document.getElementById('receiptClass').textContent = receiptData.class + ' - ' + receiptData.section;
+    document.getElementById('receiptRoll').textContent = receiptData.roll_no || '-';
+    
+    document.getElementById('receiptDate').textContent = formattedDate;
+    document.getElementById('receiptMode').textContent = (paymentMode || receiptData.payment_mode || 'Cash');
+    document.getElementById('receiptReference').textContent = referenceNo || 'N/A';
+    document.getElementById('receiptMonth').textContent = monthDisplay;
+    
+    // Fee breakdown
+    let breakdownHtml = '';
+    feeData.fee_breakdown.forEach(item => {
+        if (item.particular_name !== 'Transport Fee') {
+            breakdownHtml += `
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 8px 0;">${item.particular_name}</td>
+                    <td style="text-align: right; padding: 8px 0;">₹${item.final_amount.toFixed(2)}</td>
+                </tr>
+            `;
+        }
+    });
+
+    // Add transport if present
+    const transportItem = feeData.fee_breakdown.find(f => f.particular_name === 'Transport Fee');
+    if (transportItem) {
+        breakdownHtml += `
+            <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding: 8px 0;">🚌 ${transportItem.particular_name}</td>
+                <td style="text-align: right; padding: 8px 0;">₹${transportItem.final_amount.toFixed(2)}</td>
+            </tr>
+        `;
+    }
+
+    document.getElementById('receiptBreakdown').innerHTML = breakdownHtml;
+    
+    // Amounts
+    const totalWithPrevious = receiptData.total_fee + receiptData.previous_due - receiptData.concession;
+    
+    document.getElementById('receiptCurrentFee').textContent = receiptData.total_fee.toFixed(2);
+    document.getElementById('receiptPreviousDue').textContent = receiptData.previous_due.toFixed(2);
+    document.getElementById('receiptConcession').textContent = receiptData.concession.toFixed(2);
+    document.getElementById('receiptTotalDue').textContent = totalWithPrevious.toFixed(2);
+    document.getElementById('receiptPaid').textContent = receiptData.paid_amount.toFixed(2);
+    document.getElementById('receiptBalance').textContent = receiptData.balance.toFixed(2);
+    document.getElementById('receiptFooterDate').textContent = formattedDate;
+
+    // Show/hide concession section
+    if (receiptData.concession > 0) {
+        document.getElementById('receiptConcessionDiv').style.display = 'block';
+        document.getElementById('receiptConcessionRemarks').textContent = concessionRemarks || 'Concession Applied';
+    } else {
+        document.getElementById('receiptConcessionDiv').style.display = 'none';
+    }
+
+    // Show receipt modal
+    document.getElementById('receiptModal').style.display = 'block';
+}
+
+function closeReceipt() {
+    document.getElementById('receiptModal').style.display = 'none';
+}
+
+function printReceipt() {
+    const receiptContent = document.querySelector('#receiptModal > div > div').innerHTML;
+    const printWindow = window.open('', '', 'height=800,width=900');
+    printWindow.document.write(`
+        <html>
+            <head>
+                <title>Fee Receipt - School ERP</title>
+                <style>
+                    body { font-family: Arial, sans-serif; }
+                    * { margin: 0; padding: 0; }
+                    .print-content { padding: 30px; }
+                    @media print { button { display: none; } }
+                </style>
+            </head>
+            <body>
+                <div class="print-content">${receiptContent}</div>
+            </body>
+        </html>
+    `);
+    printWindow.document.close();
+    setTimeout(() => printWindow.print(), 250);
+}
+
+function downloadReceipt() {
+    alert('PDF download feature coming soon!');
+    // TODO: Implement PDF generation using a library like jsPDF or server-side generation
+}
+
+function showAlert(message, type) {
+    const alertBox = document.getElementById('alertBox');
+    alertBox.innerHTML = `<div class="alert ${type}">${message}</div>`;
+    window.scrollTo(0, alertBox.offsetTop - 100);
+}
+
+// Initialize payment date to today
+window.addEventListener('load', function() {
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('paymentDate').value = today;
+});
+</script>
+
+{% endblock %}

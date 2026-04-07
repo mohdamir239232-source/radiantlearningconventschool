@@ -1,0 +1,124 @@
+{% extends 'base_layout.html' %}
+
+{% block content %}
+<style>
+  .shell { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 18px; }
+  .head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .head h2 { margin: 0; color: #0f172a; }
+  .head p { margin: 4px 0 0; color: #64748b; font-size: 13px; }
+  .table-wrap { overflow-x: auto; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; }
+  table { width: 100%; border-collapse: collapse; min-width: 760px; }
+  th, td { padding: 12px; border-bottom: 1px solid #f1f5f9; text-align: left; font-size: 13px; }
+  th { background: #f8fafc; color: #334155; text-transform: uppercase; font-size: 12px; letter-spacing: 0.03em; }
+  .chip { background: #ecfeff; color: #0e7490; padding: 3px 8px; border-radius: 999px; font-weight: 600; }
+  .btn { text-decoration: none; border: 1px solid #cbd5e1; border-radius: 8px; padding: 6px 10px; color: #0f172a; background: #fff; font-size: 12px; }
+  .empty { text-align: center; color: #64748b; padding: 18px; }
+  .bulk-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; margin-bottom: 12px; }
+  .bulk-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  .bulk-grid label { display: block; font-size: 12px; color: #64748b; margin-bottom: 4px; }
+  .bulk-grid select { width: 100%; border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px; }
+  .subject-pick { margin-top: 10px; }
+  .subject-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; max-height: 180px; overflow: auto; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; }
+  .subject-list label { font-size: 13px; color: #0f172a; display: flex; align-items: center; gap: 6px; }
+  .bulk-actions { margin-top: 12px; }
+  .btn-main { border: 1px solid #0f766e; background: #0f766e; color: #fff; border-radius: 8px; padding: 8px 12px; cursor: pointer; font-size: 13px; }
+  @media (max-width: 900px) { .bulk-grid { grid-template-columns: 1fr; } }
+</style>
+
+<div class="shell">
+  <div class="head">
+    <div>
+      <h2>Assign Subject</h2>
+      <p>Select a student to assign one or multiple subjects.</p>
+    </div>
+  </div>
+
+  <div class="bulk-card">
+    <h3 style="margin:0 0 10px; color:#0f172a;">Bulk Assign Subject (Class-wise)</h3>
+    <form method="post" action="/student/assign-subject/bulk/">
+      {% csrf_token %}
+      <div class="bulk-grid">
+        <div>
+          <label>Class</label>
+          <select id="bulk_assign_class" name="student_class" required>
+            <option value="">Select Class</option>
+            {% for class_name in class_names %}
+            <option value="{{ class_name }}">{{ class_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label>Section</label>
+          <select id="bulk_assign_section" name="section">
+            <option value="ALL">All Sections</option>
+          </select>
+        </div>
+        <div class="subject-pick">
+          <label>Subjects</label>
+          <div class="subject-list">
+            {% for subject in subjects %}
+            <label><input type="checkbox" name="subjects" value="{{ subject.id }}"> {{ subject.name }} ({{ subject.code }})</label>
+            {% empty %}
+            <span style="color:#64748b;">No subjects found.</span>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      <div class="bulk-actions">
+        <button class="btn-main" type="submit">Assign Subjects To Whole Class</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Admission No.</th>
+          <th>Student Name</th>
+          <th>Class</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for student in students %}
+        <tr>
+          <td>{{ student.admission_number }}</td>
+          <td><strong>{{ student.name }}</strong></td>
+          <td><span class="chip">{{ student.student_class }} - {{ student.section }}</span></td>
+          <td><a class="btn" href="/student/{{ student.id }}/assign-subject/">Assign Subjects</a></td>
+        </tr>
+        {% empty %}
+        <tr><td class="empty" colspan="4">No students available.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{{ class_section_map|json_script:'assign-class-section-map' }}
+<script>
+  (function() {
+    const classMap = JSON.parse(document.getElementById('assign-class-section-map').textContent || '{}');
+    const classSelect = document.getElementById('bulk_assign_class');
+    const sectionSelect = document.getElementById('bulk_assign_section');
+
+    function refreshSections() {
+      if (!classSelect || !sectionSelect) return;
+      const className = classSelect.value;
+      const sections = classMap[className] || [];
+      sectionSelect.innerHTML = '<option value="ALL">All Sections</option>';
+      sections.forEach(function(section) {
+        const opt = document.createElement('option');
+        opt.value = section;
+        opt.textContent = section;
+        sectionSelect.appendChild(opt);
+      });
+    }
+
+    if (classSelect) {
+      classSelect.addEventListener('change', refreshSections);
+    }
+  })();
+</script>
+{% endblock %}

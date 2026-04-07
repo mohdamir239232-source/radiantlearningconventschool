@@ -1,0 +1,668 @@
+{% extends 'base_layout.html' %}
+
+{% block content %}
+
+<style>
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.page-header h2 {
+    margin: 0;
+    color: #333;
+    font-size: 26px;
+    font-weight: 600;
+}
+
+.btn-primary {
+    background: #b80b36;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s;
+}
+
+.btn-primary:hover {
+    background: #9a0a2d;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(184, 11, 54, 0.3);
+}
+
+.slab-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.slab-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: transform 0.3s, box-shadow 0.3s;
+    border-left: 5px solid #b80b36;
+}
+
+.slab-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(184, 11, 54, 0.15);
+}
+
+.slab-header {
+    background: linear-gradient(135deg, #b80b36 0%, #9a0a2d 100%);
+    color: white;
+    padding: 20px;
+}
+
+.slab-class-name {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.slab-month {
+    font-size: 13px;
+    opacity: 0.9;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.slab-body {
+    padding: 20px;
+}
+
+.slab-amount {
+    font-size: 32px;
+    font-weight: 700;
+    color: #b80b36;
+    margin-bottom: 15px;
+}
+
+.slab-amount-label {
+    font-size: 12px;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 20px;
+}
+
+.slab-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-sm {
+    flex: 1;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.btn-edit {
+    background: #FFF3E0;
+    color: #E65100;
+}
+
+.btn-edit:hover {
+    background: #FFE0B2;
+}
+
+.btn-delete {
+    background: #FFEBEE;
+    color: #C62828;
+}
+
+.btn-delete:hover {
+    background: #FFCDD2;
+}
+
+.stats-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.stat-box {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border-top: 4px solid #b80b36;
+    text-align: center;
+}
+
+.stat-value {
+    font-size: 32px;
+    font-weight: 700;
+    color: #b80b36;
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    font-size: 13px;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #999;
+}
+
+.empty-state h3 {
+    color: #666;
+    margin-top: 20px;
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+}
+
+.modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+}
+
+.modal-header {
+    margin-bottom: 20px;
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: #333;
+    font-size: 20px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #b80b36;
+    box-shadow: 0 0 0 3px rgba(184, 11, 54, 0.1);
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 25px;
+}
+
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.btn-submit {
+    background: #b80b36;
+    color: white;
+}
+
+.btn-submit:hover {
+    background: #9a0a2d;
+}
+
+.btn-cancel {
+    background: #f0f0f0;
+    color: #333;
+}
+
+.btn-cancel:hover {
+    background: #e0e0e0;
+}
+
+.alert {
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    display: none;
+}
+
+.alert.success {
+    background: #E8F5E9;
+    color: #2E7D32;
+    border: 1px solid #81C784;
+    display: block;
+}
+
+.alert.error {
+    background: #FFEBEE;
+    color: #C62828;
+    border: 1px solid #EF5350;
+    display: block;
+}
+</style>
+
+<div class="page-header">
+    <div>
+        <h2>📊 Fee Amount Slab</h2>
+        <p style="color: #666; margin: 5px 0 0 0;">Set class-wise fee particulars and amounts</p>
+    </div>
+    <button class="btn-primary" onclick="openModal()">+ Add Fee Slab</button>
+</div>
+
+<!-- Stats Section -->
+<div class="stats-container">
+    <div class="stat-box">
+        <div class="stat-value">{{ slabs|length }}</div>
+        <div class="stat-label">Total Slabs</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-value">{{ classes|length }}</div>
+        <div class="stat-label">Classes</div>
+    </div>
+</div>
+
+<!-- Cards Grid -->
+<div id="alertBox"></div>
+{% if slabs %}
+<div class="slab-grid">
+    {% for slab in slabs %}
+    <div class="slab-card">
+        <div class="slab-header">
+            <div class="slab-class-name">{{ slab.class_model.name }}</div>
+            <div class="slab-month">📅 {{ slab.get_academic_month_display }}</div>
+        </div>
+        <div class="slab-body">
+            {% if slab.particulars.all %}
+            <div style="margin-bottom: 15px;">
+                {% for particular_item in slab.particulars.all %}
+                <div style="padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-size: 13px;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span><b>{{ particular_item.particular.name }}</b></span>
+                        <span style="color: #b80b36; font-weight: 600;">₹ {{ particular_item.amount }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <div style="background: #f8f8f8; padding: 8px 12px; border-radius: 4px; text-align: right; margin-bottom: 15px;">
+                <div style="font-size: 11px; color: #666; text-transform: uppercase;">Total Amount</div>
+                <div style="font-size: 18px; font-weight: 700; color: #b80b36;">₹ {{ slab.get_total_amount }}</div>
+            </div>
+            {% else %}
+            <div style="text-align: center; color: #999; padding: 20px 0;">
+                <p style="margin: 0;">No particulars added</p>
+            </div>
+            {% endif %}
+            <div class="slab-actions">
+                <button class="btn-sm btn-edit" onclick="editSlab({{ slab.id }})">Edit</button>
+                <button class="btn-sm btn-delete" onclick="deleteSlab({{ slab.id }})">Delete</button>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <h3>😕 No Fee Slabs Found</h3>
+    <p>Start by adding a new fee slab</p>
+    <button class="btn-primary" onclick="openModal()" style="margin-top: 15px;">Add Fee Slab</button>
+</div>
+{% endif %}
+
+<!-- Modal Form -->
+<div id="slabModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Add Fee Amount Slab</h3>
+        </div>
+        
+        <form id="slabForm" method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="modalClass">Class *</label>
+                <select id="modalClass" name="class_model" required onchange="loadParticularsForClass()">
+                    <option value="">-- Select Class --</option>
+                    {% for class in classes %}
+                    <option value="{{ class.id }}">{{ class.name }} - {{ class.section }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="modalMonth">Academic Month *</label>
+                <select id="modalMonth" name="academic_month" required>
+                    <option value="">-- Select Month --</option>
+                    <option value="jan">January</option>
+                    <option value="feb">February</option>
+                    <option value="mar">March</option>
+                    <option value="apr">April</option>
+                    <option value="may">May</option>
+                    <option value="jun">June</option>
+                    <option value="jul">July</option>
+                    <option value="aug">August</option>
+                    <option value="sep">September</option>
+                    <option value="oct">October</option>
+                    <option value="nov">November</option>
+                    <option value="dec">December</option>
+                </select>
+            </div>
+            
+            <div style="background: #f9f9f9; padding: 15px; border-radius: 6px; margin-bottom: 20px;">
+                <label style="display: block; font-weight: 600; color: #333; margin-bottom: 12px; font-size: 13px;">Fee Particulars *</label>
+                <div id="particularsContainer">
+                    <div class="particular-row" style="display: flex; gap: 8px; margin-bottom: 10px;">
+                        <select class="particular-select" name="particulars[]" required style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px;">
+                            <option value="">-- Select Particular --</option>
+                            {% for particular in particulars %}
+                            <option value="{{ particular.id }}">{{ particular.name }} ({{ particular.get_frequency_display }})</option>
+                            {% endfor %}
+                        </select>
+                        <input type="number" class="particular-amount" name="amounts[]" step="0.01" placeholder="₹ Amount" required style="flex: 0.8; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px;">
+                        <button type="button" class="btn-remove-particular" onclick="removeParticularRow(this)" style="padding: 8px 12px; background: #FFEBEE; color: #C62828; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;">Remove</button>
+                    </div>
+                </div>
+                <button type="button" onclick="addParticularRow()" style="padding: 8px 14px; background: #E8F5E9; color: #2E7D32; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; margin-top: 10px;">+ Add Particular</button>
+            </div>
+            
+            <div class="form-actions">
+                <button type="button" class="btn btn-cancel" onclick="closeModal()">Cancel</button>
+                <button type="submit" class="btn btn-submit">Save Slab</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+let currentSlabId = null;
+
+// Create array of all available particulars from template
+const allParticulars = [
+    {% for particular in particulars %}
+    { id: {{ particular.id }}, name: '{{ particular.name }}', frequency_display: '{{ particular.get_frequency_display }}' },
+    {% endfor %}
+];
+
+function openModal() {
+    currentSlabId = null;
+    document.getElementById('slabForm').reset();
+    document.getElementById('particularsContainer').innerHTML = '';
+    addParticularRow();
+    document.querySelector('.modal-header h3').innerText = 'Add Fee Amount Slab';
+    document.getElementById('slabModal').classList.add('active');
+}
+
+function closeModal() {
+    document.getElementById('slabModal').classList.remove('active');
+    currentSlabId = null;
+}
+
+function loadParticularsForClass() {
+    const classId = document.getElementById('modalClass').value;
+    const month = document.getElementById('modalMonth').value;
+    
+    if (!classId) {
+        document.getElementById('particularsContainer').innerHTML = '';
+        addParticularRow();
+        return;
+    }
+    
+    fetch(`/fee/api/particulars-by-class/?class_id=${classId}&month=${month}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const container = document.getElementById('particularsContainer');
+                container.innerHTML = '';
+                
+                data.particulars.forEach(particular => {
+                    const rowDiv = document.createElement('div');
+                    rowDiv.className = 'particular-row';
+                    rowDiv.style.cssText = 'display: flex; gap: 8px; margin-bottom: 10px;';
+                    rowDiv.innerHTML = `
+                        <select class="particular-select" name="particulars[]" required style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px;">
+                            <option value="${particular.id}" selected>${particular.name} (${particular.frequency_display})</option>
+                        </select>
+                        <input type="number" class="particular-amount" name="amounts[]" step="0.01" placeholder="₹ Amount" value="${particular.amount || ''}" required style="flex: 0.8; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px;">
+                        <button type="button" class="btn-remove-particular" onclick="removeParticularRow(this)" style="padding: 8px 12px; background: #FFEBEE; color: #C62828; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;">Remove</button>
+                    `;
+                    container.appendChild(rowDiv);
+                });
+                
+                if (data.particulars.length === 0) {
+                    addParticularRow();
+                }
+            } else {
+                showAlert(data.error, 'error');
+                addParticularRow();
+            }
+        })
+        .catch(error => {
+            showAlert('Error loading particulars: ' + error, 'error');
+            addParticularRow();
+        });
+}
+
+function addParticularRow() {
+    const container = document.getElementById('particularsContainer');
+    const rowDiv = document.createElement('div');
+    rowDiv.className = 'particular-row';
+    rowDiv.style.cssText = 'display: flex; gap: 8px; margin-bottom: 10px;';
+    
+    let selectOptions = '<option value="">-- Select Particular --</option>';
+    allParticulars.forEach(particular => {
+        selectOptions += `<option value="${particular.id}">${particular.name} (${particular.frequency_display})</option>`;
+    });
+    
+    rowDiv.innerHTML = `
+        <select class="particular-select" name="particulars[]" required style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px;">
+            ${selectOptions}
+        </select>
+        <input type="number" class="particular-amount" name="amounts[]" step="0.01" placeholder="₹ Amount" required style="flex: 0.8; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px;">
+        <button type="button" class="btn-remove-particular" onclick="removeParticularRow(this)" style="padding: 8px 12px; background: #FFEBEE; color: #C62828; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;">Remove</button>
+    `;
+    container.appendChild(rowDiv);
+}
+
+function removeParticularRow(button) {
+    button.parentElement.remove();
+}
+
+function editSlab(id) {
+    fetch(`/fee/amount-slab/${id}/data/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                currentSlabId = id;
+                document.getElementById('modalClass').value = data.slab.class_model;
+                document.getElementById('modalMonth').value = data.slab.academic_month;
+                
+                // Clear and populate particulars
+                const container = document.getElementById('particularsContainer');
+                container.innerHTML = '';
+                if (data.slab.particulars && data.slab.particulars.length > 0) {
+                    data.slab.particulars.forEach(p => {
+                        const rowDiv = document.createElement('div');
+                        rowDiv.className = 'particular-row';
+                        rowDiv.style.cssText = 'display: flex; gap: 8px; margin-bottom: 10px;';
+                        
+                        let selectOptions = '<option value="">-- Select Particular --</option>';
+                        allParticulars.forEach(particular => {
+                            const selected = p.particular__id === particular.id ? 'selected' : '';
+                            selectOptions += `<option value="${particular.id}" ${selected}>${particular.name} (${particular.frequency_display})</option>`;
+                        });
+                        
+                        rowDiv.innerHTML = `
+                            <select class="particular-select" name="particulars[]" required style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px;">
+                                ${selectOptions}
+                            </select>
+                            <input type="number" class="particular-amount" name="amounts[]" step="0.01" placeholder="₹ Amount" value="${p.amount}" required style="flex: 0.8; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px;">
+                            <button type="button" class="btn-remove-particular" onclick="removeParticularRow(this)" style="padding: 8px 12px; background: #FFEBEE; color: #C62828; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;">Remove</button>
+                        `;
+                        container.appendChild(rowDiv);
+                    });
+                } else {
+                    addParticularRow();
+                }
+                
+                document.querySelector('.modal-header h3').innerText = 'Edit Fee Amount Slab';
+                document.getElementById('slabModal').classList.add('active');
+            }
+        });
+}
+
+function deleteSlab(id) {
+    if (confirm('Are you sure you want to delete this slab?')) {
+        const formData = new FormData();
+        formData.append('csrfmiddlewaretoken', document.querySelector('[name="csrfmiddlewaretoken"]').value);
+        
+        fetch(`/fee/amount-slab/${id}/delete/`, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert(data.message, 'success');
+                setTimeout(() => {
+                    location.reload();
+                }, 1000);
+            } else {
+                showAlert(data.error, 'error');
+            }
+        })
+        .catch(error => {
+            showAlert('Error: ' + error, 'error');
+        });
+    }
+}
+
+document.getElementById('slabForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Validate form
+    const classId = document.getElementById('modalClass').value;
+    const month = document.getElementById('modalMonth').value;
+    const particulars = document.querySelectorAll('.particular-select');
+    const amounts = document.querySelectorAll('.particular-amount');
+    
+    if (!classId || !month) {
+        showAlert('Please select class and month', 'error');
+        return;
+    }
+    
+    if (particulars.length === 0) {
+        showAlert('Please add at least one particular', 'error');
+        return;
+    }
+    
+    let hasValidParticulars = false;
+    for (let i = 0; i < particulars.length; i++) {
+        if (particulars[i].value && amounts[i].value) {
+            hasValidParticulars = true;
+            break;
+        }
+    }
+    
+    if (!hasValidParticulars) {
+        showAlert('Please select particulars with amounts', 'error');
+        return;
+    }
+    
+    const formData = new FormData(this);
+    const url = currentSlabId 
+        ? `/fee/amount-slab/${currentSlabId}/edit/`
+        : '/fee/amount-slab/add/';
+    
+    fetch(url, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert(data.message, 'success');
+            closeModal();
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        } else {
+            showAlert(data.error, 'error');
+        }
+    })
+    .catch(error => {
+        showAlert('Error: ' + error, 'error');
+    });
+});
+
+function showAlert(message, type) {
+    const alertBox = document.getElementById('alertBox');
+    if (!alertBox) return;
+    
+    const alert = document.createElement('div');
+    alert.className = `alert ${type}`;
+    alert.innerText = message;
+    alertBox.innerHTML = '';
+    alertBox.appendChild(alert);
+    
+    setTimeout(() => {
+        alert.remove();
+    }, 3000);
+}
+
+// Close modal on backdrop click
+document.getElementById('slabModal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+});
+</script>
+
+{% endblock %}

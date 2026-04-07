@@ -1,0 +1,1464 @@
+{% extends 'base_layout.html' %}
+
+{% block content %}
+<style>
+  .staff-shell {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 18px;
+  }
+
+  .staff-nav,
+  .staff-panel {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 18px;
+    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.06);
+  }
+
+  .staff-nav {
+    padding: 16px;
+    position: sticky;
+    top: 14px;
+    height: fit-content;
+  }
+
+  .staff-nav h3 {
+    margin: 0 0 12px;
+    font-size: 16px;
+    color: #7f1d1d;
+  }
+
+  .staff-link {
+    display: block;
+    text-decoration: none;
+    margin-bottom: 8px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    color: #334155;
+    background: #f8fafc;
+    font-weight: 600;
+    font-size: 14px;
+  }
+
+  .staff-link:hover {
+    background: #fff7ed;
+    border-color: #fdba74;
+    color: #9a3412;
+  }
+
+  .staff-link.active {
+    background: linear-gradient(135deg, #7f1d1d, #b45309);
+    border-color: transparent;
+    color: #fff7ed;
+  }
+
+  .staff-panel {
+    padding: 24px;
+  }
+
+  .staff-hero {
+    border: 1px solid #fed7aa;
+    border-radius: 16px;
+    padding: 14px;
+    margin-bottom: 14px;
+    background: linear-gradient(125deg, #fff7ed 0%, #ffffff 62%, #f8fafc 100%);
+  }
+
+  .staff-hero-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .hero-chips {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .hero-chip {
+    border: 1px solid #fdba74;
+    border-radius: 999px;
+    padding: 5px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #9a3412;
+    background: #ffffff;
+  }
+
+  .panel-kicker {
+    display: inline-block;
+    margin-bottom: 10px;
+    padding: 5px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #9a3412;
+    background: #fff7ed;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .staff-panel h2 {
+    margin: 0 0 10px;
+    color: #0f172a;
+    font-size: 28px;
+  }
+
+  .staff-panel p {
+    margin: 0 0 18px;
+    color: #475569;
+    line-height: 1.6;
+  }
+
+  .module-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .module-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 14px;
+    background: linear-gradient(160deg, #ffffff 0%, #f8fafc 100%);
+  }
+
+  .module-card strong {
+    display: block;
+    color: #0f172a;
+    margin-bottom: 6px;
+    font-size: 14px;
+  }
+
+  .module-card span {
+    color: #64748b;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 10px;
+    margin: 10px 0 14px;
+  }
+
+  .stat {
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 10px 12px;
+    background: #ffffff;
+  }
+
+  .stat .label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #64748b;
+    margin-bottom: 4px;
+  }
+
+  .stat .value {
+    font-size: 22px;
+    font-weight: 700;
+    color: #0f172a;
+    line-height: 1;
+  }
+
+  .staff-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .table-wrap {
+    overflow: auto;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+  }
+
+  .staff-table th,
+  .staff-table td {
+    border-bottom: 1px solid #e2e8f0;
+    padding: 10px 8px;
+    text-align: left;
+    font-size: 13px;
+    color: #334155;
+  }
+
+  .staff-table th {
+    font-size: 12px;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    background: #f8fafc;
+    position: sticky;
+    top: 0;
+    z-index: 3;
+  }
+
+  .staff-table tbody tr {
+    transition: background-color 0.2s ease;
+  }
+
+  .staff-table tbody tr:hover {
+    background: #fff7ed;
+  }
+
+  .chip {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .chip-role {
+    background: #dcfce7;
+    color: #166534;
+  }
+
+  .chip-admin {
+    background: #fee2e2;
+    color: #991b1b;
+  }
+
+  .chip-off {
+    background: #e2e8f0;
+    color: #334155;
+  }
+
+  .form-shell {
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 14px;
+    background: #ffffff;
+    max-width: 900px;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 10px;
+  }
+
+  .row {
+    margin-bottom: 10px;
+  }
+
+  .row label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 12px;
+    color: #64748b;
+    font-weight: 600;
+  }
+
+  .row input,
+  .row select {
+    width: 100%;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    padding: 9px 10px;
+    font-size: 13px;
+    background: #f8fafc;
+  }
+
+  .submit-btn {
+    width: 100%;
+    border: none;
+    border-radius: 11px;
+    padding: 10px 12px;
+    background: linear-gradient(135deg, #7f1d1d, #b45309);
+    color: #fff7ed;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .notes-box {
+    border: 1px dashed #cbd5e1;
+    border-radius: 14px;
+    padding: 14px;
+    color: #475569;
+    font-size: 14px;
+    line-height: 1.55;
+    background: #f8fafc;
+  }
+
+  .action-wrap {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .inline-form {
+    margin: 0;
+  }
+
+  .mini-btn {
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: #ffffff;
+    padding: 5px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #334155;
+    cursor: pointer;
+  }
+
+  .mini-btn.primary {
+    background: #eff6ff;
+    border-color: #bfdbfe;
+    color: #1d4ed8;
+  }
+
+  .mini-btn.info {
+    background: #ecfeff;
+    border-color: #a5f3fc;
+    color: #155e75;
+  }
+
+  .mini-btn.warn {
+    background: #fff7ed;
+    border-color: #fdba74;
+    color: #9a3412;
+  }
+
+  .mini-btn.danger {
+    background: #fef2f2;
+    border-color: #fecaca;
+    color: #b91c1c;
+  }
+
+  .editor-shell {
+    border: 1px solid #fdba74;
+    border-radius: 14px;
+    padding: 14px;
+    margin-bottom: 14px;
+    background: #fffbeb;
+  }
+
+  .editor-head {
+    margin: 0 0 12px;
+    color: #9a3412;
+    font-size: 18px;
+  }
+
+  .toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 6px 0 12px;
+  }
+
+  .toolbar .search {
+    width: 240px;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    padding: 8px 10px;
+    font-size: 13px;
+    background: #ffffff;
+  }
+
+  .empty-state {
+    text-align: center;
+    color: #64748b;
+    padding: 16px;
+  }
+
+  .idcard-tools {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+    align-items: end;
+    margin-bottom: 14px;
+  }
+
+  .idcard-tools label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    color: #475569;
+    margin-bottom: 6px;
+  }
+
+  .idcard-tools select {
+    width: 100%;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    padding: 9px 10px;
+    font-size: 13px;
+    background: #ffffff;
+  }
+
+  .idcard-preview-shell {
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 12px;
+    background: #f8fafc;
+  }
+
+  .bulk-select-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 8px;
+    max-height: 230px;
+    overflow: auto;
+    padding: 8px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    background: #ffffff;
+    margin-bottom: 10px;
+  }
+
+  .bulk-select-item {
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 8px;
+    font-size: 12px;
+    color: #334155;
+    background: #f8fafc;
+  }
+
+  .bulk-select-item input {
+    margin-right: 6px;
+  }
+
+  .idcard-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(680px, 1fr));
+    gap: 12px;
+  }
+
+  .idcard-pair {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(300px, 1fr));
+    gap: 10px;
+    align-items: start;
+  }
+
+  .idcard-canvas {
+    width: 100%;
+    max-width: 340px;
+    max-width: 100%;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid #fdba74;
+    background: #ffffff;
+    box-shadow: 0 14px 28px rgba(15, 23, 42, 0.12);
+    position: relative;
+  }
+
+  .idcard-canvas.back {
+    border-color: #cbd5e1;
+    box-shadow: 0 10px 20px rgba(15, 23, 42, 0.08);
+  }
+
+  .id-watermark {
+    position: absolute;
+    inset: 44px 0 0 0;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.08;
+    z-index: 0;
+  }
+
+  .id-watermark img {
+    width: 110px;
+    height: 110px;
+    object-fit: contain;
+  }
+
+  .id-watermark span {
+    font-size: 40px;
+    font-weight: 700;
+    color: #7f1d1d;
+    letter-spacing: 0.05em;
+  }
+
+  .idcard-head {
+    background: linear-gradient(135deg, #7f1d1d, #b45309);
+    color: #fff7ed;
+    padding: 10px 12px;
+  }
+
+  .idcard-head h4 {
+    margin: 0;
+    font-size: 14px;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+
+  .idcard-head p {
+    margin: 2px 0 0;
+    font-size: 11px;
+    opacity: 0.9;
+  }
+
+  .idcard-body {
+    padding: 12px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .idcard-photo {
+    width: 84px;
+    height: 96px;
+    border-radius: 12px;
+    border: 1px solid #cbd5e1;
+    background: #f8fafc;
+    object-fit: cover;
+  }
+
+  .idcard-grid {
+    display: grid;
+    grid-template-columns: 90px 1fr;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .id-line {
+    margin-bottom: 6px;
+  }
+
+  .id-line small {
+    display: block;
+    font-size: 10px;
+    text-transform: uppercase;
+    color: #64748b;
+    letter-spacing: 0.05em;
+  }
+
+  .id-line strong {
+    color: #0f172a;
+    font-size: 13px;
+  }
+
+  .idcard-foot {
+    border-top: 1px dashed #cbd5e1;
+    margin-top: 8px;
+    padding-top: 8px;
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 11px;
+    color: #475569;
+  }
+
+  .id-back-body {
+    padding: 12px;
+    min-height: 185px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    z-index: 1;
+  }
+
+  .id-rule {
+    border: 1px dashed #cbd5e1;
+    border-radius: 10px;
+    padding: 8px;
+    background: #f8fafc;
+    font-size: 10px;
+    color: #475569;
+    line-height: 1.45;
+  }
+
+  .id-sign {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    font-size: 10px;
+    color: #475569;
+    margin-top: 10px;
+  }
+
+  .id-sign .line {
+    width: 120px;
+    border-top: 1px solid #94a3b8;
+    margin-bottom: 3px;
+  }
+
+  .qr-box {
+    border: 1px dashed #cbd5e1;
+    border-radius: 8px;
+    width: 68px;
+    height: 68px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff;
+  }
+
+  .idcard-mini-note {
+    font-size: 10px;
+    color: #64748b;
+    margin-top: 2px;
+  }
+
+  .no-print {
+    display: inline-flex;
+  }
+
+  @media print {
+    .sidebar,
+    .topbar,
+    .staff-nav,
+    .module-grid,
+    .notes-box,
+    .idcard-tools,
+    .no-print,
+    .panel-kicker {
+      display: none !important;
+    }
+
+    .main,
+    .content,
+    .staff-panel,
+    .staff-shell,
+    .idcard-preview-shell {
+      margin: 0 !important;
+      padding: 0 !important;
+      border: none !important;
+      box-shadow: none !important;
+      background: #ffffff !important;
+    }
+
+    .idcard-canvas {
+      box-shadow: none !important;
+      margin: 0 auto;
+      page-break-inside: avoid;
+    }
+
+    .idcard-gallery {
+      display: block;
+    }
+
+    .idcard-pair {
+      display: grid;
+      grid-template-columns: 85.6mm 85.6mm;
+      gap: 3mm;
+      margin-bottom: 4mm;
+      page-break-inside: avoid;
+      justify-content: start;
+    }
+
+    .idcard-canvas {
+      width: 85.6mm !important;
+      min-height: 54mm !important;
+      border-radius: 3mm;
+      margin: 0;
+      page-break-inside: avoid;
+    }
+
+    .idcard-head {
+      padding: 3mm;
+    }
+
+    .idcard-body,
+    .id-back-body {
+      padding: 3mm;
+    }
+
+    .idcard-photo {
+      width: 19mm;
+      height: 23mm;
+      border-radius: 2mm;
+    }
+
+    .id-line strong {
+      font-size: 3.1mm;
+    }
+  }
+
+  .notes-box ul {
+    margin: 10px 0 0 18px;
+  }
+
+  @media (max-width: 960px) {
+    .staff-shell {
+      grid-template-columns: 1fr;
+    }
+
+    .staff-nav {
+      position: static;
+    }
+
+    .idcard-gallery,
+    .idcard-pair {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<div class="staff-shell">
+  <aside class="staff-nav">
+    <h3>Staff Management</h3>
+    {% for key, meta in modules.items %}
+      <a class="staff-link {% if current_key == key %}active{% endif %}" href="/staff/{{ key }}/">{{ meta.title }}</a>
+    {% endfor %}
+  </aside>
+
+  <section class="staff-panel">
+    <div class="staff-hero">
+      <div class="staff-hero-row">
+        <div>
+          <span class="panel-kicker">Professional Staff Module</span>
+          <h2>{{ current_module.title }}</h2>
+          <p>{{ current_module.description }}</p>
+        </div>
+        <div class="hero-chips">
+          <span class="hero-chip">Role-Aware Access</span>
+          <span class="hero-chip">Audit Friendly</span>
+          <span class="hero-chip">Ready for Reporting</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="module-grid">
+      {% for item in current_module.items %}
+        <div class="module-card">
+          <strong>{{ item }}</strong>
+          <span>Configured with structured controls for operational readiness and reporting continuity.</span>
+        </div>
+      {% endfor %}
+    </div>
+
+    {% if current_key == 'view' %}
+      <div class="stats-row">
+        <div class="stat">
+          <div class="label">Total Staff</div>
+          <div class="value">{{ staff_stats.total }}</div>
+        </div>
+        <div class="stat">
+          <div class="label">Active</div>
+          <div class="value">{{ staff_stats.active }}</div>
+        </div>
+        <div class="stat">
+          <div class="label">Teachers</div>
+          <div class="value">{{ staff_stats.teachers }}</div>
+        </div>
+        <div class="stat">
+          <div class="label">Admins</div>
+          <div class="value">{{ staff_stats.admins }}</div>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <div class="notes-box" style="padding:10px 12px; font-size:12px;">
+          Use search to quickly locate staff by ID, name, role, mobile, email, or login ID.
+        </div>
+        <input id="staffSearch" class="search" type="text" placeholder="Search staff records">
+      </div>
+
+      <div class="table-wrap">
+      <table class="staff-table" id="staffTable">
+        <thead>
+          <tr>
+            <th>Emp. ID</th>
+            <th>Name</th>
+            <th>Designation</th>
+            <th>Role</th>
+            <th>Mobile</th>
+            <th>Login ID</th>
+            {% if can_view_staff_passwords %}
+            <th>Password</th>
+            {% endif %}
+            <th>Status</th>
+            <th>Email</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in staff_profiles %}
+            <tr class="staff-row">
+              <td>{{ row.employee_id }}</td>
+              <td>{{ row.full_name }}</td>
+              <td>{{ row.designation.name|default:'-' }}</td>
+              <td>
+                <span class="chip {% if row.user and row.user.is_superuser %}chip-admin{% else %}chip-role{% endif %}">
+                  {% if row.user and row.user.is_superuser %}Super Admin{% else %}
+                    {% if row.user %}
+                      {% with g=row.user.groups.first %}{% if g %}{{ g.name }}{% else %}Staff Admin{% endif %}{% endwith %}
+                    {% else %}
+                      Staff Admin
+                    {% endif %}
+                  {% endif %}
+                </span>
+              </td>
+              <td>{{ row.mobile_number|default:'-' }}</td>
+              <td>{% if row.user %}{{ row.user.username }}{% else %}-{% endif %}</td>
+              {% if can_view_staff_passwords %}
+              <td>{{ row.login_password_plain|default:'-' }}</td>
+              {% endif %}
+              <td>
+                {% if row.user and row.user.is_active %}
+                  <span class="chip chip-role">Active</span>
+                {% else %}
+                  <span class="chip chip-off">Inactive</span>
+                {% endif %}
+              </td>
+              <td>{{ row.email|default:'-' }}</td>
+              <td>
+                <div class="action-wrap">
+                  <a href="/staff/view/?edit={{ row.id }}" class="mini-btn primary">Update</a>
+
+                  {% if can_view_staff_passwords %}
+                  <form class="inline-form" method="post" action="/staff/view/">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="view_credentials">
+                    <input type="hidden" name="profile_id" value="{{ row.id }}">
+                    <button type="submit" class="mini-btn info">View Login</button>
+                  </form>
+
+                  <form class="inline-form" method="post" action="/staff/view/">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="reset_password">
+                    <input type="hidden" name="profile_id" value="{{ row.id }}">
+                    <button type="submit" class="mini-btn warn">Reset Password</button>
+                  </form>
+                  {% endif %}
+
+                  <form class="inline-form" method="post" action="/staff/view/" onsubmit="return confirm('Delete this staff record permanently?');">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="delete_staff">
+                    <input type="hidden" name="profile_id" value="{{ row.id }}">
+                    <button type="submit" class="mini-btn danger">Delete</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="10">
+                <div class="empty-state">No staff records found.</div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      </div>
+
+      {% if editing_profile %}
+      <div class="editor-shell">
+        <h3 class="editor-head">Update Staff: {{ editing_profile.full_name }} ({{ editing_profile.employee_id }})</h3>
+        <form class="form-shell" method="post" action="/staff/view/?edit={{ editing_profile.id }}" enctype="multipart/form-data">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="update_staff">
+          <input type="hidden" name="profile_id" value="{{ editing_profile.id }}">
+
+          <div class="form-grid">
+            <div class="row">
+              <label>Name</label>
+              <input type="text" name="full_name" value="{{ editing_profile.full_name }}" required>
+            </div>
+
+            <div class="row">
+              <label>Father's Name</label>
+              <input type="text" name="father_name" value="{{ editing_profile.father_name }}">
+            </div>
+
+            <div class="row">
+              <label>Mother's Name</label>
+              <input type="text" name="mother_name" value="{{ editing_profile.mother_name }}">
+            </div>
+
+            <div class="row">
+              <label>Husband Name</label>
+              <input type="text" name="husband_name" value="{{ editing_profile.husband_name }}">
+            </div>
+
+            <div class="row">
+              <label>Qualification</label>
+              <input type="text" name="qualification" value="{{ editing_profile.qualification }}">
+            </div>
+
+            <div class="row">
+              <label>Gender</label>
+              <select name="gender">
+                <option value="" {% if not editing_profile.gender %}selected{% endif %}>Select Gender</option>
+                <option value="male" {% if editing_profile.gender == 'male' %}selected{% endif %}>Male</option>
+                <option value="female" {% if editing_profile.gender == 'female' %}selected{% endif %}>Female</option>
+                <option value="other" {% if editing_profile.gender == 'other' %}selected{% endif %}>Other</option>
+              </select>
+            </div>
+
+            <div class="row">
+              <label>Mobile Number</label>
+              <input type="text" name="mobile_number" value="{{ editing_profile.mobile_number }}" required>
+            </div>
+
+            <div class="row">
+              <label>Upload Photo</label>
+              <input type="file" name="photo" accept="image/*">
+            </div>
+
+            <div class="row">
+              <label>Remove Existing Photo</label>
+              <input type="checkbox" name="remove_photo">
+            </div>
+
+            <div class="row">
+              <label>Designation</label>
+              <select name="designation_id">
+                <option value="">Select Designation</option>
+                {% for row in designation_rows %}
+                  <option value="{{ row.id }}" {% if editing_profile.designation and editing_profile.designation.id == row.id %}selected{% endif %}>{{ row.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="row">
+              <label>Email ID</label>
+              <input type="email" name="email" value="{{ editing_profile.email }}">
+            </div>
+
+            <div class="row">
+              <label>Basic Salary</label>
+              <input type="number" name="basic_salary" step="0.01" min="0" value="{{ editing_profile.basic_salary }}">
+            </div>
+
+            <div class="row">
+              <label>PAN Number</label>
+              <input type="text" name="pan_number" value="{{ editing_profile.pan_number }}">
+            </div>
+
+            <div class="row">
+              <label>Experience</label>
+              <input type="text" name="experience" value="{{ editing_profile.experience }}">
+            </div>
+
+            <div class="row">
+              <label>Last School</label>
+              <input type="text" name="last_school_name" value="{{ editing_profile.last_school_name }}">
+            </div>
+
+            <div class="row">
+              <label>Staff Role</label>
+              <select name="role" required>
+                {% with grp=editing_profile.user.groups.first %}
+                  {% for key, label in staff_role_options %}
+                    <option value="{{ key }}" {% if grp and grp.name == label %}selected{% endif %}>{{ label }}</option>
+                  {% endfor %}
+                {% endwith %}
+              </select>
+            </div>
+
+            <div class="row">
+              <label>Login Username</label>
+              <input type="text" name="username" value="{% if editing_profile.user %}{{ editing_profile.user.username }}{% endif %}">
+            </div>
+
+            {% if can_view_staff_passwords %}
+            <div class="row">
+              <label>New Login Password (optional)</label>
+              <input type="password" name="new_password" placeholder="Leave blank to keep current">
+            </div>
+            {% endif %}
+          </div>
+
+          <button type="submit" class="submit-btn">Update Staff Record</button>
+        </form>
+      </div>
+      {% endif %}
+    {% elif current_key == 'add' %}
+      <form class="form-shell" method="post" action="/staff/add/" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="create_staff_user">
+
+        <div class="form-grid">
+          <div class="row">
+            <label>Employee ID (Auto)</label>
+            <input type="text" value="{{ next_employee_id }}" readonly>
+          </div>
+
+          <div class="row">
+            <label>Name</label>
+            <input type="text" name="full_name" placeholder="Full name" required>
+          </div>
+
+          <div class="row">
+            <label>Father's Name</label>
+            <input type="text" name="father_name" placeholder="Father's name">
+          </div>
+
+          <div class="row">
+            <label>Mother's Name</label>
+            <input type="text" name="mother_name" placeholder="Mother's name">
+          </div>
+
+          <div class="row">
+            <label>Husband Name</label>
+            <input type="text" name="husband_name" placeholder="Husband name (if applicable)">
+          </div>
+
+          <div class="row">
+            <label>Qualification</label>
+            <input type="text" name="qualification" placeholder="Highest qualification">
+          </div>
+
+          <div class="row">
+            <label>Gender</label>
+            <select name="gender">
+              <option value="">Select Gender</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+
+          <div class="row">
+            <label>Mobile Number</label>
+            <input type="text" name="mobile_number" placeholder="10-digit mobile" required>
+          </div>
+
+          <div class="row">
+            <label>Upload Photo</label>
+            <input type="file" name="photo" accept="image/*">
+          </div>
+
+          <div class="row">
+            <label>Designation</label>
+            <select name="designation_id">
+              <option value="">Select Designation</option>
+              {% for row in designation_rows %}
+                <option value="{{ row.id }}">{{ row.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="row">
+            <label>Email ID</label>
+            <input type="email" name="email" placeholder="staff@school.com">
+          </div>
+
+          <div class="row">
+            <label>Basic Salary</label>
+            <input type="number" name="basic_salary" step="0.01" min="0" placeholder="0.00">
+          </div>
+
+          <div class="row">
+            <label>PAN Number</label>
+            <input type="text" name="pan_number" placeholder="ABCDE1234F">
+          </div>
+
+          <div class="row">
+            <label>Experience</label>
+            <input type="text" name="experience" placeholder="e.g. 5 years">
+          </div>
+
+          <div class="row">
+            <label>Last School</label>
+            <input type="text" name="last_school_name" placeholder="Previous school name">
+          </div>
+
+          <div class="row">
+            <label>Staff Role</label>
+            <select name="role" required>
+              {% for key, label in staff_role_options %}
+                <option value="{{ key }}">{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="row">
+            <label>Login Username (Auto if blank)</label>
+            <input type="text" name="username" placeholder="Optional">
+          </div>
+
+          <div class="row">
+            <label>Login Password (Default if blank)</label>
+            <input type="password" name="password" placeholder="Optional, default ChangeMe@123">
+          </div>
+        </div>
+
+        <button type="submit" class="submit-btn">Create Staff Account</button>
+      </form>
+    {% elif current_key == 'idcard' %}
+      <div class="notes-box" style="margin-bottom:12px;">
+        Select single or multiple staff profiles to generate live sample ID card designs and print them together.
+      </div>
+
+      <form class="idcard-tools" method="get" action="/staff/idcard/">
+        <div>
+          <label for="staff_id">Select Staff Profile</label>
+          <select id="staff_id" name="staff_id" required>
+            <option value="">Choose staff</option>
+            {% for row in staff_profiles %}
+              <option value="{{ row.id }}" {% if idcard_staff_id and idcard_staff_id == row.id|stringformat:'s' %}selected{% elif not idcard_staff_id and selected_staff_card and selected_staff_card.id == row.id %}selected{% endif %}>
+                {{ row.employee_id }} - {{ row.full_name }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+        <button type="submit" class="submit-btn" style="width:auto;">Generate Card</button>
+      </form>
+
+      <form method="get" action="/staff/idcard/" style="margin-bottom:12px;">
+        <div class="bulk-select-grid">
+          {% for row in staff_profiles %}
+            <label class="bulk-select-item">
+              <input type="checkbox" name="staff_ids" value="{{ row.id }}" {% if selected_staff_cards and row in selected_staff_cards %}checked{% endif %}>
+              {{ row.employee_id }} - {{ row.full_name }}
+            </label>
+          {% endfor %}
+        </div>
+        <button type="submit" class="submit-btn" style="width:auto;">Generate Bulk Preview</button>
+      </form>
+
+      {% if selected_staff_cards %}
+      <div class="idcard-preview-shell">
+        <div class="action-wrap" style="margin-bottom:10px;">
+          <button type="button" class="mini-btn primary no-print" onclick="window.print()">Print Selected ID Cards</button>
+          <button type="button" class="mini-btn info no-print" onclick="downloadIdCardsJpeg()">Download JPEG</button>
+          <button type="button" class="mini-btn warn no-print" onclick="downloadIdCardsPdf()">Download PDF</button>
+          <button type="button" class="mini-btn no-print" onclick="downloadA4JpegSheets()">Download A4 JPEG Sheet</button>
+          <button type="button" class="mini-btn no-print" onclick="downloadA4PdfSheets()">Download A4 PDF Sheet</button>
+        </div>
+
+        <div class="idcard-gallery">
+          {% for card in selected_staff_cards %}
+          <div class="idcard-pair">
+            <div class="idcard-canvas" id="idCardCanvas{{ card.id }}">
+              <div class="id-watermark">
+                {% if school_setting and school_setting.logo %}
+                  <img src="{{ school_setting.logo.url }}" alt="School Logo">
+                {% else %}
+                  <span>RLCS</span>
+                {% endif %}
+              </div>
+              <div class="idcard-head">
+                <h4>{% if school_setting and school_setting.school_name %}{{ school_setting.school_name }}{% else %}RLCS School{% endif %}</h4>
+                <p>Staff Identity Card</p>
+              </div>
+              <div class="idcard-body">
+                <div class="idcard-grid">
+                  <div>
+                    {% if card.photo %}
+                      <img class="idcard-photo" src="{{ card.photo.url }}" alt="{{ card.full_name }}">
+                    {% else %}
+                      <div class="idcard-photo" style="display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:11px;">No Photo</div>
+                    {% endif %}
+                  </div>
+                  <div>
+                    <div class="id-line">
+                      <small>Name</small>
+                      <strong>{{ card.full_name }}</strong>
+                    </div>
+                    <div class="id-line">
+                      <small>Employee ID</small>
+                      <strong>{{ card.employee_id }}</strong>
+                    </div>
+                    <div class="id-line">
+                      <small>Designation</small>
+                      <strong>{{ card.designation.name|default:'Staff Member' }}</strong>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="id-line">
+                  <small>Mobile</small>
+                  <strong>{{ card.mobile_number|default:'-' }}</strong>
+                </div>
+                <div class="id-line">
+                  <small>Email</small>
+                  <strong>{{ card.email|default:'-' }}</strong>
+                </div>
+                <div class="idcard-foot">
+                  <span>
+                    <span class="qr-box" id="qr{{ card.id }}" data-qr="EMP:{{ card.employee_id }} | NAME:{{ card.full_name|escape }}"></span>
+                    <span class="idcard-mini-note">Verify ID</span>
+                  </span>
+                  <span>
+                    <div>Issued: {{ idcard_issue_date|date:'d M Y' }}</div>
+                    <div>Authorized: Administration</div>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div class="idcard-canvas back" id="idCardCanvasBack{{ card.id }}">
+              <div class="id-watermark">
+                {% if school_setting and school_setting.logo %}
+                  <img src="{{ school_setting.logo.url }}" alt="School Logo">
+                {% else %}
+                  <span>RLCS</span>
+                {% endif %}
+              </div>
+              <div class="idcard-head">
+                <h4>Card Policies</h4>
+                <p>Back Side</p>
+              </div>
+              <div class="id-back-body">
+                <div class="id-rule">
+                  This card is school property and must be carried during duty hours. If found, return to school office. Unauthorized use or duplication is prohibited.
+                </div>
+
+                <div class="id-line" style="margin-top:8px;">
+                  <small>Emergency Contact</small>
+                  <strong>{{ card.mobile_number|default:'School Office' }}</strong>
+                </div>
+
+                <div class="id-sign">
+                  <div>
+                    <div class="line"></div>
+                    Card Holder
+                  </div>
+                  <div style="text-align:right;">
+                    <div class="line"></div>
+                    Authorized Signatory
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% else %}
+      <div class="empty-state">No staff records available. Add a staff profile first, then generate ID card.</div>
+      {% endif %}
+    {% else %}
+      <div class="notes-box">
+        This submenu now has a professional layout shell and navigation setup.
+        <ul>
+          <li>Unified module cards and workflow blocks are connected.</li>
+          <li>Role-protected route is active under Staff Management.</li>
+          <li>Ready for advanced form logic and report exports as next extension.</li>
+        </ul>
+      </div>
+    {% endif %}
+  </section>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script>
+  async function renderCardToCanvas(element) {
+    return html2canvas(element, {
+      scale: 3,
+      useCORS: true,
+      backgroundColor: '#ffffff'
+    });
+  }
+
+  async function renderAllCardCanvases() {
+    const cards = Array.from(document.querySelectorAll('.idcard-canvas'));
+    if (!cards.length) {
+      alert('No ID cards available for download.');
+      return [];
+    }
+
+    const rendered = [];
+    for (let i = 0; i < cards.length; i += 1) {
+      rendered.push(await renderCardToCanvas(cards[i]));
+    }
+    return rendered;
+  }
+
+  function mmToPx(mm, dpi) {
+    return Math.round((mm / 25.4) * dpi);
+  }
+
+  function drawCutMarks(ctx, x, y, w, h, mark, color) {
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+
+    ctx.beginPath();
+    ctx.moveTo(x - mark, y);
+    ctx.lineTo(x - 6, y);
+    ctx.moveTo(x, y - mark);
+    ctx.lineTo(x, y - 6);
+
+    ctx.moveTo(x + w + 6, y);
+    ctx.lineTo(x + w + mark, y);
+    ctx.moveTo(x + w, y - mark);
+    ctx.lineTo(x + w, y - 6);
+
+    ctx.moveTo(x - mark, y + h);
+    ctx.lineTo(x - 6, y + h);
+    ctx.moveTo(x, y + h + 6);
+    ctx.lineTo(x, y + h + mark);
+
+    ctx.moveTo(x + w + 6, y + h);
+    ctx.lineTo(x + w + mark, y + h);
+    ctx.moveTo(x + w, y + h + 6);
+    ctx.lineTo(x + w, y + h + mark);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  async function buildA4SheetCanvases() {
+    const renderedCards = await renderAllCardCanvases();
+    if (!renderedCards.length) {
+      return [];
+    }
+
+    const dpi = 300;
+    const pageWidthPx = mmToPx(210, dpi);
+    const pageHeightPx = mmToPx(297, dpi);
+    const cardWidthPx = mmToPx(85.6, dpi);
+    const cardHeightPx = mmToPx(54, dpi);
+    const marginPx = mmToPx(12, dpi);
+    const gapXPx = mmToPx(8, dpi);
+    const gapYPx = mmToPx(8, dpi);
+    const cols = 2;
+    const rows = 4;
+    const perPage = cols * rows;
+    const cutMarkSize = mmToPx(3, dpi);
+    const sheets = [];
+
+    for (let i = 0; i < renderedCards.length; i += perPage) {
+      const sheet = document.createElement('canvas');
+      sheet.width = pageWidthPx;
+      sheet.height = pageHeightPx;
+      const ctx = sheet.getContext('2d');
+
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, pageWidthPx, pageHeightPx);
+
+      const pageCards = renderedCards.slice(i, i + perPage);
+      pageCards.forEach(function (cardCanvas, index) {
+        const row = Math.floor(index / cols);
+        const col = index % cols;
+        const x = marginPx + (col * (cardWidthPx + gapXPx));
+        const y = marginPx + (row * (cardHeightPx + gapYPx));
+
+        ctx.drawImage(cardCanvas, x, y, cardWidthPx, cardHeightPx);
+        drawCutMarks(ctx, x, y, cardWidthPx, cardHeightPx, cutMarkSize, '#64748b');
+      });
+
+      sheets.push(sheet);
+    }
+
+    return sheets;
+  }
+
+  async function downloadIdCardsJpeg() {
+    const renderedCards = await renderAllCardCanvases();
+    if (!renderedCards.length) {
+      return;
+    }
+
+    for (let i = 0; i < renderedCards.length; i += 1) {
+      const canvas = renderedCards[i];
+      const link = document.createElement('a');
+      link.href = canvas.toDataURL('image/jpeg', 0.95);
+      link.download = 'staff-id-card-' + (i + 1) + '.jpg';
+      link.click();
+    }
+  }
+
+  async function downloadIdCardsPdf() {
+    const renderedCards = await renderAllCardCanvases();
+    if (!renderedCards.length) {
+      return;
+    }
+
+    if (!window.jspdf || !window.jspdf.jsPDF) {
+      alert('PDF library failed to load. Please refresh and try again.');
+      return;
+    }
+
+    const jsPDF = window.jspdf.jsPDF;
+    const cardWidthMm = 85.6;
+    const cardHeightMm = 54;
+    const doc = new jsPDF({
+      orientation: 'landscape',
+      unit: 'mm',
+      format: [cardWidthMm, cardHeightMm]
+    });
+
+    for (let i = 0; i < renderedCards.length; i += 1) {
+      const canvas = renderedCards[i];
+      const imageData = canvas.toDataURL('image/jpeg', 0.95);
+
+      if (i > 0) {
+        doc.addPage([cardWidthMm, cardHeightMm], 'landscape');
+      }
+
+      doc.addImage(imageData, 'JPEG', 0, 0, cardWidthMm, cardHeightMm, undefined, 'FAST');
+    }
+
+    doc.save('staff-id-cards-pvc.pdf');
+  }
+
+  async function downloadA4JpegSheets() {
+    const sheets = await buildA4SheetCanvases();
+    if (!sheets.length) {
+      return;
+    }
+
+    sheets.forEach(function (sheet, index) {
+      const link = document.createElement('a');
+      link.href = sheet.toDataURL('image/jpeg', 0.95);
+      link.download = 'staff-id-cards-sheet-' + (index + 1) + '.jpg';
+      link.click();
+    });
+  }
+
+  async function downloadA4PdfSheets() {
+    const sheets = await buildA4SheetCanvases();
+    if (!sheets.length) {
+      return;
+    }
+
+    if (!window.jspdf || !window.jspdf.jsPDF) {
+      alert('PDF library failed to load. Please refresh and try again.');
+      return;
+    }
+
+    const jsPDF = window.jspdf.jsPDF;
+    const doc = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4'
+    });
+
+    sheets.forEach(function (sheet, index) {
+      if (index > 0) {
+        doc.addPage('a4', 'portrait');
+      }
+      const img = sheet.toDataURL('image/jpeg', 0.95);
+      doc.addImage(img, 'JPEG', 0, 0, 210, 297, undefined, 'FAST');
+    });
+
+    doc.save('staff-id-cards-a4-sheets.pdf');
+  }
+
+  (function () {
+    const searchInput = document.getElementById('staffSearch');
+    if (searchInput) {
+      searchInput.addEventListener('input', function () {
+        const query = searchInput.value.trim().toLowerCase();
+        document.querySelectorAll('.staff-row').forEach(function (row) {
+          row.style.display = row.textContent.toLowerCase().includes(query) ? '' : 'none';
+        });
+      });
+    }
+
+    if (typeof QRCode !== 'undefined') {
+      document.querySelectorAll('.qr-box[data-qr]').forEach(function (box) {
+        new QRCode(box, {
+          text: box.getAttribute('data-qr') || 'STAFF-ID',
+          width: 62,
+          height: 62,
+          correctLevel: QRCode.CorrectLevel.M
+        });
+      });
+    }
+  })();
+</script>
+{% endblock %}

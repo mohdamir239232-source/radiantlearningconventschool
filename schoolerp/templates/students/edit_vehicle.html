@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+<h3>Edit Vehicle</h3>
+
+<form method="post">
+
+{% csrf_token %}
+
+<div class="row">
+
+<div class="col-md-4">
+<label>Vehicle Name</label>
+<input type="text" class="form-control" name="vehicle_name" value="{{vehicle.vehicle_name}}">
+</div>
+
+<div class="col-md-4">
+<label>Vehicle Number</label>
+<input type="text" class="form-control" name="reg_number" value="{{vehicle.reg_number}}">
+</div>
+
+<div class="col-md-4">
+<label>Seats</label>
+<input type="number" class="form-control" name="seats" value="{{vehicle.seats}}">
+</div>
+
+</div>
+
+<br>
+
+<div class="row">
+
+<div class="col-md-6">
+<label>Driver Name</label>
+<input type="text" class="form-control" name="driver_name" value="{{vehicle.driver_name}}">
+</div>
+
+<div class="col-md-6">
+<label>Driver Mobile</label>
+<input type="text" class="form-control" name="driver_mobile" value="{{vehicle.driver_mobile}}">
+</div>
+
+</div>
+
+<br>
+
+<button class="btn btn-success">Update Vehicle</button>
+
+</form>
+
+</div>
+
+{% endblock %}

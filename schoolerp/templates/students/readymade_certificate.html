@@ -1,0 +1,315 @@
+{% extends 'base_layout.html' %}
+
+{% block content %}
+<style>
+.rm-wrap {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    gap: 16px;
+}
+
+.panel {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 14px;
+}
+
+.panel h3 {
+    margin: 0 0 12px 0;
+    font-size: 16px;
+    color: #111827;
+}
+
+.field {
+    margin-bottom: 12px;
+}
+
+.field label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    color: #374151;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+}
+
+.field select {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    font-size: 14px;
+    background: #fff;
+}
+
+.field select:focus {
+    outline: none;
+    border-color: #b80b36;
+    box-shadow: 0 0 0 3px rgba(184, 11, 54, 0.12);
+}
+
+.btn-print {
+    width: 100%;
+    padding: 10px 12px;
+    border: none;
+    border-radius: 8px;
+    background: #b80b36;
+    color: #fff;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.btn-print:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+}
+
+.certificate {
+    background: #fff;
+    border: 10px solid #f4e7ea;
+    border-radius: 14px;
+    padding: 34px 34px 28px;
+    min-height: 420px;
+    position: relative;
+}
+
+.cert-title {
+    text-align: center;
+    font-size: 30px;
+    font-weight: 800;
+    color: #7f102d;
+    letter-spacing: 0.08em;
+    margin-bottom: 5px;
+}
+
+.cert-sub {
+    text-align: center;
+    color: #6b7280;
+    margin-bottom: 26px;
+    font-size: 13px;
+}
+
+.cert-body {
+    font-size: 17px;
+    line-height: 1.9;
+    color: #1f2937;
+}
+
+.underline {
+    font-weight: 700;
+    border-bottom: 1px dashed #111827;
+    padding: 0 4px;
+}
+
+.sign-row {
+    margin-top: 50px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.sign-box {
+    text-align: center;
+    min-width: 200px;
+}
+
+.sign-line {
+    border-top: 1px solid #111827;
+    margin-top: 24px;
+    padding-top: 4px;
+    font-size: 13px;
+}
+
+.placeholder {
+    text-align: center;
+    color: #64748b;
+    margin-top: 120px;
+    font-size: 16px;
+}
+
+@media (max-width: 980px) {
+    .rm-wrap {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media print {
+    .topbar, .sidebar, .panel, .page-helper { display: none !important; }
+    .main { margin-left: 0 !important; width: 100% !important; }
+    .content { padding: 0 !important; background: #fff !important; }
+    .certificate { border: none; padding: 20px; }
+}
+</style>
+
+<div class="page-helper" style="margin-bottom:10px;color:#6b7280;">Certificate > Readymade Certificate</div>
+
+<div class="rm-wrap">
+    <div class="panel">
+        <h3>Readymade Certificate</h3>
+
+        <div class="field">
+            <label for="classSel">Class</label>
+            <select id="classSel" onchange="onClassChange()">
+                <option value="">Select Class</option>
+                {% for class_name in class_names %}
+                <option value="{{ class_name }}">{{ class_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="field">
+            <label for="sectionSel">Section</label>
+            <select id="sectionSel" onchange="onSectionChange()" disabled>
+                <option value="">Select Section</option>
+            </select>
+        </div>
+
+        <div class="field">
+            <label for="studentSel">Student</label>
+            <select id="studentSel" onchange="onStudentChange()" disabled>
+                <option value="">Select Student</option>
+            </select>
+        </div>
+
+        <button id="printBtn" class="btn-print" onclick="printCertificate()" disabled>Print Certificate</button>
+    </div>
+
+    <div class="panel">
+        <div id="certificatePreview" class="certificate">
+            <div class="placeholder">Class, section aur student select karke certificate auto-ready hoga.</div>
+        </div>
+    </div>
+</div>
+
+<script>
+let studentsCache = [];
+let selectedStudent = null;
+
+function escapeHtml(text) {
+    const val = String(text || '');
+    return val.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+function onClassChange() {
+    const className = document.getElementById('classSel').value;
+    const sectionSel = document.getElementById('sectionSel');
+    const studentSel = document.getElementById('studentSel');
+
+    selectedStudent = null;
+    studentsCache = [];
+    sectionSel.innerHTML = '<option value="">Select Section</option>';
+    studentSel.innerHTML = '<option value="">Select Student</option>';
+    sectionSel.disabled = true;
+    studentSel.disabled = true;
+    document.getElementById('printBtn').disabled = true;
+    resetPreview();
+
+    if (!className) return;
+
+    fetch(`/certificate/api/students/?class_name=${encodeURIComponent(className)}`)
+        .then(r => r.json())
+        .then(data => {
+            if (!data.success) {
+                alert(data.error || 'Failed to load class data');
+                return;
+            }
+
+            const sections = Array.isArray(data.sections) ? data.sections : [];
+            sections.forEach(sec => {
+                sectionSel.innerHTML += `<option value="${escapeHtml(sec)}">${escapeHtml(sec)}</option>`;
+            });
+            sectionSel.disabled = false;
+        })
+        .catch(() => alert('Network error while loading class data'));
+}
+
+function onSectionChange() {
+    const className = document.getElementById('classSel').value;
+    const section = document.getElementById('sectionSel').value;
+    const studentSel = document.getElementById('studentSel');
+
+    selectedStudent = null;
+    studentsCache = [];
+    studentSel.innerHTML = '<option value="">Select Student</option>';
+    studentSel.disabled = true;
+    document.getElementById('printBtn').disabled = true;
+    resetPreview();
+
+    if (!className || !section) return;
+
+    const params = new URLSearchParams({ class_name: className, section: section });
+    fetch('/certificate/api/students/?' + params.toString())
+        .then(r => r.json())
+        .then(data => {
+            if (!data.success) {
+                alert(data.error || 'Failed to load students');
+                return;
+            }
+
+            studentsCache = Array.isArray(data.students) ? data.students : [];
+            studentsCache.forEach(stu => {
+                studentSel.innerHTML += `<option value="${stu.id}">${escapeHtml(stu.name)} (${escapeHtml(String(stu.roll_no))})</option>`;
+            });
+            studentSel.disabled = false;
+        })
+        .catch(() => alert('Network error while loading students'));
+}
+
+function onStudentChange() {
+    const studentId = parseInt(document.getElementById('studentSel').value || '0', 10);
+    selectedStudent = studentsCache.find(s => s.id === studentId) || null;
+    renderCertificate();
+}
+
+function resetPreview() {
+    document.getElementById('certificatePreview').innerHTML =
+        '<div class="placeholder">Class, section aur student select karke certificate auto-ready hoga.</div>';
+}
+
+function renderCertificate() {
+    const box = document.getElementById('certificatePreview');
+    const printBtn = document.getElementById('printBtn');
+
+    if (!selectedStudent) {
+        resetPreview();
+        printBtn.disabled = true;
+        return;
+    }
+
+    const today = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' });
+
+    box.innerHTML = `
+        <div class="cert-title">STUDENT CERTIFICATE</div>
+        <div class="cert-sub">To Whom It May Concern</div>
+        <div class="cert-body">
+            This is to certify that <span class="underline">${escapeHtml(selectedStudent.name)}</span>,
+            S/O <span class="underline">${escapeHtml(selectedStudent.father_name)}</span>,
+            Admission No. <span class="underline">${escapeHtml(selectedStudent.admission_number)}</span>,
+            Roll No. <span class="underline">${escapeHtml(String(selectedStudent.roll_no))}</span>,
+            is a bonafide student of Class <span class="underline">${escapeHtml(selectedStudent.student_class)}</span>
+            Section <span class="underline">${escapeHtml(selectedStudent.section)}</span> in this institution.
+            
+            This certificate is issued on <span class="underline">${escapeHtml(today)}</span>
+            upon request for official use.
+        </div>
+        <div class="sign-row">
+            <div class="sign-box">
+                <div style="font-size:12px;color:#6b7280;">Date: ${escapeHtml(today)}</div>
+                <div class="sign-line">Principal / Authorized Signatory</div>
+            </div>
+        </div>
+    `;
+
+    printBtn.disabled = false;
+}
+
+function printCertificate() {
+    if (!selectedStudent) {
+        alert('Please select student first.');
+        return;
+    }
+    window.print();
+}
+</script>
+{% endblock %}

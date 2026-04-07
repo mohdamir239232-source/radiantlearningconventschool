@@ -1,0 +1,369 @@
+{% extends 'base_layout.html' %}
+
+{% block content %}
+<style>
+.admission-wrap {
+  background: #f8fafc;
+  padding: 20px;
+  border-radius: 14px;
+}
+
+.admission-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.admission-head h2 {
+  margin: 0;
+  color: #14213d;
+}
+
+.ad-no {
+  background: #14213d;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.section-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 14px;
+}
+
+.section-title {
+  margin: 0 0 14px;
+  color: #b80b36;
+  font-size: 18px;
+}
+
+.grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.field label {
+  display: block;
+  font-size: 13px;
+  color: #334155;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+}
+
+.field input.error,
+.field select.error,
+.field textarea.error {
+  border-color: #dc2626;
+  background: #fff7f7;
+}
+
+.field-error {
+  color: #b00020;
+  font-size: 12px;
+  margin-top: 6px;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.btn {
+  border: 0;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: #b80b36;
+  color: #fff;
+}
+
+.btn-link {
+  background: #e2e8f0;
+  color: #0f172a;
+  text-decoration: none;
+}
+
+.error-note {
+  margin-bottom: 12px;
+  color: #b00020;
+  font-weight: 600;
+}
+
+@media (max-width: 1024px) {
+  .grid-4, .grid-3, .grid-2 {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .grid-4, .grid-3, .grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+
+<div class="admission-wrap">
+  <div class="admission-head">
+    <h2>Student Admission Form</h2>
+    <div class="ad-no">Ad. No.: {{ next_admission_number }}</div>
+  </div>
+
+  {% if form.errors %}
+  <div class="error-note">Please correct highlighted fields before submission.</div>
+  {% endif %}
+
+  {% if form.non_field_errors %}
+  <div class="error-note">{{ form.non_field_errors }}</div>
+  {% endif %}
+
+  {% with name=form.name dob=form.dob pen_number=form.pen_number student_class=form.student_class section=form.section admission_date=form.admission_date gender=form.gender category=form.category fee_category=form.fee_category student_status=form.student_status aadhar_number=form.aadhar_number apaar_id=form.apaar_id roll_no=form.roll_no session=form.session contact_detail=form.contact_detail photo=form.photo address=form.address state=form.state district=form.district pin_code=form.pin_code nationality=form.nationality father_name=form.father_name mother_name=form.mother_name local_guardian=form.local_guardian father_occupation=form.father_occupation mother_occupation=form.mother_occupation father_qualification=form.father_qualification mother_qualification=form.mother_qualification father_aadhar=form.father_aadhar mother_aadhar=form.mother_aadhar father_mobile=form.father_mobile mother_mobile=form.mother_mobile parents_detail=form.parents_detail last_school_name=form.last_school_name previous_class=form.previous_class last_school_address=form.last_school_address transport_required=form.transport_required transport_route=form.transport_route transport_village=form.transport_village transport_amount=form.transport_amount admission_number=form.admission_number %}
+
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <div class="section-card">
+      <h3 class="section-title">1. Scholar's Details</h3>
+      <div class="grid-4">
+        <div class="field"><label>Ad. No.</label>{{ admission_number }}{% for error in admission_number.errors %}<div class="field-error">{{ error }}</div>{% endfor %}</div>
+        <div class="field"><label>Student Name</label>{{ name }}{% for error in name.errors %}<div class="field-error">{{ error }}</div>{% endfor %}</div>
+        <div class="field"><label>DOB</label>{{ dob }}{% for error in dob.errors %}<div class="field-error">{{ error }}</div>{% endfor %}</div>
+        <div class="field"><label>PEN Number</label>{{ pen_number }}{% for error in pen_number.errors %}<div class="field-error">{{ error }}</div>{% endfor %}</div>
+        <div class="field"><label>Class</label>{{ student_class }}{% for error in student_class.errors %}<div class="field-error">{{ error }}</div>{% endfor %}</div>
+        <div class="field"><label>Section</label>{{ section }}{% for error in section.errors %}<div class="field-error">{{ error }}</div>{% endfor %}</div>
+        <div class="field"><label>Roll No.</label>{{ roll_no }}{% for error in roll_no.errors %}<div class="field-error">{{ error }}</div>{% endfor %}</div>
+        <div class="field"><label>Academic Session</label>{{ session }}{% for error in session.errors %}<div class="field-error">{{ error }}</div>{% endfor %}</div>
+        <div class="field"><label>Date of Admission</label>{{ admission_date }}{% for error in admission_date.errors %}<div class="field-error">{{ error }}</div>{% endfor %}</div>
+        <div class="field"><label>Gender</label>{{ gender }}{% for error in gender.errors %}<div class="field-error">{{ error }}</div>{% endfor %}</div>
+        <div class="field"><label>Category</label>{{ category }}{% for error in category.errors %}<div class="field-error">{{ error }}</div>{% endfor %}</div>
+        <div class="field"><label>Fee Category</label>{{ fee_category }}{% for error in fee_category.errors %}<div class="field-error">{{ error }}</div>{% endfor %}</div>
+        <div class="field"><label>New/Old</label>{{ student_status }}{% for error in student_status.errors %}<div class="field-error">{{ error }}</div>{% endfor %}</div>
+        <div class="field"><label>Aadhar Number</label>{{ aadhar_number }}{% for error in aadhar_number.errors %}<div class="field-error">{{ error }}</div>{% endfor %}</div>
+        <div class="field"><label>Apaar ID</label>{{ apaar_id }}{% for error in apaar_id.errors %}<div class="field-error">{{ error }}</div>{% endfor %}</div>
+        <div class="field"><label>Contact Detail</label>{{ contact_detail }}{% for error in contact_detail.errors %}<div class="field-error">{{ error }}</div>{% endfor %}</div>
+        <div class="field"><label>Student Photo</label>{{ photo }}{% for error in photo.errors %}<div class="field-error">{{ error }}</div>{% endfor %}</div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <h3 class="section-title">2. Address Detail</h3>
+      <div class="grid-3">
+        <div class="field" style="grid-column: span 3;"><label>Address</label>{{ address }}{% for error in address.errors %}<div class="field-error">{{ error }}</div>{% endfor %}</div>
+        <div class="field"><label>State</label>{{ state }}{% for error in state.errors %}<div class="field-error">{{ error }}</div>{% endfor %}</div>
+        <div class="field"><label>District</label>{{ district }}{% for error in district.errors %}<div class="field-error">{{ error }}</div>{% endfor %}</div>
+        <div class="field"><label>PIN Code</label>{{ pin_code }}{% for error in pin_code.errors %}<div class="field-error">{{ error }}</div>{% endfor %}</div>
+        <div class="field"><label>Nationality</label>{{ nationality }}{% for error in nationality.errors %}<div class="field-error">{{ error }}</div>{% endfor %}</div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <h3 class="section-title">3. Parents Detail</h3>
+      <div class="grid-4">
+        <div class="field"><label>Father Name</label>{{ father_name }}{% for error in father_name.errors %}<div class="field-error">{{ error }}</div>{% endfor %}</div>
+        <div class="field"><label>Mother Name</label>{{ mother_name }}{% for error in mother_name.errors %}<div class="field-error">{{ error }}</div>{% endfor %}</div>
+        <div class="field"><label>Local Guardian (if any)</label>{{ local_guardian }}{% for error in local_guardian.errors %}<div class="field-error">{{ error }}</div>{% endfor %}</div>
+        <div class="field"><label>Father Occupation</label>{{ father_occupation }}{% for error in father_occupation.errors %}<div class="field-error">{{ error }}</div>{% endfor %}</div>
+        <div class="field"><label>Mother Occupation</label>{{ mother_occupation }}{% for error in mother_occupation.errors %}<div class="field-error">{{ error }}</div>{% endfor %}</div>
+        <div class="field"><label>Father Qualification</label>{{ father_qualification }}{% for error in father_qualification.errors %}<div class="field-error">{{ error }}</div>{% endfor %}</div>
+        <div class="field"><label>Mother Qualification</label>{{ mother_qualification }}{% for error in mother_qualification.errors %}<div class="field-error">{{ error }}</div>{% endfor %}</div>
+        <div class="field"><label>Father Aadhar Card</label>{{ father_aadhar }}{% for error in father_aadhar.errors %}<div class="field-error">{{ error }}</div>{% endfor %}</div>
+        <div class="field"><label>Mother Aadhar Card</label>{{ mother_aadhar }}{% for error in mother_aadhar.errors %}<div class="field-error">{{ error }}</div>{% endfor %}</div>
+        <div class="field"><label>Father Mobile Number</label>{{ father_mobile }}{% for error in father_mobile.errors %}<div class="field-error">{{ error }}</div>{% endfor %}</div>
+        <div class="field"><label>Mother Mobile Number</label>{{ mother_mobile }}{% for error in mother_mobile.errors %}<div class="field-error">{{ error }}</div>{% endfor %}</div>
+        <div class="field" style="grid-column: span 4;"><label>Parents Detail</label>{{ parents_detail }}{% for error in parents_detail.errors %}<div class="field-error">{{ error }}</div>{% endfor %}</div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <h3 class="section-title">4. Previous School Detail</h3>
+      <div class="grid-3">
+        <div class="field"><label>Last School Name</label>{{ last_school_name }}{% for error in last_school_name.errors %}<div class="field-error">{{ error }}</div>{% endfor %}</div>
+        <div class="field"><label>Class</label>{{ previous_class }}{% for error in previous_class.errors %}<div class="field-error">{{ error }}</div>{% endfor %}</div>
+        <div class="field" style="grid-column: span 3;"><label>Last School Address</label>{{ last_school_address }}{% for error in last_school_address.errors %}<div class="field-error">{{ error }}</div>{% endfor %}</div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <h3 class="section-title">5. Transport Details</h3>
+      <div class="grid-4">
+        <div class="field"><label>Transport Required</label>{{ transport_required }}{% for error in transport_required.errors %}<div class="field-error">{{ error }}</div>{% endfor %}</div>
+        <div class="field"><label>Route</label>{{ transport_route }}{% for error in transport_route.errors %}<div class="field-error">{{ error }}</div>{% endfor %}</div>
+        <div class="field"><label>Village</label>{{ transport_village }}{% for error in transport_village.errors %}<div class="field-error">{{ error }}</div>{% endfor %}</div>
+        <div class="field"><label>Route Amount (Auto)</label>{{ transport_amount }}{% for error in transport_amount.errors %}<div class="field-error">{{ error }}</div>{% endfor %}</div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <a class="btn btn-link" href="/student/list/">Back to List</a>
+      <button class="btn btn-primary" type="submit">Save Admission</button>
+    </div>
+  </form>
+  {% endwith %}
+</div>
+
+{{ route_fare_map|json_script:'route-fare-map' }}
+{{ route_village_map|json_script:'route-village-map' }}
+{{ route_village_fare_map|json_script:'route-village-fare-map' }}
+{{ class_section_map|json_script:'class-section-map' }}
+{{ state_district_map|json_script:'state-district-map' }}
+{{ all_districts|json_script:'all-districts' }}
+<script>
+  (function() {
+    const classSelect = document.getElementById('id_student_class');
+    const sectionSelect = document.getElementById('id_section');
+    const stateSelect = document.getElementById('id_state');
+    const districtSelect = document.getElementById('id_district');
+    const routeSelect = document.getElementById('id_transport_route');
+    const villageSelect = document.getElementById('id_transport_village');
+    const requiredSelect = document.getElementById('id_transport_required');
+    const amountInput = document.getElementById('id_transport_amount');
+    const fareMap = JSON.parse(document.getElementById('route-fare-map').textContent || '{}');
+    const villageMap = JSON.parse(document.getElementById('route-village-map').textContent || '{}');
+    const villageFareMap = JSON.parse(document.getElementById('route-village-fare-map').textContent || '{}');
+    const classSectionMap = JSON.parse(document.getElementById('class-section-map').textContent || '{}');
+    const stateDistrictMap = JSON.parse(document.getElementById('state-district-map').textContent || '{}');
+    const allDistricts = JSON.parse(document.getElementById('all-districts').textContent || '[]');
+
+      document.querySelectorAll('.field').forEach((field) => {
+        if (field.querySelector('.field-error')) {
+          const control = field.querySelector('input, select, textarea');
+          if (control) {
+            control.classList.add('error');
+          }
+        }
+      });
+
+    function setOptions(selectEl, options, placeholder) {
+      if (!selectEl) return;
+      const current = selectEl.value;
+      selectEl.innerHTML = '';
+
+      const defaultOpt = document.createElement('option');
+      defaultOpt.value = '';
+      defaultOpt.textContent = placeholder;
+      selectEl.appendChild(defaultOpt);
+
+      options.forEach(function(value) {
+        const opt = document.createElement('option');
+        opt.value = value;
+        opt.textContent = value;
+        if (value === current) {
+          opt.selected = true;
+        }
+        selectEl.appendChild(opt);
+      });
+    }
+
+    function updateSections() {
+      if (!classSelect || !sectionSelect) return;
+      const className = classSelect.value;
+      const sections = classSectionMap[className] || [];
+      setOptions(sectionSelect, sections, 'Select Section');
+    }
+
+    function updateDistricts() {
+      if (!stateSelect || !districtSelect) return;
+      const stateName = stateSelect.value;
+      const districts = stateDistrictMap[stateName] || [];
+      setOptions(districtSelect, districts, 'Select District');
+      districtSelect.required = stateName !== '';
+    }
+
+    function updateVillages() {
+      if (!routeSelect || !villageSelect) return;
+      const routeId = routeSelect.value;
+      const villageEntries = villageFareMap[routeId] || [];
+      const villages = villageEntries.length
+        ? villageEntries.map(function(item) { return item.village; })
+        : (villageMap[routeId] || []);
+      setOptions(villageSelect, villages, 'Select transport village');
+    }
+
+    function updateFare() {
+      if (!routeSelect || !villageSelect || !amountInput) return;
+      const routeId = routeSelect.value;
+      const selectedVillage = villageSelect.value;
+      let fareValue = null;
+
+      const villageEntries = villageFareMap[routeId] || [];
+      if (selectedVillage && villageEntries.length) {
+        const matched = villageEntries.find(function(item) {
+          return item.village === selectedVillage;
+        });
+        if (matched && matched.fare !== null && matched.fare !== '') {
+          fareValue = parseFloat(matched.fare);
+        }
+      }
+
+      if ((fareValue === null || Number.isNaN(fareValue)) && routeId && fareMap[routeId]) {
+        fareValue = parseFloat(fareMap[routeId]);
+      }
+
+      amountInput.value = (fareValue !== null && !Number.isNaN(fareValue)) ? fareValue.toFixed(2) : '';
+
+      if (requiredSelect && requiredSelect.value !== 'Yes' && amountInput.value !== '') {
+        // Keep fare visible for user reference even before toggling transport required.
+      }
+    }
+
+    if (classSelect && sectionSelect) {
+      classSelect.addEventListener('change', updateSections);
+      updateSections();
+    }
+
+    if (stateSelect && districtSelect) {
+      stateSelect.addEventListener('change', updateDistricts);
+      updateDistricts();
+    }
+
+    if (routeSelect) {
+      routeSelect.addEventListener('change', function() {
+        updateVillages();
+        updateFare();
+      });
+      updateVillages();
+    }
+
+    if (villageSelect) {
+      villageSelect.addEventListener('change', updateFare);
+    }
+
+    if (routeSelect && requiredSelect) {
+      routeSelect.addEventListener('change', updateFare);
+      requiredSelect.addEventListener('change', updateFare);
+      updateFare();
+    }
+  })();
+</script>
+{% endblock %}

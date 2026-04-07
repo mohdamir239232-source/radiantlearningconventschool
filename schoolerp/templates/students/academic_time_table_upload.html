@@ -1,0 +1,61 @@
+{% extends 'base_layout.html' %}
+
+{% block content %}
+<style>
+.card { background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:14px; margin-bottom:14px; }
+.card h3 { margin:0 0 10px; color:#111827; }
+.note { background:#f8fafc; border:1px dashed #cbd5e1; padding:10px; border-radius:8px; font-size:13px; color:#475569; }
+.btn { border:none; border-radius:8px; padding:10px 12px; background:#1d4ed8; color:#fff; font-weight:700; cursor:pointer; }
+.table { width:100%; border-collapse:collapse; }
+.table th, .table td { border-bottom:1px solid #e5e7eb; padding:8px; font-size:13px; }
+.table th { background:#f9fafb; text-transform:uppercase; font-size:12px; color:#374151; }
+</style>
+
+<div class="card">
+    <h3>Time Table Upload (CSV)</h3>
+    <div class="note">
+        Required columns: <strong>class_name, section, day_of_week, period_label, subject_name</strong><br>
+        Optional columns: teacher_name, start_time, end_time, room_number<br>
+        Example day_of_week: monday, tuesday, wednesday...
+    </div>
+    <form method="post" enctype="multipart/form-data" style="margin-top:12px;display:flex;gap:10px;align-items:center;">
+        {% csrf_token %}
+        <input type="file" name="csv_file" accept=".csv" required>
+        <button class="btn" type="submit">Upload Time Table</button>
+    </form>
+</div>
+
+<div class="card">
+    <h3>Latest Uploaded Rows</h3>
+    <div style="overflow:auto;">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Class</th>
+                    <th>Section</th>
+                    <th>Day</th>
+                    <th>Period</th>
+                    <th>Subject</th>
+                    <th>Teacher</th>
+                    <th>Source</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in latest_entries %}
+                <tr>
+                    <td>{{ row.class_name }}</td>
+                    <td>{{ row.section }}</td>
+                    <td>{{ row.get_day_of_week_display }}</td>
+                    <td>{{ row.period_label }}</td>
+                    <td>{{ row.subject_name }}</td>
+                    <td>{{ row.teacher_name|default:'-' }}</td>
+                    <td>{{ row.get_source_display }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7">No rows available.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

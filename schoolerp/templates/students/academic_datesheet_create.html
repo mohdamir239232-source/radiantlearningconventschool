@@ -1,0 +1,268 @@
+{% extends "base_layout.html" %}
+{% block title %}Exam Date Sheet{% endblock %}
+{% block content %}
+<style>
+  .academic-page .page-hero {
+    background: linear-gradient(120deg, #fef2f2 0%, #ffffff 55%, #f8fafc 100%);
+    border: 1px solid #fecaca;
+    border-radius: 16px;
+    padding: 16px 18px;
+    margin-bottom: 14px;
+  }
+  .academic-page .hero-title {
+    margin: 0;
+    font-size: 1.2rem;
+    color: #0f172a;
+  }
+  .academic-page .hero-subtitle {
+    margin: 2px 0 0;
+    color: #475569;
+    font-size: 0.86rem;
+  }
+  .academic-page .hero-chip {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 999px;
+    padding: 6px 12px;
+    font-size: 0.78rem;
+    color: #1e293b;
+    font-weight: 600;
+  }
+  .academic-page .academic-card {
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.07);
+  }
+  .academic-page .card-header {
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .academic-page .academic-table thead th {
+    background: #0f172a;
+    color: #f8fafc;
+    font-size: 0.72rem;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+  .academic-page .filter-bar {
+    position: sticky;
+    top: 0;
+    z-index: 7;
+    background: #ffffff;
+  }
+  .academic-page .academic-table tbody tr {
+    transition: background-color 0.2s ease;
+  }
+  .academic-page .academic-table tbody tr:hover {
+    background: #f8fafc;
+  }
+  .academic-page .field-badge {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 999px;
+    padding: 2px 10px;
+    font-size: 0.74rem;
+    font-weight: 600;
+    color: #0f172a;
+  }
+  .academic-page .action-btn {
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+  }
+  .academic-page .empty-state {
+    padding: 26px 12px;
+    text-align: center;
+    color: #64748b;
+  }
+  .academic-page .empty-state i {
+    font-size: 1.1rem;
+    margin-bottom: 6px;
+    color: #94a3b8;
+  }
+</style>
+<div class="container-fluid py-3 academic-page">
+  <div class="page-hero d-flex justify-content-between align-items-center flex-wrap gap-3">
+    <div class="d-flex align-items-center gap-2">
+      <i class="fas fa-clipboard-list text-danger fs-4"></i>
+      <div>
+        <h4 class="hero-title fw-bold">Exam Date Sheet</h4>
+        <p class="hero-subtitle">Manage exam calendar with date, timing, marks, and room details.</p>
+      </div>
+    </div>
+    <div class="d-flex align-items-center gap-2 flex-wrap">
+      <span class="hero-chip"><i class="fas fa-calendar-check me-1 text-danger"></i>{{ datesheets|length }} Entries</span>
+      <span class="hero-chip"><i class="fas fa-clock me-1 text-danger"></i>Time-Ready</span>
+    </div>
+  </div>
+
+  {% if messages %}
+    {% for msg in messages %}
+      <div class="alert alert-{{ msg.tags|default:'info' }} alert-dismissible fade show py-2" role="alert">
+        {{ msg }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <div class="row g-3">
+    <!-- LEFT: Form -->
+    <div class="col-lg-5">
+      <div class="card shadow-sm border-0 academic-card">
+        <div class="card-header bg-danger text-white py-2">
+          <i class="fas fa-{% if edit_obj %}edit{% else %}plus-circle{% endif %} me-2"></i>
+          {% if edit_obj %}Edit Exam Entry{% else %}Add Exam Entry{% endif %}
+        </div>
+        <div class="card-body">
+          <form method="post">
+            {% csrf_token %}
+            {% if edit_obj %}
+              <input type="hidden" name="record_id" value="{{ edit_obj.pk }}">
+            {% endif %}
+            <div class="row g-2">
+              <div class="col-6">
+                <label class="form-label fw-semibold small">Class <span class="text-danger">*</span></label>
+                <input list="classList" name="class_name" class="form-control form-control-sm"
+                       value="{{ edit_obj.class_name|default:'' }}" placeholder="e.g. 10" required>
+                <datalist id="classList">
+                  {% for c in class_names %}<option value="{{ c }}">{% endfor %}
+                </datalist>
+              </div>
+              <div class="col-6">
+                <label class="form-label fw-semibold small">Section</label>
+                <input name="section" class="form-control form-control-sm"
+                       value="{{ edit_obj.section|default:'' }}" placeholder="A / All">
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-semibold small">Subject <span class="text-danger">*</span></label>
+                <input name="subject_name" class="form-control form-control-sm"
+                       value="{{ edit_obj.subject_name|default:'' }}" placeholder="Subject Name" required>
+              </div>
+              <div class="col-6">
+                <label class="form-label fw-semibold small">Exam Type <span class="text-danger">*</span></label>
+                <select name="exam_type" class="form-select form-select-sm" required>
+                  {% for val, label in exam_type_choices %}
+                    <option value="{{ val }}" {% if edit_obj.exam_type == val %}selected{% elif not edit_obj and val == 'final' %}selected{% endif %}>{{ label }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-6">
+                <label class="form-label fw-semibold small">Total Marks</label>
+                <input type="number" name="total_marks" class="form-control form-control-sm" min="1"
+                       value="{{ edit_obj.total_marks|default:'100' }}">
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-semibold small">Exam Date <span class="text-danger">*</span></label>
+                <input type="date" name="exam_date" class="form-control form-control-sm"
+                       value="{{ edit_obj.exam_date|date:'Y-m-d'|default:'' }}" required>
+              </div>
+              <div class="col-6">
+                <label class="form-label fw-semibold small">Start Time <span class="text-danger">*</span></label>
+                <input type="time" name="start_time" class="form-control form-control-sm"
+                       value="{{ edit_obj.start_time|time:'H:i'|default:'' }}" required>
+              </div>
+              <div class="col-6">
+                <label class="form-label fw-semibold small">End Time <span class="text-danger">*</span></label>
+                <input type="time" name="end_time" class="form-control form-control-sm"
+                       value="{{ edit_obj.end_time|time:'H:i'|default:'' }}" required>
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-semibold small">Venue / Room</label>
+                <input name="venue" class="form-control form-control-sm"
+                       value="{{ edit_obj.venue|default:'' }}" placeholder="Hall A, Room 12 (optional)">
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-semibold small">Notes</label>
+                <textarea name="notes" class="form-control form-control-sm" rows="2"
+                          placeholder="Special instructions...">{{ edit_obj.notes|default:'' }}</textarea>
+              </div>
+            </div>
+            <div class="d-flex gap-2 mt-3">
+              <button type="submit" class="btn btn-danger btn-sm px-4">
+                <i class="fas fa-save me-1"></i>{% if edit_obj %}Update{% else %}Add to Sheet{% endif %}
+              </button>
+              {% if edit_obj %}
+                <a href="/academic/datesheet-create/" class="btn btn-secondary btn-sm">
+                  <i class="fas fa-times me-1"></i>Cancel
+                </a>
+              {% endif %}
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Records -->
+    <div class="col-lg-7">
+      <div class="card shadow-sm border-0 academic-card">
+        <div class="card-header py-2 d-flex align-items-center justify-content-between flex-wrap gap-2 filter-bar">
+          <span class="fw-semibold"><i class="fas fa-table me-1 text-danger"></i>Exam Date Sheet</span>
+          <form method="get" class="d-flex gap-2 align-items-center flex-wrap">
+            <input list="classList2" name="class_name" class="form-control form-control-sm" style="width:90px"
+                   placeholder="Class" value="{{ filter_class }}">
+            <datalist id="classList2">{% for c in class_names %}<option value="{{ c }}">{% endfor %}</datalist>
+            <select name="exam_type" class="form-select form-select-sm" style="width:130px">
+              <option value="">All Types</option>
+              {% for val, label in exam_type_choices %}
+                <option value="{{ val }}" {% if filter_exam_type == val %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+            <button class="btn btn-sm btn-outline-danger"><i class="fas fa-search"></i></button>
+            {% if filter_class or filter_exam_type %}
+              <a href="/academic/datesheet-create/" class="btn btn-sm btn-outline-secondary"><i class="fas fa-times"></i></a>
+            {% endif %}
+          </form>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive" style="max-height:500px;overflow-y:auto;">
+            <table class="table table-sm table-hover table-bordered mb-0 small academic-table">
+              <thead class="sticky-top">
+                <tr>
+                  <th>#</th><th>Class</th><th>Sec</th><th>Subject</th><th>Type</th>
+                  <th>Date</th><th>Time</th><th>Marks</th><th>Venue</th><th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for d in datesheets %}
+                <tr>
+                  <td>{{ forloop.counter }}</td>
+                  <td><span class="field-badge">Class {{ d.class_name }}</span></td>
+                  <td><span class="field-badge">{{ d.section|default:'-' }}</span></td>
+                  <td>{{ d.subject_name }}</td>
+                  <td><span class="badge bg-warning text-dark">{{ d.get_exam_type_display }}</span></td>
+                  <td>{{ d.exam_date|date:"d M Y" }}</td>
+                  <td class="text-nowrap">{{ d.start_time|time:"h:i A" }} – {{ d.end_time|time:"h:i A" }}</td>
+                  <td class="text-center">{{ d.total_marks }}</td>
+                  <td>{{ d.venue|default:'-' }}</td>
+                  <td>
+                    <a href="/academic/datesheet-create/?edit={{ d.pk }}" class="btn btn-sm btn-outline-danger action-btn" title="Edit">
+                      <i class="fas fa-pen"></i></a>
+                    <form method="post" class="d-inline" onsubmit="return confirm('Delete this exam entry?')">
+                      {% csrf_token %}
+                      <input type="hidden" name="action" value="delete">
+                      <input type="hidden" name="record_id" value="{{ d.pk }}">
+                      <button class="btn btn-sm btn-outline-danger action-btn" title="Delete"><i class="fas fa-trash"></i></button>
+                    </form>
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="10">
+                    <div class="empty-state">
+                      <i class="fas fa-clipboard d-block"></i>
+                      No exam entries found. Add exam records to generate a date sheet.
+                    </div>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

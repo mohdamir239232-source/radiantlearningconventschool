@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div style="display:grid;grid-template-columns:2fr 1fr;gap:18px;align-items:start;">
+	<div style="background:#ffffff;border-radius:20px;padding:26px;box-shadow:0 18px 36px rgba(15, 23, 42, 0.08);border:1px solid #e2e8f0;">
+		<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;">
+			<div>
+				<div style="display:inline-block;padding:6px 12px;border-radius:999px;background:#fff7ed;color:#9a3412;font-size:12px;font-weight:600;margin-bottom:12px;">SUPER ADMIN IDENTITY</div>
+				<h3 style="margin-bottom:10px;color:#7f1d1d;font-size:26px;">{{ request.user.username }}</h3>
+				<p style="margin-bottom:0;color:#475569;max-width:560px;line-height:1.6;">Primary administrative profile for ERP governance, access approval, and institutional configuration monitoring.</p>
+			</div>
+			<a href="/account/change-password/" style="text-decoration:none;background:linear-gradient(135deg,#f59e0b,#f97316);color:#111827;font-weight:600;padding:12px 18px;border-radius:12px;box-shadow:0 14px 28px rgba(249,115,22,0.2);">Update Password</a>
+		</div>
+
+		<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:22px;">
+			<div style="padding:16px;border-radius:16px;background:#f8fafc;border:1px solid #e2e8f0;">
+				<div style="font-size:12px;color:#64748b;margin-bottom:6px;">Role</div>
+				<div style="font-size:17px;font-weight:600;color:#0f172a;">Super Admin</div>
+			</div>
+			<div style="padding:16px;border-radius:16px;background:#f8fafc;border:1px solid #e2e8f0;">
+				<div style="font-size:12px;color:#64748b;margin-bottom:6px;">Account Type</div>
+				<div style="font-size:17px;font-weight:600;color:#0f172a;">Control Account</div>
+			</div>
+			<div style="padding:16px;border-radius:16px;background:#f8fafc;border:1px solid #e2e8f0;">
+				<div style="font-size:12px;color:#64748b;margin-bottom:6px;">Security Status</div>
+				<div style="font-size:17px;font-weight:600;color:#166534;">Active</div>
+			</div>
+		</div>
+	</div>
+
+	<div style="background:#fff7ed;border-radius:20px;padding:22px;border:1px solid #fed7aa;box-shadow:0 14px 30px rgba(249,115,22,0.12);">
+		<h4 style="margin-bottom:14px;color:#9a3412;">Quick Account Actions</h4>
+		<a href="/account/admin/" style="display:block;text-decoration:none;background:#ffffff;color:#7c2d12;padding:12px 14px;border-radius:12px;font-weight:600;margin-bottom:10px;">Profile Overview</a>
+		<a href="/account/change-password/" style="display:block;text-decoration:none;background:#ffffff;color:#7c2d12;padding:12px 14px;border-radius:12px;font-weight:600;margin-bottom:10px;">Password and Access Policy</a>
+		<a href="/account/logout/" style="display:block;text-decoration:none;background:#7f1d1d;color:#fff7ed;padding:12px 14px;border-radius:12px;font-weight:600;">Secure Sign Out</a>
+	</div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+<h3>Add Transport Route</h3>
+
+<form method="post">
+
+{% csrf_token %}
+
+<div class="row">
+
+<div class="col-md-6">
+<label class="form-label">Route Name</label>
+<input type="text" class="form-control" name="route_name" required>
+</div>
+
+<div class="col-md-6">
+<label class="form-label">Transport Fee</label>
+<input type="number" class="form-control" name="amount" required>
+</div>
+
+</div>
+
+<br>
+
+<button class="btn btn-primary">Save Route</button>
+
+</form>
+
+<hr>
+
+<h4 class="mt-4">Route List</h4>
+
+<table class="table table-bordered table-striped">
+
+<thead class="table-dark">
+
+<tr>
+<th>Route</th>
+<th>Fee</th>
+<th>Action</th>
+</tr>
+
+</thead>
+
+<tbody>
+
+{% for r in routes %}
+
+<tr>
+
+<td>{{ r.route_name }}</td>
+<td>{{ r.transport_fee }}</td>
+<td>
+<a href="/edit-route/{{ r.id }}/" class="btn btn-sm btn-warning">Edit</a>
+<a href="/delete-route/{{ r.id }}/" class="btn btn-sm btn-danger">Delete</a>
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,63 @@
+<h2 style="text-align:center">
+RADIANT LEARNING CONVENT SCHOOL
+</h2>
+
+<h3 style="text-align:center">Fee Receipt</h3>
+
+Receipt No : {{fee.receipt_no}}
+
+Student Name : {{fee.student.student_name}}
+
+Father : {{fee.student.father_name}}
+
+Class : {{fee.student.class_name}}
+
+Month : {{fee.month}}
+
+<hr>
+
+Tuition Fee : {{fee.tuition_fee}}
+
+Transport Fee : {{fee.transport_fee}}
+
+Books : {{fee.books_fee}}
+
+Dress : {{fee.dress_fee}}
+
+Other : {{fee.other_fee}}
+
+<hr>
+
+Total : {{fee.total_amount}}
+
+Received : {{fee.received_amount}}
+
+Balance : {{fee.total_amount|add:"-fee.received_amount"}}
+
+<br><br>
+
+<button onclick="window.print()">Print</button>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Receipt</title>
+</head>
+<body onload="window.print()">
+
+    <h2>School Fee Receipt</h2>
+
+    <p><b>Receipt No:</b> {{ fee.receipt_no }}</p>
+    <p><b>Student:</b> {{ fee.student.student_name }}</p>
+    <p><b>Class:</b> {{ fee.student.class_name }}</p>
+
+    <hr>
+
+    <p>Tuition Fee: ₹{{ fee.tuition_fee }}</p>
+    <p>Transport Fee: ₹{{ fee.transport_fee }}</p>
+
+    <hr>
+
+    <h3>Total: ₹{{ fee.total_amount }}</h3>
+
+</body>
+</html>

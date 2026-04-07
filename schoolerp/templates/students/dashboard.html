@@ -1,0 +1,498 @@
+{% extends 'base_layout.html' %}
+
+{% block content %}
+
+<style>
+/* Dashboard Styles */
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.dashboard-header h2 {
+    margin: 0;
+    color: #333;
+    font-size: 28px;
+    font-weight: 600;
+}
+
+.dashboard-date {
+    color: #666;
+    font-size: 14px;
+}
+
+.dashboard-filter {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.dashboard-filter select {
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    min-width: 220px;
+}
+
+.dashboard-filter button {
+    background: #b80b36;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 14px;
+    cursor: pointer;
+}
+
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border-left: 5px solid #b80b36;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.12);
+}
+
+.stat-card.students-card {
+    border-left-color: #4CAF50;
+}
+
+.stat-card.fee-card {
+    border-left-color: #2196F3;
+}
+
+.stat-card.attendance-card {
+    border-left-color: #FF9800;
+}
+
+.stat-card.teachers-card {
+    border-left-color: #9C27B0;
+}
+
+.stat-label {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 500;
+}
+
+.stat-value {
+    font-size: 32px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.stat-change {
+    font-size: 12px;
+    color: #4CAF50;
+}
+
+.stat-change.negative {
+    color: #F44336;
+}
+
+/* Charts Container */
+.charts-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.chart-box {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.chart-box h3 {
+    margin: 0 0 20px 0;
+    color: #333;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+canvas {
+    max-height: 300px !important;
+}
+
+/* Table Container */
+.table-container {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    overflow-x: auto;
+}
+
+.table-container h3 {
+    margin: 0 0 20px 0;
+    color: #333;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+table thead {
+    background: #f5f5f5;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+table th {
+    padding: 15px;
+    text-align: left;
+    color: #666;
+    font-weight: 600;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+table td {
+    padding: 15px;
+    border-bottom: 1px solid #f0f0f0;
+    color: #333;
+}
+
+table tbody tr:hover {
+    background: #f9f9f9;
+}
+
+.badge {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.badge-success {
+    background: #E8F5E9;
+    color: #2E7D32;
+}
+
+.badge-warning {
+    background: #FFF3E0;
+    color: #E65100;
+}
+
+.badge-danger {
+    background: #FFEBEE;
+    color: #C62828;
+}
+
+.badge-info {
+    background: #E3F2FD;
+    color: #1565C0;
+}
+</style>
+
+<!-- Dashboard Header -->
+<div class="dashboard-header">
+    <div>
+        <h2>📊 Dashboard</h2>
+        <p class="dashboard-date" id="currentDate"></p>
+        {% if selected_session %}
+        <p class="dashboard-date">Showing data for: <strong>{{ selected_session.name }}</strong></p>
+        {% endif %}
+    </div>
+    <form method="get" class="dashboard-filter">
+        <label for="sessionFilter">Session:</label>
+        <select id="sessionFilter" name="session">
+            <option value="">All Sessions</option>
+            {% for session in sessions %}
+                <option value="{{ session.id }}" {% if selected_session_id == session.id %}selected{% endif %}>{{ session.name }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit">Apply</button>
+    </form>
+</div>
+
+<!-- Stats Grid -->
+<div class="stats-grid">
+    <div class="stat-card students-card">
+        <div class="stat-label">Total Students</div>
+        <div class="stat-value">{{ total_students|default:"0" }}</div>
+        <div class="stat-change">↑ 5% this month</div>
+    </div>
+
+    <div class="stat-card fee-card">
+        <div class="stat-label">Total Fee Collected</div>
+        <div class="stat-value">₹{{ total_fee|default:"0" }}</div>
+        <div class="stat-change">↑ 12% from last month</div>
+    </div>
+
+    <div class="stat-card attendance-card">
+        <div class="stat-label">Today's Fee</div>
+        <div class="stat-value">₹{{ paid_fee|default:"0" }}</div>
+        <div class="stat-change">Updated today</div>
+    </div>
+
+    <div class="stat-card teachers-card">
+        <div class="stat-label">Due Fees</div>
+        <div class="stat-value">₹{{ due_fee|default:"0" }}</div>
+        <div class="stat-change negative">↓ Must collect soon</div>
+    </div>
+</div>
+
+<!-- Charts Section -->
+<div class="charts-container">
+    <div class="chart-box">
+        <h3>📈 Fee Collection Trend</h3>
+        <canvas id="lineChart"></canvas>
+    </div>
+
+    <div class="chart-box">
+        <h3>📊 Monthly Fee Distribution</h3>
+        <canvas id="barChart"></canvas>
+    </div>
+
+    <div class="chart-box">
+        <h3>🥧 Fee by Category</h3>
+        <canvas id="pieChart"></canvas>
+    </div>
+
+    <div class="chart-box">
+        <h3>📉 Student Section Distribution</h3>
+        <canvas id="doughnutChart"></canvas>
+    </div>
+</div>
+
+<!-- Recent Activities Table -->
+<div class="table-container">
+    <h3>📋 Recent Fee Deposits</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Student Name</th>
+                <th>Roll No</th>
+                <th>Amount</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Receipt</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for fee in recent_fees %}
+            <tr>
+                <td>{{ fee.student.name }}</td>
+                <td>{{ fee.student.roll_no }}</td>
+                <td>₹{{ fee.paid_fee|default:"0" }}</td>
+                <td>{% if fee.date %}{{ fee.date|date:"d M Y" }}{% else %}-{% endif %}</td>
+                <td>
+                    {% if fee.due_fee == 0 %}
+                        <span class="badge badge-success">Paid</span>
+                    {% elif fee.paid_fee > 0 %}
+                        <span class="badge badge-warning">Partial</span>
+                    {% else %}
+                        <span class="badge badge-danger">Pending</span>
+                    {% endif %}
+                </td>
+                <td><a href="#" style="color: #b80b36; text-decoration: none;">View</a></td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" style="text-align: center; color: #777;">No fee records found for selected session.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{{ monthly_labels|json_script:'monthly-labels' }}
+{{ monthly_paid_values|json_script:'monthly-paid-values' }}
+{{ monthly_total_values|json_script:'monthly-total-values' }}
+{{ fee_status_labels|json_script:'fee-status-labels' }}
+{{ fee_status_values|json_script:'fee-status-values' }}
+{{ class_labels|json_script:'class-labels' }}
+{{ class_counts|json_script:'class-counts' }}
+<script>
+// Set current date
+document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-IN', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+});
+
+// Colors
+const colors = ['#b80b36', '#4CAF50', '#2196F3', '#FF9800', '#9C27B0', '#00BCD4'];
+const monthlyLabels = JSON.parse(document.getElementById('monthly-labels').textContent || '[]');
+const monthlyPaidValues = JSON.parse(document.getElementById('monthly-paid-values').textContent || '[]');
+const monthlyTotalValues = JSON.parse(document.getElementById('monthly-total-values').textContent || '[]');
+const feeStatusLabels = JSON.parse(document.getElementById('fee-status-labels').textContent || '[]');
+const feeStatusValues = JSON.parse(document.getElementById('fee-status-values').textContent || '[]');
+const classLabels = JSON.parse(document.getElementById('class-labels').textContent || '[]');
+const classCounts = JSON.parse(document.getElementById('class-counts').textContent || '[]');
+
+const safeMonthlyLabels = monthlyLabels.length ? monthlyLabels : ['No Data'];
+const safeMonthlyPaidValues = monthlyPaidValues.length ? monthlyPaidValues : [0];
+const safeMonthlyTotalValues = monthlyTotalValues.length ? monthlyTotalValues : [0];
+const safeClassLabels = classLabels.length ? classLabels : ['No Class'];
+const safeClassCounts = classCounts.length ? classCounts : [0];
+
+// Line Chart - Fee Collection Trend
+new Chart(document.getElementById('lineChart'), {
+    type: 'line',
+    data: {
+        labels: safeMonthlyLabels,
+        datasets: [{
+            label: 'Fee Collected (₹)',
+            data: safeMonthlyPaidValues,
+            borderColor: '#b80b36',
+            backgroundColor: 'rgba(184, 11, 54, 0.05)',
+            borderWidth: 3,
+            fill: true,
+            tension: 0.4,
+            pointBackgroundColor: '#b80b36',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            pointRadius: 5,
+            pointHoverRadius: 7
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+            legend: {
+                display: false
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    callback: function(value) {
+                        return '₹' + value.toLocaleString();
+                    }
+                }
+            }
+        }
+    }
+});
+
+// Bar Chart - Monthly Fee
+new Chart(document.getElementById('barChart'), {
+    type: 'bar',
+    data: {
+        labels: safeMonthlyLabels,
+        datasets: [{
+            label: 'Fee Collected (₹)',
+            data: safeMonthlyTotalValues,
+            backgroundColor: [
+                '#b80b36',
+                '#4CAF50',
+                '#2196F3',
+                '#FF9800',
+                '#9C27B0',
+                '#00BCD4'
+            ],
+            borderRadius: 8,
+            borderSkipped: false
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+            legend: {
+                display: false
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    callback: function(value) {
+                        return '₹' + (value / 1000) + 'K';
+                    }
+                }
+            }
+        }
+    }
+});
+
+// Pie Chart - Fee by Category
+new Chart(document.getElementById('pieChart'), {
+    type: 'doughnut',
+    data: {
+        labels: feeStatusLabels,
+        datasets: [{
+            data: feeStatusValues,
+            backgroundColor: [
+                '#b80b36',
+                '#4CAF50',
+                '#2196F3',
+                '#FF9800'
+            ],
+            borderColor: '#fff',
+            borderWidth: 3
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+
+// Doughnut Chart - Student Distribution
+new Chart(document.getElementById('doughnutChart'), {
+    type: 'doughnut',
+    data: {
+        labels: safeClassLabels,
+        datasets: [{
+            data: safeClassCounts,
+            backgroundColor: [
+                '#b80b36',
+                '#2196F3',
+                '#4CAF50',
+                '#FF9800'
+            ],
+            borderColor: '#fff',
+            borderWidth: 3
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+</script>
+
+{% endblock %}

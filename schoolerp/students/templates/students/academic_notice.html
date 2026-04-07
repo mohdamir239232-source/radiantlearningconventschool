@@ -1,0 +1,56 @@
+{% extends 'base_layout.html' %}
+
+{% block content %}
+<style>
+  .shell { max-width: 1080px; margin: 0 auto; background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 18px; }
+  .head h2 { margin: 0; color: #0f172a; }
+  .head p { margin: 6px 0 0; color: #64748b; font-size: 13px; }
+  .form-grid { margin-top: 14px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  .form-grid .wide { grid-column: 1 / -1; }
+  .field label { display:block; font-size:12px; color:#64748b; margin-bottom:5px; }
+  .field input, .field textarea { width:100%; border:1px solid #cbd5e1; border-radius:8px; padding:9px; box-sizing:border-box; }
+  .btn { border: 1px solid #0f766e; background: #0f766e; color: #fff; border-radius: 8px; padding: 8px 12px; cursor: pointer; font-size: 13px; }
+  .table-wrap { margin-top: 14px; border:1px solid #e2e8f0; border-radius:12px; overflow:auto; }
+  table { width:100%; border-collapse:collapse; }
+  th, td { padding:12px; border-bottom:1px solid #f1f5f9; text-align:left; }
+  th { background:#f8fafc; font-size:12px; text-transform:uppercase; color:#334155; }
+  .empty { text-align:center; color:#64748b; }
+  @media (max-width: 900px) { .form-grid { grid-template-columns:1fr; } }
+</style>
+
+<div class="shell">
+  <div class="head">
+    <h2>Academic Notice Board</h2>
+    <p>Create and publish notices for students and parents.</p>
+  </div>
+
+  <form method="post">
+    {% csrf_token %}
+    <div class="form-grid">
+      <div class="field"><label>Title</label><input name="title" required></div>
+      <div class="field"><label>Publish Date</label><input type="date" name="publish_date" required></div>
+      <div class="field" style="display:flex; align-items:flex-end;"><button class="btn" type="submit">Publish Notice</button></div>
+      <div class="field wide"><label>Description</label><textarea name="description" rows="3" required></textarea></div>
+    </div>
+  </form>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Publish Date</th><th>Title</th><th>Description</th></tr>
+      </thead>
+      <tbody>
+        {% for item in notices %}
+        <tr>
+          <td>{{ item.publish_date|date:'d-m-Y' }}</td>
+          <td><strong>{{ item.title }}</strong></td>
+          <td>{{ item.description }}</td>
+        </tr>
+        {% empty %}
+        <tr><td class="empty" colspan="3">No notices published yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

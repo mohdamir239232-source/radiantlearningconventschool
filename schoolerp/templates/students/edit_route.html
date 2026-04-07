@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+<h3>Edit Transport Route</h3>
+
+<form method="POST">
+{% csrf_token %}
+
+<div class="row">
+
+<div class="col-md-6">
+<label>Route Name</label>
+<input type="text" name="route_name" value="{{ route.route_name }}" class="form-control">
+</div>
+
+<div class="col-md-6">
+<label>Transport Fee</label>
+<input type="number" name="transport_fee" value="{{ route.transport_fee }}" class="form-control">
+</div>
+
+</div>
+
+<br>
+
+<button class="btn btn-success">Update Route</button>
+
+<a href="/vehicle-route/" class="btn btn-secondary">Back</a>
+
+</form>
+
+</div>
+
+{% endblock %}

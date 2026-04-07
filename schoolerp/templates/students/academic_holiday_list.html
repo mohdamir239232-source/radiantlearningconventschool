@@ -1,0 +1,267 @@
+{% extends "base_layout.html" %}
+{% block title %}Holiday Calendar{% endblock %}
+{% block content %}
+<style>
+  .academic-page .page-hero {
+    background: linear-gradient(120deg, #fffbeb 0%, #ffffff 55%, #f8fafc 100%);
+    border: 1px solid #fde68a;
+    border-radius: 16px;
+    padding: 16px 18px;
+    margin-bottom: 14px;
+  }
+  .academic-page .hero-title {
+    margin: 0;
+    font-size: 1.2rem;
+    color: #0f172a;
+  }
+  .academic-page .hero-subtitle {
+    margin: 2px 0 0;
+    color: #475569;
+    font-size: 0.86rem;
+  }
+  .academic-page .hero-chip {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 999px;
+    padding: 6px 12px;
+    font-size: 0.78rem;
+    color: #1e293b;
+    font-weight: 600;
+  }
+  .academic-page .academic-card {
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.07);
+  }
+  .academic-page .academic-table thead th {
+    background: #0f172a;
+    color: #f8fafc;
+    font-size: 0.72rem;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+  .academic-page .filter-bar {
+    position: sticky;
+    top: 0;
+    z-index: 7;
+    background: #ffffff;
+  }
+  .academic-page .academic-table tbody tr {
+    transition: background-color 0.2s ease;
+  }
+  .academic-page .academic-table tbody tr:hover {
+    background: #f8fafc;
+  }
+  .academic-page .field-badge {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 999px;
+    padding: 2px 10px;
+    font-size: 0.74rem;
+    font-weight: 600;
+    color: #0f172a;
+  }
+  .academic-page .action-btn {
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+  }
+  .academic-page .empty-state {
+    padding: 26px 12px;
+    text-align: center;
+    color: #64748b;
+  }
+  .academic-page .empty-state i {
+    font-size: 1.1rem;
+    margin-bottom: 6px;
+    color: #94a3b8;
+  }
+  .academic-page .stat-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    min-width: 150px;
+  }
+</style>
+<div class="container-fluid py-3 academic-page">
+  <div class="page-hero d-flex justify-content-between align-items-center flex-wrap gap-3">
+    <div class="d-flex align-items-center gap-2">
+      <i class="fas fa-umbrella-beach text-warning fs-4"></i>
+      <div>
+        <h4 class="hero-title fw-bold">Holiday Calendar</h4>
+        <p class="hero-subtitle">Maintain annual holiday calendar with category and academic year tracking.</p>
+      </div>
+    </div>
+    <div class="d-flex align-items-center gap-2 flex-wrap">
+      <span class="hero-chip"><i class="fas fa-calendar me-1 text-warning"></i>{{ total_holidays }} Total</span>
+      <span class="hero-chip"><i class="fas fa-bell me-1 text-warning"></i>{{ upcoming }} Upcoming</span>
+    </div>
+  </div>
+
+  {% if messages %}
+    {% for msg in messages %}
+      <div class="alert alert-{{ msg.tags|default:'info' }} alert-dismissible fade show py-2" role="alert">
+        {{ msg }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <!-- Stats -->
+  <div class="row g-2 mb-3">
+    <div class="col-auto">
+      <div class="card border-0 shadow-sm text-center px-4 py-2 bg-warning bg-opacity-10 stat-card">
+        <div class="fw-bold fs-4 text-warning">{{ total_holidays }}</div>
+        <small class="text-muted">Total Holidays</small>
+      </div>
+    </div>
+    <div class="col-auto">
+      <div class="card border-0 shadow-sm text-center px-4 py-2 bg-success bg-opacity-10 stat-card">
+        <div class="fw-bold fs-4 text-success">{{ upcoming }}</div>
+        <small class="text-muted">Upcoming</small>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <!-- LEFT: Form -->
+    <div class="col-lg-4">
+      <div class="card shadow-sm border-0 academic-card">
+        <div class="card-header bg-warning text-dark py-2">
+          <i class="fas fa-{% if edit_obj %}edit{% else %}plus-circle{% endif %} me-2"></i>
+          {% if edit_obj %}Edit Holiday{% else %}Add Holiday{% endif %}
+        </div>
+        <div class="card-body">
+          <form method="post">
+            {% csrf_token %}
+            {% if edit_obj %}
+              <input type="hidden" name="record_id" value="{{ edit_obj.pk }}">
+            {% endif %}
+            <div class="row g-2">
+              <div class="col-12">
+                <label class="form-label fw-semibold small">Holiday Name <span class="text-danger">*</span></label>
+                <input name="holiday_name" class="form-control form-control-sm"
+                       value="{{ edit_obj.holiday_name|default:'' }}" placeholder="e.g. Diwali" required>
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-semibold small">Date <span class="text-danger">*</span></label>
+                <input type="date" name="holiday_date" class="form-control form-control-sm"
+                       value="{{ edit_obj.holiday_date|date:'Y-m-d'|default:'' }}" required>
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-semibold small">Holiday Type</label>
+                <select name="holiday_type" class="form-select form-select-sm">
+                  {% for val, label in holiday_type_choices %}
+                    <option value="{{ val }}" {% if edit_obj.holiday_type == val %}selected{% elif not edit_obj and val == 'school' %}selected{% endif %}>{{ label }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-semibold small">Academic Year</label>
+                <input name="academic_year" class="form-control form-control-sm"
+                       value="{{ edit_obj.academic_year|default:'2025-26' }}" placeholder="2025-26">
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-semibold small">Description</label>
+                <textarea name="description" class="form-control form-control-sm" rows="2"
+                          placeholder="Optional details...">{{ edit_obj.description|default:'' }}</textarea>
+              </div>
+            </div>
+            <div class="d-flex gap-2 mt-3">
+              <button type="submit" class="btn btn-warning btn-sm px-4 text-dark">
+                <i class="fas fa-save me-1"></i>{% if edit_obj %}Update{% else %}Add Holiday{% endif %}
+              </button>
+              {% if edit_obj %}
+                <a href="/academic/holiday-list/" class="btn btn-secondary btn-sm">
+                  <i class="fas fa-times me-1"></i>Cancel
+                </a>
+              {% endif %}
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Records -->
+    <div class="col-lg-8">
+      <div class="card shadow-sm border-0 academic-card">
+        <div class="card-header py-2 d-flex align-items-center justify-content-between flex-wrap gap-2 filter-bar">
+          <span class="fw-semibold"><i class="fas fa-calendar-times me-1 text-warning"></i>Holiday Calendar</span>
+          <form method="get" class="d-flex gap-2 align-items-center flex-wrap">
+            <input name="academic_year" class="form-control form-control-sm" style="width:100px"
+                   placeholder="Year" value="{{ filter_year }}">
+            <select name="holiday_type" class="form-select form-select-sm" style="width:150px">
+              <option value="">All Types</option>
+              {% for val, label in holiday_type_choices %}
+                <option value="{{ val }}" {% if filter_type == val %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+            <button class="btn btn-sm btn-outline-warning"><i class="fas fa-search"></i></button>
+            {% if filter_year or filter_type %}
+              <a href="/academic/holiday-list/" class="btn btn-sm btn-outline-secondary"><i class="fas fa-times"></i></a>
+            {% endif %}
+          </form>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive" style="max-height:500px;overflow-y:auto;">
+            <table class="table table-sm table-hover table-bordered mb-0 small academic-table">
+              <thead class="sticky-top">
+                <tr>
+                  <th>#</th><th>Holiday Name</th><th>Date</th><th>Day</th>
+                  <th>Type</th><th>Year</th><th>Description</th><th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for h in holidays %}
+                <tr>
+                  <td>{{ forloop.counter }}</td>
+                  <td class="fw-semibold">{{ h.holiday_name }}</td>
+                  <td class="text-nowrap">{{ h.holiday_date|date:"d M Y" }}</td>
+                  <td><span class="field-badge">{{ h.holiday_date|date:"l" }}</span></td>
+                  <td>
+                    {% if h.holiday_type == 'national' %}
+                      <span class="badge bg-danger">{{ h.get_holiday_type_display }}</span>
+                    {% elif h.holiday_type == 'state' %}
+                      <span class="badge bg-primary">{{ h.get_holiday_type_display }}</span>
+                    {% elif h.holiday_type == 'school' %}
+                      <span class="badge bg-success">{{ h.get_holiday_type_display }}</span>
+                    {% elif h.holiday_type == 'examination' %}
+                      <span class="badge bg-warning text-dark">{{ h.get_holiday_type_display }}</span>
+                    {% else %}
+                      <span class="badge bg-secondary">{{ h.get_holiday_type_display }}</span>
+                    {% endif %}
+                  </td>
+                  <td>{{ h.academic_year }}</td>
+                  <td class="text-muted">{{ h.description|truncatechars:40|default:'-' }}</td>
+                  <td>
+                    <a href="/academic/holiday-list/?edit={{ h.pk }}" class="btn btn-sm btn-outline-warning action-btn" title="Edit">
+                      <i class="fas fa-pen"></i></a>
+                    <form method="post" class="d-inline" onsubmit="return confirm('Delete this holiday?')">
+                      {% csrf_token %}
+                      <input type="hidden" name="action" value="delete">
+                      <input type="hidden" name="record_id" value="{{ h.pk }}">
+                      <button class="btn btn-sm btn-outline-danger action-btn" title="Delete"><i class="fas fa-trash"></i></button>
+                    </form>
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="8">
+                    <div class="empty-state">
+                      <i class="fas fa-umbrella-beach d-block"></i>
+                      No holidays added yet. Add important dates to build your holiday calendar.
+                    </div>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
